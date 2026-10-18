@@ -1,0 +1,6 @@
+{
+  "name": "Óghowa Accelerator",
+  "description": "Venture-building ecosystem discovering, funding, and scaling world-class African businesses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 85" width="320" height="85" fill="none">
+  <!-- Top blue bar -->
+  <rect x="22" y="4" width="46" height="11" rx="2" fill="#0022E6" />
+
+  <!-- Outer Blue Ring -->
+  <circle cx="45" cy="48" r="35" fill="#0022E6" />
+  <!-- White Gap Ring -->
+  <circle cx="45" cy="48" r="25" fill="#FFFFFF" />
+  <!-- Inner Background -->
+  <circle cx="45" cy="48" r="23" fill="#FBF6EE" />
+
+  <!-- Arc text: Óghowa -->
+  <path id="topArcSvg" d="M 23 44 A 22 22 0 0 1 67 44" fill="none" />
+  <text fill="#FFFFFF" font-family="'Times New Roman', serif" font-size="7" font-weight="bold">
+    <textPath href="#topArcSvg" startOffset="50%" text-anchor="middle">Óghowa</textPath>
+  </text>
+
+  <!-- Arc text: OUR OWN -->
+  <path id="bottomArcSvg" d="M 23 50 A 22 22 0 0 0 67 50" fill="none" />
+  <text fill="#FFFFFF" font-family="'Times New Roman', serif" font-size="6" font-weight="900">
+    <textPath href="#bottomArcSvg" startOffset="50%" text-anchor="middle">OUR OWN</textPath>
+  </text>
+
+  <!-- Queen Idia Bronze Mask -->
+  <g transform="translate(30, 31)">
+    <!-- Crown -->
+    <path d="M 5 10 C 5 5, 10 2, 15 2 C 20 2, 25 5, 25 10 Z" fill="#B87333" stroke="#633917" stroke-width="0.8" />
+    <line x1="7" y1="6" x2="23" y2="6" stroke="#F5C082" stroke-width="0.8" />
+    <circle cx="10" cy="4" r="1" fill="#F5C082" />
+    <circle cx="15" cy="3" r="1" fill="#F5C082" />
+    <circle cx="20" cy="4" r="1" fill="#F5C082" />
+
+    <!-- Face -->
+    <path d="M 6.5 10 Q 4 20 7.5 27 Q 11 31 15 32 Q 19 31 22.5 27 Q 26 20 23.5 10 Z" fill="url(#maskGrad)" stroke="#4A250A" stroke-width="1" />
+    <ellipse cx="11" cy="17" rx="2.5" ry="1.6" fill="#241103" />
+    <ellipse cx="19" cy="17" rx="2.5" ry="1.6" fill="#241103" />
+    <circle cx="11.5" cy="16.5" r="0.6" fill="#F5C082" />
+    <circle cx="19.5" cy="16.5" r="0.6" fill="#F5C082" />
+    <path d="M 15 14 L 13.8 21 L 16.2 21 Z" fill="#8C4916" />
+    <ellipse cx="15" cy="24.5" rx="3" ry="1.3" fill="#4A250A" />
+
+    <!-- Neck Collar -->
+    <path d="M 10 31 Q 15 33 20 31 L 21 34 Q 15 36 9 34 Z" fill="#6B3308" />
+  </g>
+
+  <!-- Brand Typography -->
+  <!-- ÒGHOWA in Royal Blue -->
+  <text x="96" y="52" fill="#0022E6" font-family="'Times New Roman', Georgia, serif" font-size="44" font-weight="900" letter-spacing="-1">
+    ÒGHOWA
+  </text>
+
+  <!-- Our own in Red Italic -->
+  <text x="290" y="74" text-anchor="end" fill="#E01D1D" font-family="'Times New Roman', Georgia, serif" font-size="22" font-style="italic" font-weight="bold">
+    Our own
+  </text>
+
+  <defs>
+    <linearGradient id="maskGrad" x1="7" y1="10" x2="23" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCA165" />
+      <stop offset="0.5" stop-color="#AA6225" />
+      <stop offset="1" stop-color="#59290B" />
+    </linearGradient>
+  </defs>
+</svg>
