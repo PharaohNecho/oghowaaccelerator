@@ -4,9 +4,10 @@ import { FLAGSHIP_PLATFORMS } from '../data/mockData';
 
 interface FlagshipPlatformsProps {
   onApplyForPlatform: (platformId: string) => void;
+  onOpenBusinessWeek?: () => void;
 }
 
-export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyForPlatform }) => {
+export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyForPlatform, onOpenBusinessWeek }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<typeof FLAGSHIP_PLATFORMS[0] | null>(null);
 
   return (
@@ -58,15 +59,33 @@ export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyFor
                 </div>
               </div>
 
-              {/* Action Link matching the red "Learn More ->" in image */}
-              <div className="px-6 pb-6 pt-2">
+              {/* Action Link */}
+              <div className="px-6 pb-6 pt-2 flex items-center justify-between gap-2">
                 <button
-                  onClick={() => setSelectedPlatform(platform)}
+                  onClick={() => {
+                    if (platform.id === 'business-week' && onOpenBusinessWeek) {
+                      onOpenBusinessWeek();
+                    } else {
+                      setSelectedPlatform(platform);
+                    }
+                  }}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors cursor-pointer"
                 >
-                  <span>Learn More</span>
+                  <span>{platform.id === 'business-week' ? 'Explore Summit' : 'Learn More'}</span>
                   <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                 </button>
+
+                {platform.id === 'business-week' && onOpenBusinessWeek && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenBusinessWeek();
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 transition cursor-pointer"
+                  >
+                    <span>Summit Page →</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -133,6 +152,17 @@ export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyFor
                 >
                   Close
                 </button>
+                {onOpenBusinessWeek && selectedPlatform.id === 'business-week' && (
+                  <button
+                    onClick={() => {
+                      setSelectedPlatform(null);
+                      onOpenBusinessWeek();
+                    }}
+                    className="px-5 py-2 text-sm font-semibold text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-sm transition cursor-pointer"
+                  >
+                    Visit Dedicated Summit Page →
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setSelectedPlatform(null);

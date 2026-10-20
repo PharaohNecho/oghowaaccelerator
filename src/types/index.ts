@@ -53,6 +53,31 @@ export interface Venture {
   logoText: string;
   badgeColor: string;
   highlights: string[];
+  isDisplayed?: boolean;
+}
+
+export interface PartnerItem {
+  id: string;
+  name: string;
+  category: string;
+  logo: string;
+  websiteUrl?: string;
+  isDisplayed?: boolean;
+}
+
+export interface CarouselSlide {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  eventDate: string;
+  location: string;
+  badge: string;
+  imageUrl: string;
+  registerLink: string;
+  seatsAvailable?: number;
+  isDisplayed: boolean;
+  order: number;
 }
 
 export interface ApplicationSubmission {

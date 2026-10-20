@@ -1,4 +1,6 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from './lib/firebase';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { EventCountdown } from './components/EventCountdown';
@@ -11,7 +13,8 @@ import { FeaturedVentures } from './components/FeaturedVentures';
 import { PartnersMarquee } from './components/PartnersMarquee';
 import { Footer } from './components/Footer';
 import { AuthModal } from './components/AuthModal';
-import { EmailNotification } from './types';
+import { EmailNotification, Venture, PartnerItem, CarouselSlide } from './types';
+import { FEATURED_VENTURES, PARTNERS_LIST, DEFAULT_CAROUSEL_EVENTS } from './data/mockData';
 
 // Code-split heavy views for high-performance loading
 const ApplicationPortal = lazy(() =>
@@ -29,12 +32,18 @@ const MentorsDirectory = lazy(() =>
 const NewsFeed = lazy(() =>
   import('./components/NewsFeed').then((m) => ({ default: m.NewsFeed }))
 );
+const BusinessWeekLanding = lazy(() =>
+  import('./components/BusinessWeekLanding').then((m) => ({ default: m.BusinessWeekLanding }))
+);
+const BusinessWeekRegistration = lazy(() =>
+  import('./components/BusinessWeekRegistration').then((m) => ({ default: m.BusinessWeekRegistration }))
+);
 
 function ViewFallback() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center bg-slate-50">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-3 border-[#0B1E48] border-t-rose-600 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-3 border-[#0B1E48] border-t-rose-600 rounded-full animate-spin" />
         <p className="text-xs font-semibold text-slate-500">Loading Óghowa Portal...</p>
       </div>
     </div>
@@ -43,51 +52,167 @@ function ViewFallback() {
 
 export default function App() {
   // Navigation & View State
-  const [currentView, setCurrentView] = useState<'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news'>('home');
+  const [currentView, setCurrentView] = useState<
+    'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news' | 'business-week' | 'business-week-register'
+  >('home');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  // Dynamic Portfolio Ventures controlled by Superadmin (Default: Ugbekun SMP, MyEduRide, Cyona Medicare)
+  const [ventures, setVentures] = useState<Venture[]>(FEATURED_VENTURES);
+
+  // Dynamic Ecosystem Partners controlled by Superadmin
+  const [partners, setPartners] = useState<PartnerItem[]>(PARTNERS_LIST);
+
+  // Dynamic Hero Carousel Slides controlled by Superadmin
+  const [carouselEvents, setCarouselEvents] = useState<CarouselSlide[]>(DEFAULT_CAROUSEL_EVENTS);
 
   // Current Logged-in User
   const [currentUser, setCurrentUser] = useState({
-    name: 'Osahon Ehigiator',
-    email: 'osahon@edutechpulse.ng',
+    name: 'Victory Usiobaifo',
+    email: 'usiobaifovictory245@gmail.com',
     role: 'founder'
   });
 
   // Startup Application State
   const [appData, setAppData] = useState({
-    founderName: 'Osahon Ehigiator',
-    founderEmail: 'osahon@edutechpulse.ng',
+    founderName: 'Victory Usiobaifo',
+    founderEmail: 'usiobaifovictory245@gmail.com',
     founderPhone: '+234 803 123 4567',
-    startupName: 'Edutech Pulse',
+    startupName: 'Ugbekun SMP',
     sector: 'Education Technology',
-    stage: 'Seed Stage',
-    description: 'An AI-powered foundational literacy engine and smart tuition reconciliation platform for primary schools across Sub-Saharan Africa.',
+    stage: 'Scaling',
+    description: 'Comprehensive school management platform simplifying school administration, tuition reconciliation, attendance, and student academic performance across K-12 institutions.',
     targetMarket: 'K-12 schools, state education ministries, and low-cost private educators.',
-    tractionMRR: '₦3,800,000',
-    activeUsers: '14,200',
-    deckFileName: 'EdutechPulse_PitchDeck_Q4.pdf',
+    tractionMRR: '₦4,800,000',
+    activeUsers: '52,000',
+    deckFileName: 'UgbekunSMP_PitchDeck.pdf',
     cacFileName: 'CAC_Registration_RC198273.pdf'
   });
 
   // Application Evaluation Status
-  const [appStatus, setAppStatus] = useState<string>('Under Review'); // 'Draft' | 'Submitted' | 'Under Review' | 'Information Required' | 'Approved' | 'Rejected'
+  const [appStatus, setAppStatus] = useState<string>('Screening');
   const [adminNotes, setAdminNotes] = useState<string>(
-    'Strong initial traction in Edo and Lagos states. Please confirm financial model projections for Q1 2026.'
+    'Strong initial traction in Edo and Lagos states. Please confirm financial model projections for Q1 2027.'
   );
 
   // Simulated Automated Email Outbox
   const [sentEmails, setSentEmails] = useState<EmailNotification[]>([
     {
       id: 'EML-001',
-      recipient: 'osahon@edutechpulse.ng',
-      recipientName: 'Osahon Ehigiator',
+      recipient: 'usiobaifovictory245@gmail.com',
+      recipientName: 'Victory Usiobaifo',
       subject: 'Welcome to Óghowa Venture Ecosystem - Application Initiated',
       type: 'Registration',
       timestamp: 'Today, 09:14 AM',
       content:
-        'Dear Osahon,\n\nWelcome to Óghowa Venture Ecosystem!\n\nYour founder account is active and your startup application for "Edutech Pulse" has been registered in our Cohort 2026 selection database.\n\nPlease monitor your Applicant Dashboard for live milestone progression and investment committee updates.\n\nWarm regards,\nÓghowa Admissions Team'
+        'Dear Victory,\n\nWelcome to Óghowa Venture Ecosystem!\n\nYour founder account is active and your startup application for "Ugbekun SMP" has been registered in our Cohort 2026 selection database.\n\nPlease monitor your Applicant Dashboard for live milestone progression and investment committee updates.\n\nWarm regards,\nÓghowa Admissions Team'
     }
   ]);
+
+  // ================= FIRESTORE REAL-TIME SYNCHRONIZATION =================
+  useEffect(() => {
+    // 1. Ventures Firestore Listener
+    const venturesPath = 'ventures';
+    const unsubVentures = onSnapshot(
+      collection(db, venturesPath),
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const list: Venture[] = [];
+          snapshot.forEach((docSnap) => {
+            list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+          });
+          setVentures(list);
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.LIST, venturesPath);
+        }
+      }
+    );
+
+    // 2. Partners Firestore Listener
+    const partnersPath = 'partners';
+    const unsubPartners = onSnapshot(
+      collection(db, partnersPath),
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const list: PartnerItem[] = [];
+          snapshot.forEach((docSnap) => {
+            list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+          });
+          setPartners(list);
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.LIST, partnersPath);
+        }
+      }
+    );
+
+    // 3. Carousel Events Firestore Listener
+    const carouselPath = 'carouselEvents';
+    const unsubCarousel = onSnapshot(
+      collection(db, carouselPath),
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const list: CarouselSlide[] = [];
+          snapshot.forEach((docSnap) => {
+            list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+          });
+          setCarouselEvents(list);
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.LIST, carouselPath);
+        }
+      }
+    );
+
+    return () => {
+      unsubVentures();
+      unsubPartners();
+      unsubCarousel();
+    };
+  }, []);
+
+  // Update Ventures with Firestore sync
+  const handleUpdateVentures = async (updated: Venture[]) => {
+    setVentures(updated);
+    try {
+      for (const v of updated) {
+        await setDoc(doc(db, 'ventures', v.id), v, { merge: true });
+      }
+    } catch {
+      console.warn('Persisting to Firestore: local state updated');
+    }
+  };
+
+  // Update Partners with Firestore sync
+  const handleUpdatePartners = async (updated: PartnerItem[]) => {
+    setPartners(updated);
+    try {
+      for (const p of updated) {
+        await setDoc(doc(db, 'partners', p.id), p, { merge: true });
+      }
+    } catch {
+      console.warn('Persisting to Firestore: local state updated');
+    }
+  };
+
+  // Update Carousel Events with Firestore sync
+  const handleUpdateCarouselEvents = async (updated: CarouselSlide[]) => {
+    setCarouselEvents(updated);
+    try {
+      for (const s of updated) {
+        await setDoc(doc(db, 'carouselEvents', s.id), s, { merge: true });
+      }
+    } catch {
+      console.warn('Persisting to Firestore: local state updated');
+    }
+  };
 
   // Automated Status Change Email Dispatcher
   const handleStatusUpdate = (newStatus: string, feedbackMsg = '') => {
@@ -121,7 +246,7 @@ export default function App() {
       subject: `Application Confirmed: ${submissionData.startupName} is Under Review`,
       type: 'Registration',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
-      content: `Dear ${submissionData.founderName},\n\nWe have received your complete 5-step application for ${submissionData.startupName} (Sector: ${submissionData.sector}).\n\nYour documents (${submissionData.deckFileName} & ${submissionData.cacFileName}) have been uploaded to the diligence vault and allocated to our sector screening leads.\n\nYou can track the progress of your application directly on your founder dashboard.\n\nBest regards,\nÓghowa Admissions Desk`
+      content: `Dear ${submissionData.founderName},\n\nWe have received your complete application for ${submissionData.startupName} (Sector: ${submissionData.sector}).\n\nYour documents (${submissionData.deckFileName} & ${submissionData.cacFileName}) have been uploaded to the diligence vault and allocated to our sector screening leads.\n\nYou can track the progress of your application directly on your founder dashboard.\n\nBest regards,\nÓghowa Admissions Desk`
     };
 
     setSentEmails([confirmationEmail, ...sentEmails]);
@@ -147,6 +272,48 @@ export default function App() {
     }, 50);
   };
 
+  const handleOpenBusinessWeek = () => {
+    setCurrentView('business-week');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenBusinessWeekRegistration = () => {
+    setCurrentView('business-week-register');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // If user navigated to the dedicated Óghowa Business Week summit main page:
+  if (currentView === 'business-week') {
+    return (
+      <Suspense fallback={<ViewFallback />}>
+        <BusinessWeekLanding
+          onBackToAccelerator={() => {
+            setCurrentView('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenRegistration={handleOpenBusinessWeekRegistration}
+          onOpenApply={handleStartJourney}
+        />
+      </Suspense>
+    );
+  }
+
+  // If user navigated to the dedicated Óghowa Business Week Registration page:
+  if (currentView === 'business-week-register') {
+    return (
+      <Suspense fallback={<ViewFallback />}>
+        <BusinessWeekRegistration
+          onBackToBusinessWeek={handleOpenBusinessWeek}
+          onBackToAccelerator={() => {
+            setCurrentView('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onTicketReserved={handleTicketReserved}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
       {/* Top Navbar with Announcement Bar */}
@@ -166,7 +333,7 @@ export default function App() {
       <main className="flex-1">
         {currentView === 'home' && (
           <>
-            {/* A. Hero Section */}
+            {/* A. Hero Section with Blended Images and Superadmin-Editable Carousel */}
             <Hero
               onStartJourney={handleStartJourney}
               onExploreEcosystem={handleExploreEcosystem}
@@ -174,19 +341,22 @@ export default function App() {
                 setCurrentView('mentors');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              carouselEvents={carouselEvents}
+              onOpenBusinessWeek={handleOpenBusinessWeek}
+              onRegisterForBusinessWeek={handleOpenBusinessWeekRegistration}
             />
 
             {/* B. Dynamic Business Startup Week Countdown & Live Seats Tracker */}
-            <EventCountdown onTicketReserved={handleTicketReserved} />
+            <EventCountdown
+              onTicketReserved={handleTicketReserved}
+              onOpenBusinessWeek={handleOpenBusinessWeek}
+              onRegisterForBusinessWeek={handleOpenBusinessWeekRegistration}
+            />
 
             {/* C. Who We Serve */}
             <WhoWeServe
-              onSelectAudience={(aud) => {
-                if (aud === 'founders' || aud === 'universities') {
-                  setCurrentView('apply');
-                } else {
-                  setCurrentView('apply');
-                }
+              onSelectAudience={() => {
+                setCurrentView('apply');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             />
@@ -200,19 +370,20 @@ export default function App() {
                 setCurrentView('apply');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              onOpenBusinessWeek={handleOpenBusinessWeek}
             />
 
-            {/* F. Infrastructure That Builds Businesses (Deep Royal Blue Ribbon) */}
+            {/* F. Infrastructure That Builds Businesses */}
             <Infrastructure />
 
             {/* G. Our Impact Numbers */}
             <ImpactStats />
 
-            {/* H. Featured Ventures */}
-            <FeaturedVentures />
+            {/* H. Featured Ventures (Controlled by Superadmin: Ugbekun SMP, MyEduRide, Cyona Medicare) */}
+            <FeaturedVentures ventures={ventures} />
 
-            {/* I. Partners Strip */}
-            <PartnersMarquee />
+            {/* I. Partners Strip (Modifiable by Superadmin) */}
+            <PartnersMarquee partners={partners} />
           </>
         )}
 
@@ -258,7 +429,7 @@ export default function App() {
           </Suspense>
         )}
 
-        {/* 4. Superadmin Review & Automated Email Console */}
+        {/* 4. Superadmin Portal with 5-minute Auto-Lock, Credentials & Control Over All Elements */}
         {currentView === 'admin' && (
           <Suspense fallback={<ViewFallback />}>
             <SuperadminPortal
@@ -266,7 +437,13 @@ export default function App() {
               appStatus={appStatus}
               adminNotes={adminNotes}
               sentEmails={sentEmails}
+              ventures={ventures}
+              partners={partners}
+              carouselEvents={carouselEvents}
               onUpdateStatus={handleStatusUpdate}
+              onUpdateVentures={handleUpdateVentures}
+              onUpdatePartners={handleUpdatePartners}
+              onUpdateCarouselEvents={handleUpdateCarouselEvents}
               onBackToDashboard={() => {
                 setCurrentView('dashboard');
                 window.scrollTo({ top: 0, behavior: 'smooth' });

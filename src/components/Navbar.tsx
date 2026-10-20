@@ -3,8 +3,8 @@ import { ShieldAlert, Compass, Sparkles, Rocket, Clock, User } from 'lucide-reac
 import { OghowaLogo } from './OghowaLogo';
 
 interface NavbarProps {
-  activeView: 'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news';
-  setActiveView: (view: 'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news') => void;
+  activeView: 'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news' | 'business-week' | 'business-week-register';
+  setActiveView: (view: 'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news' | 'business-week' | 'business-week-register') => void;
   onOpenApply: () => void;
   onOpenAuth: () => void;
   currentUser: {
@@ -50,6 +50,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              onClick={() => setActiveView('business-week')}
+              className="hover:text-blue-200 text-blue-300 font-bold transition-colors flex items-center gap-1.5 cursor-pointer bg-blue-900/60 px-3 py-0.5 rounded-full border border-blue-500/40 text-[11px]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+              <span>Óghowa Business Week 2026</span>
+            </button>
+
             <button
               onClick={() => setActiveView('admin')}
               className={`hover:text-rose-400 transition-colors flex items-center gap-1.5 cursor-pointer ${
@@ -113,6 +121,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <span>Events</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+              </button>
+              <button
+                onClick={() => {
+                  setActiveView('business-week');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`transition-colors cursor-pointer px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ${
+                  activeView === 'business-week'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                }`}
+              >
+                <span>Business Week</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
               </button>
               <button
                 onClick={() => setActiveView('mentors')}

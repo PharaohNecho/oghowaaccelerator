@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Sparkles, X, Check, Ticket, User, Mail, Building } from 'lucide-react';
+import { Calendar, MapPin, Sparkles, X, Check, Ticket, User, Mail, Building, ArrowRight } from 'lucide-react';
 import { EmailNotification } from '../types';
 
 interface EventCountdownProps {
   onTicketReserved?: (email: EmailNotification) => void;
+  onOpenBusinessWeek?: () => void;
+  onRegisterForBusinessWeek?: () => void;
 }
 
-export const EventCountdown: React.FC<EventCountdownProps> = ({ onTicketReserved }) => {
+export const EventCountdown: React.FC<EventCountdownProps> = ({
+  onTicketReserved,
+  onOpenBusinessWeek,
+  onRegisterForBusinessWeek
+}) => {
   const [eventSeats, setEventSeats] = useState<number>(38);
   const [isSeatModalOpen, setIsSeatModalOpen] = useState<boolean>(false);
   const [seatReserved, setSeatReserved] = useState<boolean>(false);
@@ -83,7 +89,12 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({ onTicketReserved
               <span>Upcoming Event</span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-3 tracking-tight">
+            <h3
+              onClick={onOpenBusinessWeek}
+              className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-3 tracking-tight ${
+                onOpenBusinessWeek ? 'cursor-pointer hover:text-blue-200 transition-colors' : ''
+              }`}
+            >
               Óghowa Business Startup Week
             </h3>
 
@@ -136,16 +147,32 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({ onTicketReserved
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                setSeatReserved(false);
-                setIsSeatModalOpen(true);
-              }}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-lg font-bold text-sm bg-rose-600 hover:bg-rose-700 active:scale-98 text-white shadow-lg shadow-rose-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Ticket className="w-4 h-4" />
-              <span>Reserve Instant Pass (Free)</span>
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+              {onOpenBusinessWeek && (
+                <button
+                  onClick={onOpenBusinessWeek}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-xs bg-white text-[#0B1E48] hover:bg-slate-100 active:scale-98 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Explore Summit Page</span>
+                  <ArrowRight className="w-4 h-4 text-blue-600" />
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  if (onRegisterForBusinessWeek) {
+                    onRegisterForBusinessWeek();
+                  } else {
+                    setSeatReserved(false);
+                    setIsSeatModalOpen(true);
+                  }
+                }}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 active:scale-98 text-white shadow-lg shadow-rose-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Ticket className="w-4 h-4" />
+                <span>Register for Pass</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

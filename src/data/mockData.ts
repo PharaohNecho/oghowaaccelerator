@@ -1,4 +1,4 @@
-import { Mentor, NewsArticle, Venture, ApplicationSubmission } from '../types';
+import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide } from '../types';
 
 export const WHO_WE_SERVE_DATA = [
   {
@@ -197,40 +197,42 @@ export const IMPACT_METRICS = [
 
 export const FEATURED_VENTURES: Venture[] = [
   {
-    id: 'ogbelekon',
-    name: 'Ogbelekon',
+    id: 'ugbekun-smp',
+    name: 'Ugbekun SMP',
     sector: 'Education Technology',
-    tagline: 'Modern school management & digital learning ecosystem.',
-    description: 'School management platform simplifying administration, tuition tracking, attendance, and student academic performance across K-12 institutions.',
-    founder: 'Osasere Idehen & Team',
+    tagline: 'Modern school management & digital administrative ecosystem.',
+    description: 'Comprehensive school management platform simplifying school administration, tuition reconciliation, attendance, and student academic performance across K-12 institutions.',
+    founder: 'Osasere Idehen',
     metrics: [
-      { label: 'Schools', value: '140+' },
-      { label: 'Active Students', value: '45,000+' },
-      { label: 'Admin Efficiency', value: '+68%' }
+      { label: 'Schools', value: '180+' },
+      { label: 'Active Students', value: '52,000+' },
+      { label: 'Admin Efficiency', value: '+74%' }
     ],
     cohort: 'Cohort 2025-A',
     stage: 'Scaling',
-    logoText: 'Og',
+    logoText: 'US',
     badgeColor: 'bg-blue-600',
-    highlights: ['Edo State EdTech Pilot Partner', 'Seed grant recipient', 'Integrated tuition payment gateway']
+    highlights: ['Edo State EdTech Pilot Partner', 'Integrated tuition payment gateway', 'Ministry of Education accredited'],
+    isDisplayed: true
   },
   {
-    id: 'eduride',
-    name: 'Edulllfa / EduRide',
+    id: 'myeduride',
+    name: 'MyEduRide',
     sector: 'Transport Technology',
     tagline: 'Smart student and campus mobility for safety and reliability.',
-    description: 'Intelligent student transportation management and route optimization ensuring guaranteed child transit security, real-time bus telemetry, and parent peace of mind.',
+    description: 'Tech-enabled student transportation management and route optimization ensuring guaranteed child transit security, real-time bus telemetry, and parent peace of mind.',
     founder: 'Efe Omoregie',
     metrics: [
-      { label: 'Safe Trips', value: '180,000+' },
-      { label: 'Campuses', value: '12' },
-      { label: 'On-Time Rate', value: '98.4%' }
+      { label: 'Safe Trips', value: '220,000+' },
+      { label: 'Partner Schools', value: '45' },
+      { label: 'On-Time Rate', value: '99.1%' }
     ],
     cohort: 'Cohort 2025-B',
     stage: 'Accelerated',
-    logoText: 'ER',
+    logoText: 'MR',
     badgeColor: 'bg-amber-500',
-    highlights: ['Geo-fenced tracking alerts', 'Fleet telematics integration', 'Corporate logistics partnership']
+    highlights: ['Geo-fenced tracking alerts', 'Fleet telematics integration', 'Corporate logistics partnership'],
+    isDisplayed: true
   },
   {
     id: 'cyona-medicare',
@@ -240,33 +242,16 @@ export const FEATURED_VENTURES: Venture[] = [
     description: 'Clinic and patient healthcare services matching platform providing verified telehealth consultations, digitized medical records, and doorstep prescription delivery.',
     founder: 'Dr. Blessing Osagie',
     metrics: [
-      { label: 'Consultations', value: '28,000+' },
-      { label: 'Partner Clinics', value: '64' },
+      { label: 'Consultations', value: '35,000+' },
+      { label: 'Partner Clinics', value: '78' },
       { label: 'Patient Rating', value: '4.9/5' }
     ],
     cohort: 'Cohort 2025-B',
     stage: 'Scaling',
     logoText: 'CM',
     badgeColor: 'bg-emerald-600',
-    highlights: ['Certified NHIS tele-health partner', 'Affordable rural outreach', '₦45M Seed extension closed']
-  },
-  {
-    id: 'future-ventures',
-    name: 'Future Ventures',
-    sector: 'Venture Pipeline',
-    tagline: 'Next-generation tech enterprises building the African frontier.',
-    description: 'High-impact ventures spinning out of Óghowa Accelerator focusing on climate-smart agriculture, decentralized clean power, cross-border remittances, and GovTech.',
-    founder: 'Óghowa Studio Fellows',
-    metrics: [
-      { label: 'In Studio', value: '8 Startups' },
-      { label: 'Patent Filings', value: '4' },
-      { label: 'Syndicate Stage', value: 'Open' }
-    ],
-    cohort: 'Cohort 2026-A',
-    stage: 'Upcoming',
-    logoText: 'FV',
-    badgeColor: 'bg-rose-600',
-    highlights: ['Pre-vetted market demand', 'Mentored by top tech executives', 'Capital grant co-matching']
+    highlights: ['Certified NHIS tele-health partner', 'Affordable rural outreach', '₦45M Seed extension closed'],
+    isDisplayed: true
   }
 ];
 
@@ -564,17 +549,62 @@ export const SAMPLE_APPLICATIONS: ApplicationSubmission[] = [
   }
 ];
 
-export const PARTNERS_LIST = [
-  { name: 'Edo State Government', label: 'Edo State Govt', category: 'Government' },
-  { name: 'University of Benin', label: 'UNIBEN', category: 'Academic' },
-  { name: 'Sterling Bank', label: 'Sterling', category: 'Financial' },
-  { name: 'Microsoft', label: 'Microsoft', category: 'Technology' },
-  { name: 'Amazon Web Services', label: 'AWS', category: 'Cloud' },
-  { name: 'MTN Nigeria', label: 'MTN', category: 'Telecom' },
-  { name: 'Dangote Group', label: 'Dangote', category: 'Enterprise' },
-  { name: 'GIZ Germany', label: 'giz', category: 'Development' },
-  { name: 'Standard Chartered', label: 'Standard Chartered', category: 'Banking' },
-  { name: 'AFD France', label: 'AFD', category: 'Development' },
-  { name: 'NITDA', label: 'NITDA', category: 'Government' },
-  { name: 'Bank of Industry', label: 'BOI', category: 'Financial' }
+export const PARTNERS_LIST: PartnerItem[] = [
+  { id: 'p1', name: 'Edo State Government', category: 'Government', logo: '🏛️ Edo State Govt', isDisplayed: true, websiteUrl: 'https://edostate.gov.ng' },
+  { id: 'p2', name: 'University of Benin', category: 'Academic', logo: '🎓 UNIBEN', isDisplayed: true, websiteUrl: 'https://uniben.edu' },
+  { id: 'p3', name: 'Sterling Bank', category: 'Financial', logo: '🏦 Sterling Bank', isDisplayed: true, websiteUrl: 'https://sterling.ng' },
+  { id: 'p4', name: 'Microsoft Africa', category: 'Technology', logo: '💻 Microsoft', isDisplayed: true, websiteUrl: 'https://microsoft.com' },
+  { id: 'p5', name: 'Amazon Web Services', category: 'Cloud', logo: '☁️ AWS', isDisplayed: true, websiteUrl: 'https://aws.amazon.com' },
+  { id: 'p6', name: 'MTN Nigeria', category: 'Telecom', logo: '📶 MTN', isDisplayed: true, websiteUrl: 'https://mtn.ng' },
+  { id: 'p7', name: 'Dangote Group', category: 'Enterprise', logo: '🏭 Dangote', isDisplayed: true, websiteUrl: 'https://dangote.com' },
+  { id: 'p8', name: 'GIZ Germany', category: 'Development', logo: '🌍 GIZ', isDisplayed: true, websiteUrl: 'https://giz.de' },
+  { id: 'p9', name: 'Standard Chartered', category: 'Banking', logo: '💳 Standard Chartered', isDisplayed: true, websiteUrl: 'https://sc.com' },
+  { id: 'p10', name: 'AFD France', category: 'Development', logo: '🤝 AFD', isDisplayed: true, websiteUrl: 'https://afd.fr' },
+  { id: 'p11', name: 'NITDA', category: 'Government', logo: '🛡️ NITDA', isDisplayed: true, websiteUrl: 'https://nitda.gov.ng' },
+  { id: 'p12', name: 'Bank of Industry', category: 'Financial', logo: '🏢 BOI', isDisplayed: true, websiteUrl: 'https://boi.ng' }
+];
+
+export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
+  {
+    id: 'event-startup-week',
+    title: 'Óghowa Business Startup Week 2026',
+    subtitle: 'Africa’s Premier Gathering for Frontier Innovation, Investment & Governance',
+    description: 'Join 1,500+ tech founders, angel investors, policy makers, and enterprise executives for 5 intensive days of venture deal rooms, masterclasses, and keynote dialogues.',
+    eventDate: 'Nov 18 - 22, 2026',
+    location: 'Victor Uwaifo Creative Hub & Edo Innovates Campus, Benin City',
+    badge: 'Flagship Summit',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=75',
+    registerLink: '#register-event',
+    seatsAvailable: 38,
+    isDisplayed: true,
+    order: 1
+  },
+  {
+    id: 'event-startup-weekend',
+    title: 'Business Startup Weekend',
+    subtitle: '48-Hour Rapid Prototyping, Venture Ideation & Co-founder Matchmaking',
+    description: 'Pitch ideas, form multi-disciplinary squads, build functional MVPs, and compete for ₦5,000,000 in equity-free grant financing and direct admission into Incubation.',
+    eventDate: 'Dec 05 - 07, 2026',
+    location: 'Óghowa Venture Studio & Innovation Lab, Benin City',
+    badge: 'Hackathon Sprint',
+    imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=75',
+    registerLink: '#register-hackathon',
+    seatsAvailable: 24,
+    isDisplayed: true,
+    order: 2
+  },
+  {
+    id: 'event-pitch-day',
+    title: 'Great Venture Pitch & Syndicate Deal Room',
+    subtitle: '₦50M Pre-Seed & Seed Investment Showcase',
+    description: 'Top cohort finalists present vetted metrics to Pan-African VC partners, angel syndicates, and institutional family offices in closed-door deal sessions.',
+    eventDate: 'Jan 16, 2027',
+    location: 'Main Auditorium & Global Livestream, Hybrid',
+    badge: 'Investor Deal Room',
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=75',
+    registerLink: '#register-dealroom',
+    seatsAvailable: 15,
+    isDisplayed: true,
+    order: 3
+  }
 ];

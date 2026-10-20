@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "Venture": {
+      "title": "Venture",
+      "description": "Featured startup ventures within the Óghowa Accelerator portfolio",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "sector": { "type": "string", "maxLength": 60 },
+        "tagline": { "type": "string", "maxLength": 255 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "founder": { "type": "string", "maxLength": 100 },
+        "stage": { "type": "string", "maxLength": 50 },
+        "logoText": { "type": "string", "maxLength": 10 },
+        "badgeColor": { "type": "string", "maxLength": 50 },
+        "isDisplayed": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "sector", "description"]
+    },
+    "Partner": {
+      "title": "Partner",
+      "description": "Ecosystem and institutional corporate/government partner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "maxLength": 60 },
+        "logo": { "type": "string", "maxLength": 500 },
+        "isDisplayed": { "type": "boolean" },
+        "websiteUrl": { "type": "string", "maxLength": 300 }
+      },
+      "required": ["id", "name", "category"]
+    },
+    "CarouselEvent": {
+      "title": "CarouselEvent",
+      "description": "Upcoming events featured on the Hero carousel with registration links",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "subtitle": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "eventDate": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 150 },
+        "badge": { "type": "string", "maxLength": 60 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "registerLink": { "type": "string", "maxLength": 300 },
+        "seatsAvailable": { "type": "number" },
+        "isDisplayed": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "title", "eventDate", "registerLink"]
+    },
+    "Application": {
+      "title": "Application",
+      "description": "Startup cohort application submitted to Óghowa Accelerator",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "founderName": { "type": "string", "maxLength": 120 },
+        "founderEmail": { "type": "string", "maxLength": 120 },
+        "founderPhone": { "type": "string", "maxLength": 50 },
+        "startupName": { "type": "string", "maxLength": 120 },
+        "sector": { "type": "string", "maxLength": 80 },
+        "stage": { "type": "string", "maxLength": 60 },
+        "description": { "type": "string", "maxLength": 3000 },
+        "targetMarket": { "type": "string", "maxLength": 1000 },
+        "tractionMRR": { "type": "string", "maxLength": 80 },
+        "activeUsers": { "type": "string", "maxLength": 80 },
+        "status": { "type": "string", "maxLength": 50 },
+        "adminNotes": { "type": "string", "maxLength": 2000 },
+        "submittedAt": { "type": "string" }
+      },
+      "required": ["id", "founderName", "founderEmail", "startupName", "status"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global portal configurations and event seats countdown",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "eventSeats": { "type": "number" },
+        "eventDate": { "type": "string", "maxLength": 100 },
+        "eventName": { "type": "string", "maxLength": 150 }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/ventures/{ventureId}": {
+      "schema": { "$ref": "#/entities/Venture" },
+      "description": "Featured and accelerator portfolio companies"
+    },
+    "/partners/{partnerId}": {
+      "schema": { "$ref": "#/entities/Partner" },
+      "description": "Corporate, government, and institutional partners"
+    },
+    "/carouselEvents/{eventId}": {
+      "schema": { "$ref": "#/entities/CarouselEvent" },
+      "description": "Hero upcoming event slides"
+    },
+    "/applications/{applicationId}": {
+      "schema": { "$ref": "#/entities/Application" },
+      "description": "Startup cohort applications under review"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/Settings" },
+      "description": "Global accelerator configurations"
+    }
+  }
+}

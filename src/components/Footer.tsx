@@ -4,7 +4,7 @@ import { OghowaLogo } from './OghowaLogo';
 
 interface FooterProps {
   onOpenApply: () => void;
-  onNavigate: (view: 'home' | 'portal' | 'mentors' | 'news') => void;
+  onNavigate: (view: 'home' | 'portal' | 'mentors' | 'news' | 'business-week' | 'business-week-register') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
@@ -75,27 +75,27 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li>
-                <button onClick={() => onNavigate('home')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('home')} className="hover:text-white transition-colors cursor-pointer">
                   Ecosystem
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('portal')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('portal')} className="hover:text-white transition-colors cursor-pointer">
                   Programs & Cohorts
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('portal')} className="hover:text-white transition-colors">
-                  Venture Studio
+                <button onClick={() => onNavigate('business-week')} className="hover:text-white transition-colors cursor-pointer text-blue-400 font-semibold">
+                  Business Week
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('mentors')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('mentors')} className="hover:text-white transition-colors cursor-pointer">
                   Mentors Network
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('portal')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('portal')} className="hover:text-white transition-colors cursor-pointer">
                   Capital Syndicate
                 </button>
               </li>
@@ -109,12 +109,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li>
-                <button onClick={() => onNavigate('news')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('news')} className="hover:text-white transition-colors cursor-pointer">
                   Success Stories
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('news')} className="hover:text-white transition-colors">
+                <button onClick={() => onNavigate('business-week')} className="hover:text-white transition-colors cursor-pointer">
                   Business Week Events
                 </button>
               </li>
