@@ -21,7 +21,7 @@ export const FeaturedVentures: React.FC<FeaturedVenturesProps> = ({
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B1E48] tracking-tight">
-            Featured Ventures
+            Our Portfolio Companies
           </h2>
           <p className="mt-3 text-base sm:text-lg text-slate-600 font-normal">
             Innovative companies building the future with Óghowa.

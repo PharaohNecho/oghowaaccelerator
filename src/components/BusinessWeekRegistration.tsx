@@ -18,7 +18,6 @@ import {
   GraduationCap,
   Landmark,
   ShieldCheck,
-  Bookmark,
   ChevronDown,
   Download,
   Calendar,
@@ -26,141 +25,348 @@ import {
   Search,
   Check,
   Share2,
-  FileText
+  Copy,
+  CalendarPlus,
+  Share,
+  Pin,
+  Info,
+  Users,
+  ExternalLink,
+  HelpCircle,
+  QrCode
 } from 'lucide-react';
 import { BusinessWeekLogo } from './BusinessWeekLogo';
-import { EmailNotification } from '../types';
+import { EmailNotification, RegisteredDelegate, BusinessWeekConfig } from '../types';
 
 interface BusinessWeekRegistrationProps {
   onBackToBusinessWeek: () => void;
   onBackToAccelerator: () => void;
   onTicketReserved?: (email: EmailNotification) => void;
+  onRegisterDelegate?: (delegate: RegisteredDelegate) => void;
+  config?: BusinessWeekConfig;
 }
+
+// Full list of Nigerian states + FCT
+const NIGERIAN_STATES = [
+  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
+  'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT (Abuja)', 'Gombe',
+  'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos',
+  'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto',
+  'Taraba', 'Yobe', 'Zamfara'
+];
+
+// Key cities mapping for popular states
+const STATE_CITIES: Record<string, string[]> = {
+  'Edo': ['Benin City', 'Ekpoma', 'Auchi', 'Uromi', 'Irrua', 'Iguobazuwa', 'Sabongida-Ora', 'Ehor', 'Abudu', 'Other'],
+  'Lagos': ['Ikeja', 'Victoria Island', 'Lekki', 'Yaba', 'Surulere', 'Ikoyi', 'Epe', 'Badagry', 'Other'],
+  'FCT (Abuja)': ['Abuja Central', 'Garki', 'Wuse', 'Maitama', 'Asokoro', 'Gwarinpa', 'Kubwa', 'Lugbe', 'Other'],
+  'Rivers': ['Port Harcourt', 'Obio-Akpor', 'Bonny', 'Eleme', 'Other'],
+  'Delta': ['Asaba', 'Warri', 'Sapele', 'Agbor', 'Ughelli', 'Other'],
+  'Oyo': ['Ibadan', 'Ogbomosho', 'Oyo', 'Iseyin', 'Other'],
+  'Kano': ['Kano Municipal', 'Fagge', 'Dala', 'Gwale', 'Other'],
+  'Enugu': ['Enugu Urban', 'Nsukka', 'Agbani', 'Other'],
+  'Kaduna': ['Kaduna North', 'Kaduna South', 'Zaria', 'Kafanchan', 'Other'],
+  'Ogun': ['Abeokuta', 'Ijebu Ode', 'Sagamu', 'Ota', 'Other'],
+  'Anambra': ['Awka', 'Onitsha', 'Nnewi', 'Other'],
+  'Akwa Ibom': ['Uyo', 'Eket', 'Ikot Ekpene', 'Oron', 'Other']
+};
+
+const COUNTRIES = [
+  'Nigeria',
+  'United Kingdom',
+  'United States',
+  'Ghana',
+  'Kenya',
+  'South Africa',
+  'Canada',
+  'Germany',
+  'France',
+  'Rwanda',
+  'Egypt',
+  'Cameroon',
+  'Uganda',
+  'Tanzania',
+  'Ethiopia',
+  'India',
+  'China',
+  'United Arab Emirates',
+  'Other'
+];
+
+// Summit Target Date: November 16, 2026 at 09:00:00 WAT (UTC+1)
+const SUMMIT_START_TIME = new Date('2026-11-16T09:00:00+01:00').getTime();
+const TOTAL_PHYSICAL_SEATS = 500;
 
 export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> = ({
   onBackToBusinessWeek,
   onBackToAccelerator,
-  onTicketReserved
+  onTicketReserved,
+  onRegisterDelegate,
+  config
 }) => {
-  // Navigation Tabs: 'registration' | 'schedule-tracks' | 'status-lookup'
-  const [activeTab, setActiveTab] = useState<'registration' | 'schedule-tracks' | 'status-lookup'>('registration');
+  // Navigation Tabs: 'registration' | 'schedule-tracks' | 'status-lookup' | 'success'
+  const [activeTab, setActiveTab] = useState<'registration' | 'schedule-tracks' | 'status-lookup' | 'success'>('registration');
 
-  // Form State
-  const [primaryEmail, setPrimaryEmail] = useState<string>('');
+  // Form Required Initial Field - STARTS COMPLETELY BLANK
+  const [formEmail, setFormEmail] = useState<string>('');
+
+  // Section 1: About you - ALL BLANK
   const [fullName, setFullName] = useState<string>('');
-  const [confirmationEmail, setConfirmationEmail] = useState<string>('');
+  const [contactEmail, setContactEmail] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [organisation, setOrganisation] = useState<string>('');
   const [jobRole, setJobRole] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
 
-  // Step B: Participation
-  const [selectedPersona, setSelectedPersona] = useState<string>('founder');
-  const [selectedTracks, setSelectedTracks] = useState<string[]>([
-    'digital_economy',
-    'investment_pitches'
-  ]);
-  const [masterclass, setMasterclass] = useState<string>('early_stage_fundraising');
-  const [attendanceMode, setAttendanceMode] = useState<'in_person' | 'virtual'>('in_person');
+  // City, State and Country Split
+  const [country, setCountry] = useState<string>('Nigeria');
+  const [otherCountry, setOtherCountry] = useState<string>('');
+  const [state, setState] = useState<string>('');
+  const [otherState, setOtherState] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+  const [customCity, setCustomCity] = useState<string>('');
 
-  // Step C: Logistics
-  const [discoverySource, setDiscoverySource] = useState<string>('social_media');
+  // Section 2: Your participation - ALL BLANK
+  const [persona, setPersona] = useState<string>('');
+  const [otherPersona, setOtherPersona] = useState<string>('');
+
+  // What are you most interested in? (multi-select) - EMPTY ARRAY
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  // Will you attend in person? - BLANK
+  const [attendanceMode, setAttendanceMode] = useState<string>('');
+
+  // Are you interested in exhibiting or sponsoring? - BLANK
+  const [exhibitSponsorInterest, setExhibitSponsorInterest] = useState<string>('');
+
+  // How did you hear about Óghowa Business Week? - BLANK
+  const [discoverySource, setDiscoverySource] = useState<string>('');
+  const [otherDiscoverySource, setOtherDiscoverySource] = useState<string>('');
+
+  // Optional fields - BLANK
   const [accessibility, setAccessibility] = useState<string>('');
-  const [pitchUpdates, setPitchUpdates] = useState<boolean>(true);
+  const [expectations, setExpectations] = useState<string>('');
 
-  // Summary accordion & Draft
-  const [isSummaryOpen, setIsSummaryOpen] = useState<boolean>(false);
-  const [draftSaved, setDraftSaved] = useState<boolean>(false);
+  // Section 3: Consent - BLANK / UNCHECKED
+  const [declarationConfirmed, setDeclarationConfirmed] = useState<boolean>(false);
+  const [receiveUpdates, setReceiveUpdates] = useState<boolean>(false);
 
-  // Success Modal State
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
-  const [confirmedPass, setConfirmedPass] = useState<{
-    code: string;
-    name: string;
-    mode: string;
-    email: string;
-    org: string;
-  } | null>(null);
+  // Form Validation & Errors
+  const [formError, setFormError] = useState<string>('');
 
-  // Status Lookup State
-  const [lookupQuery, setLookupQuery] = useState<string>('');
-  const [lookupResult, setLookupResult] = useState<any | null>(null);
-  const [lookupSearched, setLookupSearched] = useState<boolean>(false);
-
-  // Active step highlight
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  // Real-Time Live Countdown Timer Engine
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
 
   useEffect(() => {
-    const handleScroll = () => {
-      const secB = document.getElementById('reg-section-participation');
-      const secC = document.getElementById('reg-section-logistics');
-      if (!secB || !secC) return;
+    const updateCountdown = () => {
+      const now = Date.now();
+      const difference = SUMMIT_START_TIME - now;
 
-      const topOffset = window.scrollY + 250;
-      const bTop = secB.offsetTop;
-      const cTop = secC.offsetTop;
-
-      if (topOffset >= cTop) {
-        setCurrentStep(3);
-      } else if (topOffset >= bTop) {
-        setCurrentStep(2);
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        });
       } else {
-        setCurrentStep(1);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    setActiveTab('registration');
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        const yOffset = -90;
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-    }, 50);
-  };
+  // Live Vacant Seats Calculation
+  const registeredCount = (config?.delegates?.length || 0) + 342;
+  const vacantSeats = Math.max(0, TOTAL_PHYSICAL_SEATS - registeredCount);
 
-  const handleTrackToggle = (trackValue: string) => {
-    if (selectedTracks.includes(trackValue)) {
-      setSelectedTracks(selectedTracks.filter((t) => t !== trackValue));
+  // Active / Confirmed Delegate Profile for the Success Page
+  const [confirmedDelegate, setConfirmedDelegate] = useState<RegisteredDelegate | null>(null);
+
+  // Success Page Interactive Micro-States
+  const [copiedToast, setCopiedToast] = useState<boolean>(false);
+  const [isDealRoomModalOpen, setIsDealRoomModalOpen] = useState<boolean>(false);
+  const [networkingEnabled, setNetworkingEnabled] = useState<boolean>(true);
+  const [supportLiaisonModalOpen, setSupportLiaisonModalOpen] = useState<boolean>(false);
+  const [shareSuccessToast, setShareSuccessToast] = useState<string>('');
+
+  // Status Lookup State
+  const [lookupQuery, setLookupQuery] = useState<string>('');
+  const [lookupResult, setLookupResult] = useState<RegisteredDelegate | null>(null);
+  const [lookupSearched, setLookupSearched] = useState<boolean>(false);
+
+  const toggleInterest = (interest: string) => {
+    if (selectedInterests.includes(interest)) {
+      setSelectedInterests(selectedInterests.filter((item) => item !== interest));
     } else {
-      setSelectedTracks([...selectedTracks, trackValue]);
+      setSelectedInterests([...selectedInterests, interest]);
     }
   };
 
-  const handleSaveDraft = () => {
-    setDraftSaved(true);
-    setTimeout(() => setDraftSaved(false), 3000);
+  const handleCopyCode = () => {
+    if (confirmedDelegate?.code) {
+      navigator.clipboard.writeText(confirmedDelegate.code);
+      setCopiedToast(true);
+      setTimeout(() => setCopiedToast(false), 2500);
+    }
+  };
+
+  const handleDownloadCalendar = () => {
+    if (!confirmedDelegate) return;
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Óghowa Accelerator//Óghowa Business Week 2026//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+SUMMARY:Óghowa Business Week 2026 (Accreditation: ${confirmedDelegate.code})
+DESCRIPTION:Official delegate accreditation for Óghowa Business Week 2026 · Innovation for Economic Transformation (...Our own), in institutional partnership with Benin Tech Fest. Delegate: ${confirmedDelegate.name} (${confirmedDelegate.role}).
+LOCATION:Victor Uwaifo Creative Hub & Edo Innovates Campus, Airport Road, GRA, Benin City, Edo State, Nigeria
+DTSTART:20261116T080000Z
+DTEND:20261121T180000Z
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', `OghowaBusinessWeek_${confirmedDelegate.code}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setShareSuccessToast('Calendar invite (.ics) downloaded for Nov 16–21, 2026!');
+    setTimeout(() => setShareSuccessToast(''), 3000);
+  };
+
+  const handlePrintBadge = () => {
+    window.print();
+  };
+
+  const handleShareBadge = () => {
+    if (!confirmedDelegate) return;
+    const shareText = `I have received my official accreditation pass for Óghowa Business Week 2026 in Benin City! Ref: ${confirmedDelegate.code}. Theme: Innovation for Economic Transformation. #OBW2026`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Óghowa Business Week Accreditation',
+        text: shareText,
+        url: window.location.href
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText);
+      setShareSuccessToast('Share message copied to clipboard!');
+      setTimeout(() => setShareSuccessToast(''), 3000);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const generatedRef = `OGH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const passData = {
+    setFormError('');
+
+    if (!formEmail.trim()) {
+      setFormError('Please enter your primary email address.');
+      return;
+    }
+
+    if (!fullName.trim() || !contactEmail.trim() || !phoneNumber.trim() || !organisation.trim() || !jobRole.trim()) {
+      setFormError('Please complete all required fields in the "About you" section.');
+      return;
+    }
+
+    if (!country || (country === 'Nigeria' && !state)) {
+      setFormError('Please select your state and city.');
+      return;
+    }
+
+    if (!persona) {
+      setFormError('Please select which category best describes you.');
+      return;
+    }
+
+    if (selectedInterests.length === 0) {
+      setFormError('Please select at least one area of interest.');
+      return;
+    }
+
+    if (!attendanceMode) {
+      setFormError('Please indicate whether you will attend in person.');
+      return;
+    }
+
+    if (!exhibitSponsorInterest) {
+      setFormError('Please indicate if you are interested in exhibiting or sponsoring.');
+      return;
+    }
+
+    if (!discoverySource) {
+      setFormError('Please select how you heard about Óghowa Business Week.');
+      return;
+    }
+
+    if (!declarationConfirmed) {
+      setFormError('Please accept the Participant Declaration consent checkbox to complete registration.');
+      return;
+    }
+
+    const effectiveCountry = country === 'Other' ? otherCountry : country;
+    const effectiveState = country === 'Nigeria' ? state : otherState;
+    const effectiveCity = (city === 'Other' || customCity) ? customCity : city;
+    const resolvedLocation = `${effectiveCity || 'Benin City'}, ${effectiveState || 'Edo State'}, ${effectiveCountry || 'Nigeria'}`;
+
+    const generatedRef = `OBW-2026-DELEGATE-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newDelegate: RegisteredDelegate = {
+      id: `del-${Date.now()}`,
       code: generatedRef,
-      name: fullName || 'Esteemed Delegate',
-      mode: attendanceMode === 'virtual' ? 'Virtual Stream Pass' : 'Physical Access Pass (Benin City)',
-      email: primaryEmail || 'delegate@businessweek.africa',
-      org: organisation || 'Independent Innovator'
+      name: fullName,
+      email: formEmail || contactEmail,
+      phone: phoneNumber,
+      organization: organisation,
+      role: jobRole,
+      country: effectiveCountry,
+      state: effectiveState,
+      city: effectiveCity,
+      location: resolvedLocation,
+      persona: persona === 'Other' ? (otherPersona || 'Other') : persona,
+      otherPersona: persona === 'Other' ? otherPersona : undefined,
+      tracks: selectedInterests.slice(0, 2),
+      interests: selectedInterests,
+      attendanceMode,
+      exhibitSponsorInterest,
+      discoverySource: discoverySource === 'Other' ? (otherDiscoverySource || 'Other') : discoverySource,
+      accessibilityRequirements: accessibility,
+      expectations,
+      declarationConfirmed,
+      receiveUpdates,
+      registeredAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      status: 'Accreditation Issued',
+      dealRoomInterest: exhibitSponsorInterest !== 'No' || persona.includes('founder') || persona.includes('Investor')
     };
 
-    setConfirmedPass(passData);
-    setIsSuccessModalOpen(true);
+    setConfirmedDelegate(newDelegate);
+    setActiveTab('success');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (onRegisterDelegate) {
+      onRegisterDelegate(newDelegate);
+    }
 
     if (onTicketReserved) {
       const ticketEmail: EmailNotification = {
         id: `EML-OBW-${Date.now()}`,
-        recipient: passData.email,
-        recipientName: passData.name,
-        subject: `Accreditation Confirmed: Óghowa Business Week 2026 (${passData.code})`,
+        recipient: newDelegate.email,
+        recipientName: newDelegate.name,
+        subject: `Accreditation Confirmed: Óghowa Business Week 2026 (${newDelegate.code})`,
         type: 'Event Ticket',
         timestamp: 'Just now',
-        content: `Dear ${passData.name},\n\nYour enrollment for Óghowa Business Week 2026 in direct collaboration with Benin Tech Fest & Edo State Innovation Network has been successfully recorded!\n\nDelegate Reference: ${passData.code}\nAccess Mode: ${passData.mode}\nOrganisation: ${passData.org}\nVenue: Victor Uwaifo Creative Hub & Edo Innovates Campus, Airport Road, Benin City.\n\nPlease save your accreditation reference for instant RFID clearance at the registration desk.\n\nWarm regards,\nÓghowa Business Week Secretariat`
+        content: `Dear ${newDelegate.name},\n\nYour participant registration for Óghowa Business Week (Nov 16 – 21, 2026) in collaboration with Benin Tech Fest is successfully confirmed!\n\nReference Code: ${newDelegate.code}\nAttendance Mode: ${newDelegate.attendanceMode}\nPersona: ${newDelegate.persona}\nOrganisation: ${newDelegate.organization} (${newDelegate.role})\nLocation: ${newDelegate.location}\nVenue: Victor Uwaifo Creative Hub & Edo Innovates Campus, Airport Road, GRA, Benin City, Edo State.\n\nPlease present this accreditation code upon arrival at the VIP registration pavilion.\n\nWarm regards,\nÓghowa Business Week Secretariat`
       };
       onTicketReserved(ticketEmail);
     }
@@ -173,32 +379,36 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
       setLookupResult(null);
       return;
     }
-    if (confirmedPass && (lookupQuery.includes(confirmedPass.code) || lookupQuery.includes(confirmedPass.email))) {
-      setLookupResult(confirmedPass);
-    } else if (lookupQuery.toLowerCase().includes('osagie') || lookupQuery.includes('2026') || lookupQuery.includes('@')) {
-      setLookupResult({
-        code: 'OGH-2026-8842',
-        name: lookupQuery.includes('@') ? lookupQuery.split('@')[0] : 'Dr. Aisosa Edebiri',
-        mode: 'In-Person Delegate (Benin City)',
-        email: lookupQuery.includes('@') ? lookupQuery : 'aisosa@edutech.ng',
-        org: 'Edo Innovation Network Fellow',
-        status: 'Accreditation Confirmed & Active'
-      });
+
+    const allDelegates = config?.delegates || [];
+    const found = allDelegates.find(
+      (d) =>
+        d.code.toLowerCase().includes(lookupQuery.toLowerCase()) ||
+        d.email.toLowerCase().includes(lookupQuery.toLowerCase()) ||
+        d.name.toLowerCase().includes(lookupQuery.toLowerCase())
+    );
+
+    if (found) {
+      setLookupResult(found);
+    } else if (confirmedDelegate && (lookupQuery.includes(confirmedDelegate.code) || lookupQuery.includes(confirmedDelegate.email))) {
+      setLookupResult(confirmedDelegate);
     } else {
       setLookupResult(null);
     }
   };
 
+  const availableCities = STATE_CITIES[state] || ['Capital City', 'Metropolitan', 'Other'];
+
   return (
     <div className="bg-[#FBF9F5] text-[#181d1b] min-h-screen flex flex-col font-sans selection:bg-[#00231b] selection:text-white">
-      {/* 1. HEADER (Styled per Óghowa Business Week theme) */}
+      {/* 1. HEADER - CLEAN BRANDED NAVIGATION */}
       <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#E5DFD5]">
         <div className="h-20 max-w-[1120px] mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={onBackToBusinessWeek}
               className="cursor-pointer hover:opacity-90 transition-opacity flex items-center"
-              title="Return to Business Week Main Page"
+              title="Return to Business Week Main Summit Page"
             >
               <BusinessWeekLogo size="sm" />
             </button>
@@ -206,15 +416,11 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
               <span className="text-base text-[#00231b] font-bold tracking-tight leading-tight">
                 Óghowa Business Week
               </span>
-              <span className="text-xs text-[#52605B]">Delegate Registration Portal</span>
-            </div>
-            <div className="hidden sm:flex items-center px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-[11px] font-bold uppercase tracking-wider ml-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B45309] mr-1.5 animate-pulse" />
-              Collaboration with Benin Tech Fest
+              <span className="text-xs text-[#52605B]">Participant Registration</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-3 sm:gap-4">
             <nav className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => {
@@ -240,7 +446,7 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
                     : 'text-[#414845] hover:text-[#181d1b]'
                 }`}
               >
-                Tracks
+                Pillars
               </button>
               <button
                 onClick={() => {
@@ -267,907 +473,1365 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
 
             <button
               onClick={onBackToAccelerator}
-              className="hidden lg:flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#52605B] hover:text-[#00231b] transition-colors cursor-pointer"
-              title="Return to Óghowa Accelerator Mother Site"
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#52605B] hover:text-[#00231b] transition-colors cursor-pointer"
+              title="Return to Óghowa Accelerator Homepage"
             >
-              <span>Main Accelerator</span>
+              <span>Oghowa Homepage</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* 2. MAIN REGISTRATION CONTAINER */}
+      {/* Toast Notification Alert */}
+      {shareSuccessToast && (
+        <div className="fixed top-24 right-6 z-50 bg-[#00231b] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{shareSuccessToast}</span>
+        </div>
+      )}
+
+      {/* 2. MAIN BODY */}
       <main className="w-full pt-20 flex-1 bg-[#FBF9F5]">
-        <div className="max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10">
-          <div className="max-w-[760px] mx-auto">
-            {/* Geometric diamond motif */}
-            <div className="w-full flex justify-center mb-4 opacity-35">
-              <svg fill="none" height="12" viewBox="0 0 48 12" width="48" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 6L6 0L12 6L6 12L0 6ZM18 6L24 0L30 6L24 12L18 6ZM36 6L42 0L48 6L42 12L36 6Z" fill="#0E3A2F" />
-              </svg>
+        {/* ============================================================== */}
+        {/* VIEW 1: ACCREDITATION SUCCESS PAGE                             */}
+        {/* ============================================================== */}
+        {activeTab === 'success' && confirmedDelegate && (
+          <div className="w-full max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10 animate-in fade-in duration-300">
+            {/* Top Stage Pill / Flow Tracker */}
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#E5DFD5]">
+              <div className="flex items-center gap-2 text-xs text-[#52605B]">
+                <button
+                  onClick={() => setActiveTab('registration')}
+                  className="font-semibold text-[#52605B] hover:text-[#00231b] transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Registration Form</span>
+                </button>
+                <span>•</span>
+                <span className="font-semibold text-[#316858]">Accreditation Confirmation</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-xs border border-[#E5DFD5]">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#52605B]">
+                  Live Accreditation System
+                </span>
+              </div>
             </div>
 
-            {/* TAB 1: REGISTRATION WIZARD */}
-            {activeTab === 'registration' && (
-              <div className="flex flex-col w-full">
-                {/* Top Progress Bar (Sticky under header) */}
-                <div className="sticky top-20 z-40 w-full mb-6 backdrop-blur-md bg-white/90 rounded-xl shadow-xs p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[#E5DFD5]">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-2.5 w-2.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B45309] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#B45309]" />
-                    </span>
-                    <span className="text-[11px] font-bold text-[#00231b] uppercase tracking-widest">
-                      Registration Status
-                    </span>
-                    <span className="text-[#52605B] text-xs">
-                      | Step <strong className="text-[#00231b] font-bold">{currentStep}</strong> of 3
-                    </span>
+            {/* Executive Success Notification Banner */}
+            <section className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs mb-8 relative overflow-hidden border border-[#E5DFD5]">
+              <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-[#b5efda]/30 blur-3xl pointer-events-none" />
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <div className="flex items-start gap-4 max-w-2xl">
+                  <div className="w-12 h-12 rounded-full bg-[#0e3a2f] text-[#b5efda] flex items-center justify-center shrink-0 shadow-md">
+                    <ShieldCheck className="w-6 h-6 text-[#b5efda]" />
                   </div>
-
-                  {/* Step Indicators */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => scrollToSection('reg-section-about')}>
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
-                          currentStep >= 1 ? 'bg-[#00231b] text-white' : 'bg-[#F4EFE6] text-[#52605B]'
-                        }`}
-                      >
-                        1
-                      </div>
-                      <span className="hidden sm:inline text-xs font-semibold text-[#00231b]">Profile</span>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] text-[11px] font-bold uppercase tracking-wider mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#B45309]" />
+                      Accreditation Issued
                     </div>
-
-                    <div className={`w-8 h-0.5 ${currentStep >= 2 ? 'bg-[#00231b]' : 'bg-[#E5DFD5]'}`} />
-
-                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => scrollToSection('reg-section-participation')}>
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
-                          currentStep >= 2 ? 'bg-[#00231b] text-white' : 'bg-[#F4EFE6] text-[#52605B]'
-                        }`}
-                      >
-                        2
-                      </div>
-                      <span className="hidden sm:inline text-xs font-semibold text-[#52605B]">Participation</span>
-                    </div>
-
-                    <div className={`w-8 h-0.5 ${currentStep >= 3 ? 'bg-[#00231b]' : 'bg-[#E5DFD5]'}`} />
-
-                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => scrollToSection('reg-section-logistics')}>
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
-                          currentStep >= 3 ? 'bg-[#00231b] text-white' : 'bg-[#F4EFE6] text-[#52605B]'
-                        }`}
-                      >
-                        3
-                      </div>
-                      <span className="hidden sm:inline text-xs font-semibold text-[#52605B]">Logistics</span>
-                    </div>
-                  </div>
-
-                  <div className="hidden lg:flex items-center gap-1.5 text-xs text-[#52605B]">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Takes ~3 mins</span>
-                  </div>
-                </div>
-
-                {/* Hero Intro Card */}
-                <div className="w-full bg-white rounded-2xl shadow-[0_4px_24px_rgba(14,58,47,0.06)] overflow-hidden mb-8 border border-[#E5DFD5]">
-                  <div className="bg-gradient-to-r from-[#00231b] to-[#0e3a2f] p-6 sm:p-8 text-white relative">
-                    <div className="absolute -right-8 -bottom-12 opacity-10 pointer-events-none select-none">
-                      <svg fill="currentColor" height="220" viewBox="0 0 100 100" width="220">
-                        <circle cx="50" cy="50" fill="none" r="45" stroke="white" strokeWidth="2" />
-                        <path d="M 50 5 Q 75 35 70 70 Q 55 95 30 80 Q 20 45 50 5" fill="none" stroke="white" strokeWidth="3" />
-                        <path d="M 50 5 Q 60 40 85 55 Q 65 90 40 85" fill="none" stroke="white" strokeWidth="2" />
-                      </svg>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 relative z-10">
-                      <div className="space-y-3 max-w-xl">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] text-[11px] font-bold uppercase tracking-wider">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#B45309]" />
-                            Official Delegation Registration
-                          </span>
-                          <span className="inline-flex items-center text-[#b5efda] text-xs font-semibold">
-                            Benin City, Edo State
-                          </span>
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                          Óghowa Business Week 2026
-                        </h1>
-                        <p className="text-sm sm:text-base text-[#eaefeb] leading-relaxed font-normal">
-                          Gathering founders, high-impact investors, industrial leaders, and emerging technologists for keynote debates, masterclasses, and strategic venture networking across Edo State.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col items-center sm:items-start bg-[#00231b]/50 backdrop-blur-sm p-4 rounded-xl gap-1 min-w-[190px] border border-white/10">
-                        <div className="flex items-center gap-1.5 text-[#FEF3C7] text-xs font-bold uppercase tracking-wider">
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>Capacity Window</span>
-                        </div>
-                        <span className="text-lg font-bold text-white">Limited Delegates</span>
-                        <p className="text-[11px] text-[#d6dbd8]">
-                          Registrations are reviewed systematically by the summit committee.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Institutional Collaboration Sub-strip */}
-                  <div className="bg-[#F4EFE6] px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-[#E5DFD5]">
-                    <div className="flex items-center gap-2 text-[#181d1b]">
-                      <ShieldCheck className="w-4 h-4 text-[#316858] shrink-0" />
-                      <span>
-                        Institutional partnership with <strong>Benin Tech Fest</strong> & Edo State Innovation Network
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#52605B]">
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>Secure & Encrypted Enrollment</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* MAIN REGISTRATION FORM */}
-                <form className="space-y-8" id="registrationForm" onSubmit={handleSubmit}>
-                  {/* SECTION A: ABOUT YOU */}
-                  <section
-                    className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-6 border border-[#E5DFD5]"
-                    id="reg-section-about"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 gap-2 border-b border-[#E5DFD5]">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#00231b] text-white flex items-center justify-center text-xs font-bold">
-                            A
-                          </span>
-                          <h2 className="text-xl font-bold text-[#00231b]">About You</h2>
-                        </div>
-                        <p className="text-xs text-[#52605B]">Primary contact and verified identification profile.</p>
-                      </div>
-                      <span className="text-[#52605B] text-[11px] uppercase tracking-wider bg-[#F4EFE6] px-2.5 py-1 rounded-md font-semibold">
-                        Fields marked <span className="text-[#B45309] font-bold">*</span> required
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Field 1: Primary Email */}
-                      <div className="flex flex-col space-y-1 md:col-span-2">
-                        <label className="text-sm font-bold text-[#181d1b] flex items-center justify-between" htmlFor="primary_email">
-                          <span>
-                            Primary Email Address <span className="text-[#B45309] font-bold">*</span>
-                          </span>
-                          <span className="text-xs font-normal text-[#52605B]">Account verification email</span>
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="primary_email"
-                            type="email"
-                            value={primaryEmail}
-                            onChange={(e) => {
-                              setPrimaryEmail(e.target.value);
-                              if (!confirmationEmail) setConfirmationEmail(e.target.value);
-                            }}
-                            placeholder="e.g. osagie.e@innovateafrica.com"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Your accreditation badge and access schedules will be dispatched here.
-                        </span>
-                      </div>
-
-                      {/* Field 2: Full Name */}
-                      <div className="flex flex-col space-y-1">
-                        <label className="text-sm font-bold text-[#181d1b]" htmlFor="full_name">
-                          Full Name <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="full_name"
-                            type="text"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            placeholder="e.g. Osagie Egharevba"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          First and surname as matching your valid identification.
-                        </span>
-                      </div>
-
-                      {/* Field 3: Confirmation Email */}
-                      <div className="flex flex-col space-y-1 bg-[#F4EFE6]/60 p-3 rounded-lg border border-[#E5DFD5]">
-                        <div className="flex items-center justify-between">
-                          <label className="text-sm font-bold text-[#181d1b]" htmlFor="confirmation_email">
-                            Confirm Email Address <span className="text-[#B45309] font-bold">*</span>
-                          </label>
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded">
-                            Preserved Field
-                          </span>
-                        </div>
-                        <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="confirmation_email"
-                            type="email"
-                            value={confirmationEmail}
-                            onChange={(e) => setConfirmationEmail(e.target.value)}
-                            placeholder="Confirm or repeat email address"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Preserved per source form specification for participant confirmation.
-                        </span>
-                      </div>
-
-                      {/* Field 4: Phone / WhatsApp Number */}
-                      <div className="flex flex-col space-y-1">
-                        <label className="text-sm font-bold text-[#181d1b]" htmlFor="phone_number">
-                          Phone / WhatsApp Number <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <div className="flex rounded-lg border border-[#C8BFB0] overflow-hidden bg-white">
-                          <div className="flex items-center gap-1.5 px-3 bg-[#F4EFE6] text-[#181d1b] text-xs font-bold border-r border-[#C8BFB0] select-none shrink-0">
-                            <span className="w-4 h-3 bg-[#008751] rounded-xs inline-block" />
-                            <span>+234</span>
-                          </div>
-                          <input
-                            className="w-full px-3.5 py-2.5 text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden"
-                            id="phone_number"
-                            type="tel"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            placeholder="801 234 5678"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Used for urgent delegate briefing updates.
-                        </span>
-                      </div>
-
-                      {/* Field 5: Organisation */}
-                      <div className="flex flex-col space-y-1">
-                        <label className="text-sm font-bold text-[#181d1b]" htmlFor="organisation">
-                          Organisation / Business / School <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <div className="relative">
-                          <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="organisation"
-                            type="text"
-                            value={organisation}
-                            onChange={(e) => setOrganisation(e.target.value)}
-                            placeholder="e.g. Benin Hub Ventures or Edo State Polytechnic"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Write "Independent" if not attached to an organisation.
-                        </span>
-                      </div>
-
-                      {/* Field 6: Job Role */}
-                      <div className="flex flex-col space-y-1">
-                        <label className="text-sm font-bold text-[#181d1b]" htmlFor="job_role">
-                          Job Title / Role <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <div className="relative">
-                          <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="job_role"
-                            type="text"
-                            value={jobRole}
-                            onChange={(e) => setJobRole(e.target.value)}
-                            placeholder="e.g. Founder, Managing Partner, Product Lead"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Indicate your primary role within your active entity.
-                        </span>
-                      </div>
-
-                      {/* Field 7: Location */}
-                      <div className="flex flex-col space-y-1">
-                        <label className="text-sm font-bold text-[#181d1b]" htmlFor="location">
-                          City, State and Country <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                          <input
-                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] placeholder:text-[#52605B]/60 focus:outline-hidden focus:ring-2 focus:ring-[#B45309]"
-                            id="location"
-                            type="text"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            placeholder="e.g. Benin City, Edo State, Nigeria"
-                            required
-                          />
-                        </div>
-                        <span className="text-[11px] text-[#52605B]">
-                          Assists logistical committee with regional delegate distribution metrics.
-                        </span>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* SECTION B: PARTICIPATION & TRACK PREFERENCES */}
-                  <section
-                    className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-6 border border-[#E5DFD5]"
-                    id="reg-section-participation"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 gap-2 border-b border-[#E5DFD5]">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#00231b] text-white flex items-center justify-center text-xs font-bold">
-                            B
-                          </span>
-                          <h2 className="text-xl font-bold text-[#00231b]">Participation & Track Preferences</h2>
-                        </div>
-                        <p className="text-xs text-[#52605B]">Customise your summit track, breakout sessions, and engagement format.</p>
-                      </div>
-                      <span className="text-[#316858] text-[11px] font-bold tracking-wider uppercase">
-                        Track Allocation
-                      </span>
-                    </div>
-
-                    {/* Persona Cards */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-[#181d1b] block">
-                        Category / Participant Persona <span className="text-[#B45309] font-bold">*</span>
-                      </label>
-                      <p className="text-xs text-[#52605B]">Select the persona that best aligns with your goals for this summit:</p>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
-                        {[
-                          { id: 'founder', title: 'Founder / Startup Operator', sub: 'Scaling scalable ventures or MVP products', icon: Rocket },
-                          { id: 'investor', title: 'Investor / VC / Angel', sub: 'Deploying seed, venture or growth capital', icon: Coins },
-                          { id: 'corporate', title: 'Corporate Executive / Leader', sub: 'Enterprises, banking, and strategic industries', icon: Building },
-                          { id: 'creative_tech', title: 'Creative & Tech Professional', sub: 'Designers, engineers, content creators', icon: Palette },
-                          { id: 'student_academic', title: 'Student / Academic Researcher', sub: 'Tertiary research, faculty, and scholars', icon: GraduationCap },
-                          { id: 'policymaker', title: 'Policy Maker / Public Sector', sub: 'Government, regulatory and multilateral', icon: Landmark }
-                        ].map((p) => {
-                          const IconComp = p.icon;
-                          const isSelected = selectedPersona === p.id;
-                          return (
-                            <div
-                              key={p.id}
-                              onClick={() => setSelectedPersona(p.id)}
-                              className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                                isSelected
-                                  ? 'bg-[#00231b] text-white border-[#00231b] shadow-md'
-                                  : 'bg-[#FBF9F5] hover:bg-[#F4EFE6] border-[#E5DFD5] text-[#181d1b]'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <IconComp className={`w-5 h-5 ${isSelected ? 'text-[#FEF3C7]' : 'text-[#00231b]'}`} />
-                                <div
-                                  className={`w-4 h-4 rounded-full flex items-center justify-center border ${
-                                    isSelected ? 'bg-white border-white' : 'border-[#C8BFB0]'
-                                  }`}
-                                >
-                                  {isSelected && <div className="w-2 h-2 rounded-full bg-[#00231b]" />}
-                                </div>
-                              </div>
-                              <div>
-                                <h4 className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-[#181d1b]'}`}>
-                                  {p.title}
-                                </h4>
-                                <p className={`text-[11px] mt-1 leading-snug ${isSelected ? 'text-[#eaefeb]' : 'text-[#52605B]'}`}>
-                                  {p.sub}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Tracks Checkboxes */}
-                    <div className="space-y-2 pt-2">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                        <label className="text-sm font-bold text-[#181d1b]">
-                          Primary Area of Interest / Tracks <span className="text-[#B45309] font-bold">*</span>
-                        </label>
-                        <span className="text-xs text-[#52605B]">Select all relevant thematic tracks</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {[
-                          { id: 'digital_economy', title: 'Digital Economy & Tech Ecosystem', desc: 'Software, fintech, AI innovation, and regional talent pipelines.' },
-                          { id: 'agritech', title: 'Agriculture, Agritech & Value Chain', desc: 'Agro-processing, sustainable yield, and mechanized distribution.' },
-                          { id: 'creative_arts', title: 'Creative Economy, Arts & Media', desc: 'Heritage preservation, digital content, film, and creative enterprise.' },
-                          { id: 'manufacturing_energy', title: 'Manufacturing, Energy & Infrastructure', desc: 'Power grids, clean mobility, local industrial zones, and production.' },
-                          { id: 'investment_pitches', title: 'Investment, Venture Capital & Startup Pitches', desc: 'Deal syndicates, investor showcases, and founder pitch rooms.' },
-                          { id: 'policy_governance', title: 'Policy, Governance & Economic Transformation', desc: 'Regulatory frameworks, SME incentives, and sub-national growth policies.' }
-                        ].map((track) => {
-                          const isChecked = selectedTracks.includes(track.id);
-                          return (
-                            <label
-                              key={track.id}
-                              className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
-                                isChecked
-                                  ? 'bg-[#FEF3C7]/40 border-[#B45309]/50'
-                                  : 'bg-[#FBF9F5] hover:bg-[#F4EFE6] border-[#E5DFD5]'
-                              }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => handleTrackToggle(track.id)}
-                                className="mt-1 h-4 w-4 rounded accent-[#00231b] text-[#00231b]"
-                              />
-                              <div>
-                                <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
-                                  {track.title}
-                                </span>
-                                <span className="text-[11px] text-[#52605B] block mt-0.5 leading-snug">
-                                  {track.desc}
-                                </span>
-                              </div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Masterclass dropdown */}
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-sm font-bold text-[#181d1b]" htmlFor="masterclass_breakout">
-                        Masterclasses & Breakout Sessions of Interest
-                      </label>
-                      <select
-                        id="masterclass_breakout"
-                        value={masterclass}
-                        onChange={(e) => setMasterclass(e.target.value)}
-                        className="w-full bg-white p-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#B45309]"
-                      >
-                        <option value="early_stage_fundraising">Early Stage Fundraising & Term Sheets</option>
-                        <option value="scaling_commerce">Scaling Cross-Border Commerce & Logistics</option>
-                        <option value="ai_sme_adoption">AI & Technology Adoption for African SMEs</option>
-                        <option value="building_edo_infra">Building in Edo: Infrastructure & Market Access</option>
-                        <option value="general_delegation">General Delegation / All Keynote Sessions</option>
-                      </select>
-                      <span className="text-[11px] text-[#52605B]">
-                        Seats inside masterclass halls are capped per session room capacity.
-                      </span>
-                    </div>
-
-                    {/* Attendance Mode */}
-                    <div className="space-y-1.5 pt-1">
-                      <label className="text-sm font-bold text-[#181d1b] block">
-                        How will you attend? <span className="text-[#B45309] font-bold">*</span>
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label
-                          onClick={() => setAttendanceMode('in_person')}
-                          className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                            attendanceMode === 'in_person'
-                              ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
-                              : 'bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
-                          }`}
-                        >
-                          <Building className={`w-6 h-6 ${attendanceMode === 'in_person' ? 'text-[#FEF3C7]' : 'text-[#00231b]'}`} />
-                          <div>
-                            <span className="text-sm font-bold block">In-Person Delegate</span>
-                            <span className={`text-[11px] block mt-0.5 ${attendanceMode === 'in_person' ? 'text-[#eaefeb]' : 'text-[#52605B]'}`}>
-                              Benin City, Edo State, Nigeria (Live Badge Pass)
-                            </span>
-                          </div>
-                        </label>
-
-                        <label
-                          onClick={() => setAttendanceMode('virtual')}
-                          className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                            attendanceMode === 'virtual'
-                              ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
-                              : 'bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
-                          }`}
-                        >
-                          <Clock className={`w-6 h-6 ${attendanceMode === 'virtual' ? 'text-[#FEF3C7]' : 'text-[#316858]'}`} />
-                          <div>
-                            <span className="text-sm font-bold block">Virtual Stream</span>
-                            <span className={`text-[11px] block mt-0.5 ${attendanceMode === 'virtual' ? 'text-[#eaefeb]' : 'text-[#52605B]'}`}>
-                              Interactive live broadcast & virtual networking hub
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* SECTION C: LOGISTICS & ADDITIONAL DETAILS */}
-                  <section
-                    className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-6 border border-[#E5DFD5]"
-                    id="reg-section-logistics"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 gap-2 border-b border-[#E5DFD5]">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#00231b] text-white flex items-center justify-center text-xs font-bold">
-                            C
-                          </span>
-                          <h2 className="text-xl font-bold text-[#00231b]">Logistics & Additional Details</h2>
-                        </div>
-                        <p className="text-xs text-[#52605B]">Referral channel, delegate accommodations, and syndicate updates.</p>
-                      </div>
-                      <span className="text-[#52605B] text-[11px] font-semibold uppercase tracking-wider">
-                        Final Step
-                      </span>
-                    </div>
-
-                    {/* How did you hear */}
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-sm font-bold text-[#181d1b]" htmlFor="discovery_source">
-                        How did you hear about Óghowa Business Week? <span className="text-[#B45309] font-bold">*</span>
-                      </label>
-                      <select
-                        id="discovery_source"
-                        value={discoverySource}
-                        onChange={(e) => setDiscoverySource(e.target.value)}
-                        className="w-full bg-white p-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#B45309]"
-                        required
-                      >
-                        <option value="social_media">Social Media (Twitter/X, LinkedIn, Instagram)</option>
-                        <option value="benin_tech_fest">Benin Tech Fest Channels</option>
-                        <option value="edo_innovation_hub">Edo State Innovation Hub</option>
-                        <option value="referral">Colleague or Friend Referral</option>
-                        <option value="press_media">Press / Television / Print Media</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-
-                    {/* Dietary / Accessibility */}
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-sm font-bold text-[#181d1b]" htmlFor="accessibility">
-                        Dietary or Accessibility Requirements <span className="text-xs font-normal text-[#52605B]">(Optional)</span>
-                      </label>
-                      <textarea
-                        id="accessibility"
-                        rows={3}
-                        value={accessibility}
-                        onChange={(e) => setAccessibility(e.target.value)}
-                        placeholder="Please let us know if you require special accessibility accommodations or dietary provisions during physical sessions."
-                        className="w-full bg-white p-3 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#B45309]"
-                      />
-                      <span className="text-[11px] text-[#52605B]">
-                        E.g., wheelchair assistance, ramp access, Halal, vegetarian, or allergy notices.
-                      </span>
-                    </div>
-
-                    {/* Deal Room Updates */}
-                    <div className="bg-[#F4EFE6]/70 p-4 rounded-xl border border-[#E5DFD5]">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={pitchUpdates}
-                          onChange={(e) => setPitchUpdates(e.target.checked)}
-                          className="mt-1 h-4 w-4 rounded accent-[#00231b] text-[#00231b]"
-                        />
-                        <div className="space-y-0.5">
-                          <span className="text-sm font-bold text-[#00231b] block">
-                            Startup Pitch Applications & Investor Deal Rooms
-                          </span>
-                          <span className="text-xs text-[#52605B] block leading-relaxed">
-                            Do you want to receive timely notifications and priority invites to pitch your company or access the closed-door Deal Syndicate room?
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-
-                    {/* Data Security & Confidentiality */}
-                    <div className="flex items-start gap-2.5 p-3.5 bg-[#FBF9F5] rounded-xl text-xs text-[#52605B] border border-[#E5DFD5]">
-                      <ShieldCheck className="w-5 h-5 text-[#316858] shrink-0 mt-0.5" />
-                      <span>
-                        <strong>Data Security & Confidentiality:</strong> Your details will be used exclusively for Óghowa Business Week delegate communication in direct institutional collaboration with Benin Tech Fest. No third-party marketing spam.
-                      </span>
-                    </div>
-                  </section>
-
-                  {/* LIVE REGISTRATION SUMMARY CARD (ACCORDION TOGGLE) */}
-                  <div className="bg-white rounded-2xl shadow-xs border border-[#E5DFD5] overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setIsSummaryOpen(!isSummaryOpen)}
-                      className="w-full p-4 flex items-center justify-between text-left hover:bg-[#F4EFE6]/50 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <FileText className="w-4 h-4 text-[#00231b]" />
-                        <span className="text-sm font-bold text-[#00231b]">Review Your Inputs Before Submission</span>
-                        <span className="text-xs text-[#52605B] hidden sm:inline">(Click to toggle live summary)</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-[#00231b] transition-transform duration-200 ${isSummaryOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {isSummaryOpen && (
-                      <div className="px-5 pb-5 bg-[#F4EFE6]/30 border-t border-[#E5DFD5] pt-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                          <div className="bg-white p-3 rounded-lg border border-[#E5DFD5]">
-                            <span className="text-[10px] font-bold text-[#52605B] uppercase block">Participant</span>
-                            <p className="text-sm font-bold text-[#181d1b] truncate mt-0.5">{fullName || '— Not filled —'}</p>
-                            <p className="text-[#52605B] truncate">{primaryEmail || '—'}</p>
-                          </div>
-                          <div className="bg-white p-3 rounded-lg border border-[#E5DFD5]">
-                            <span className="text-[10px] font-bold text-[#52605B] uppercase block">Organization & Title</span>
-                            <p className="text-sm font-bold text-[#181d1b] truncate mt-0.5">{organisation || '— Not filled —'}</p>
-                            <p className="text-[#52605B] truncate">{jobRole || '—'}</p>
-                          </div>
-                          <div className="bg-white p-3 rounded-lg border border-[#E5DFD5]">
-                            <span className="text-[10px] font-bold text-[#52605B] uppercase block">Format & Origin</span>
-                            <p className="text-sm font-bold text-[#316858] mt-0.5">
-                              {attendanceMode === 'virtual' ? 'Virtual Stream Pass' : 'In-Person Delegate (Benin City)'}
-                            </p>
-                            <p className="text-[#52605B] truncate">{location || '—'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ACTION BUTTONS */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1 pb-6">
-                    <button
-                      type="button"
-                      onClick={handleSaveDraft}
-                      className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] text-sm font-bold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Bookmark className="w-4 h-4" />
-                      <span>{draftSaved ? '✓ Draft Saved Locally' : 'Save Draft'}</span>
-                    </button>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                      <span className="text-xs text-[#52605B] text-center sm:text-right">
-                        Instant accreditation via email
-                      </span>
-                      <button
-                        type="submit"
-                        className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
-                      >
-                        <span>Complete Registration</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* TAB 2: SCHEDULE & THEMATIC TRACKS */}
-            {activeTab === 'schedule-tracks' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-xs">
-                  <h2 className="text-2xl font-bold text-[#00231b] mb-2">Summit Tracks & Agenda Details</h2>
-                  <p className="text-sm text-[#52605B] mb-6">
-                    Each track is curated with leading venture founders, institutional partners, and keynote debates across Benin City.
-                  </p>
-
-                  <div className="space-y-4">
-                    {[
-                      {
-                        title: 'Track 1: Digital Economy & Software Ecosystem',
-                        time: 'Day 1 & 2 • Main Auditorium',
-                        desc: 'Fintech rails, API integration across borders, talent pipelines from UNIBEN and Edo Innovates, AI tools for African commerce.'
-                      },
-                      {
-                        title: 'Track 2: Agritech & Mechanized Cold-Chain',
-                        time: 'Day 2 • Hall B',
-                        desc: 'High-yield agro processing, rural logistics, commodities export verification, and digital payment integration.'
-                      },
-                      {
-                        title: 'Track 3: The ₦50M Deal Room & Investor Pitch Room',
-                        time: 'Day 3 • Closed Syndicate Suite',
-                        desc: 'Ten shortlisted venture finalists pitch live before regional angel syndicates and venture capital partners.'
-                      },
-                      {
-                        title: 'Track 4: Creative Arts, Film & Digital Heritage',
-                        time: 'Day 4 • Victor Uwaifo Amphitheatre',
-                        desc: 'Celebrating Benin historic bronze casting, digital 3D archives, animation studios, and commercial music synchronization.'
-                      }
-                    ].map((item, idx) => (
-                      <div key={idx} className="p-4 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] space-y-1.5">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                          <h3 className="font-bold text-sm sm:text-base text-[#00231b]">{item.title}</h3>
-                          <span className="text-[11px] font-semibold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded w-fit">
-                            {item.time}
-                          </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-[#52605B] leading-relaxed">{item.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-[#E5DFD5] flex items-center justify-between">
-                    <button
-                      onClick={onBackToBusinessWeek}
-                      className="text-xs font-semibold text-blue-700 hover:underline"
-                    >
-                      ← View Full 5-Day Agenda on Summit Page
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('registration')}
-                      className="px-5 py-2.5 rounded-lg bg-[#00231b] text-white text-xs font-bold hover:bg-[#0e3a2f]"
-                    >
-                      Enroll in Tracks →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: VERIFY REGISTRATION STATUS */}
-            {activeTab === 'status-lookup' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-xs">
-                  <div className="max-w-md mx-auto text-center space-y-3 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-[#FEF3C7] text-[#B45309] flex items-center justify-center mx-auto">
-                      <Search className="w-6 h-6" />
-                    </div>
-                    <h2 className="text-xl font-bold text-[#00231b]">Verify Accreditation Pass</h2>
-                    <p className="text-xs text-[#52605B]">
-                      Enter your delegate reference code or primary email address to look up your clearance badge and session allocations.
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] tracking-tight">
+                      Registration Confirmed — Welcome to Óghowa Business Week 2026
+                    </h1>
+                    <p className="text-xs sm:text-sm text-[#52605B] mt-2 leading-relaxed">
+                      Your participant registration has been recorded into the national innovation register for November 16 – 21, 2026. A cryptographic delegate pass and calendar sync have been dispatched to{' '}
+                      <span className="font-bold text-[#181d1b]">{confirmedDelegate.email}</span>.
                     </p>
                   </div>
+                </div>
 
-                  <form onSubmit={handleStatusSearch} className="max-w-md mx-auto space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
-                      <input
-                        type="text"
-                        value={lookupQuery}
-                        onChange={(e) => setLookupQuery(e.target.value)}
-                        placeholder="e.g. OGH-2026-8842 or delegate@email.com"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#B45309]"
-                        required
-                      />
-                    </div>
+                {/* ID Card Box with Copy feedback */}
+                <div className="bg-[#F4EFE6] p-4 rounded-xl flex flex-col gap-2 shrink-0 min-w-[280px] border border-[#E5DFD5]">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#52605B]">
+                    Reference / Accreditation ID
+                  </span>
+                  <div className="flex items-center justify-between bg-white px-3.5 py-2 rounded-lg border border-[#E5DFD5]">
+                    <span className="text-sm sm:text-base text-[#00231b] tracking-wider font-mono font-bold">
+                      {confirmedDelegate.code}
+                    </span>
                     <button
-                      type="submit"
-                      className="w-full py-2.5 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-sm font-bold transition cursor-pointer"
+                      onClick={handleCopyCode}
+                      className="text-[#316858] hover:text-[#00231b] transition-colors p-1 cursor-pointer"
+                      title="Copy Reference ID"
                     >
-                      Search Delegate Registry
+                      <Copy className="w-4 h-4" />
                     </button>
-                  </form>
-
-                  {lookupSearched && lookupResult && (
-                    <div className="mt-6 max-w-md mx-auto p-4 rounded-xl bg-[#F4EFE6] border border-[#E5DFD5] space-y-3 animate-in fade-in">
-                      <div className="flex items-center gap-2 text-emerald-700 text-xs font-bold">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Accreditation Active & Confirmed</span>
-                      </div>
-                      <div className="space-y-1 text-xs">
-                        <p className="text-[#181d1b] font-bold text-sm">{lookupResult.name}</p>
-                        <p className="text-[#52605B]">Reference: <strong className="font-mono text-[#00231b]">{lookupResult.code}</strong></p>
-                        <p className="text-[#52605B]">Access Format: {lookupResult.mode}</p>
-                        <p className="text-[#52605B]">Organisation: {lookupResult.org}</p>
-                      </div>
-                      <div className="pt-2 border-t border-[#E5DFD5] text-[11px] text-[#52605B]">
-                        Present your reference code or digital badge at the Victor Uwaifo Hub entrance.
-                      </div>
-                    </div>
-                  )}
-
-                  {lookupSearched && !lookupResult && (
-                    <div className="mt-6 max-w-md mx-auto p-4 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-2 animate-in fade-in">
-                      <p className="text-xs font-bold text-rose-800">No Delegate Record Found</p>
-                      <p className="text-[11px] text-rose-700">
-                        Please check the code or email entered, or complete a new registration.
-                      </p>
-                      <button
-                        onClick={() => setActiveTab('registration')}
-                        className="text-xs font-bold text-[#00231b] underline"
-                      >
-                        Proceed to Register Now
-                      </button>
-                    </div>
-                  )}
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-[#52605B]">
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#316858]" />
+                      <span>Verified Protocol</span>
+                    </span>
+                    {copiedToast && (
+                      <span className="text-emerald-700 font-bold text-xs animate-in fade-in">
+                        Copied!
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </main>
+            </section>
 
-      {/* CONFIRMATION MODAL OVERLAY */}
-      {isSuccessModalOpen && confirmedPass && (
-        <div className="fixed inset-0 z-50 bg-[#00231b]/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 relative overflow-hidden animate-in fade-in zoom-in-95">
-            <div className="w-full h-2.5 bg-gradient-to-r from-[#B45309] via-[#00231b] to-[#316858] absolute top-0 left-0" />
-            <div className="w-14 h-14 rounded-full bg-[#b5efda] text-[#002018] flex items-center justify-center mb-1">
-              <CheckCircle2 className="w-8 h-8 text-[#00231b]" />
+            {/* Main Grid: Pass on Left, Logistics on Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: The Digital Accreditation Badge Pass */}
+              <section className="lg:col-span-7 flex flex-col items-center">
+                <div className="w-full max-w-[500px] bg-gradient-to-b from-[#00231b] via-[#0e3a2f] to-[#001712] rounded-2xl text-white shadow-2xl relative overflow-hidden transition-all duration-300 border border-[#316858]/30">
+                  <div className="absolute inset-0 opacity-[0.07] pointer-events-none mix-blend-overlay">
+                    <svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern height="40" id="edo-lattice" patternUnits="userSpaceOnUse" width="40">
+                          <path d="M0 20 L20 0 L40 20 L20 40 Z" fill="none" stroke="#FFFFFF" strokeWidth="1.5" />
+                          <circle cx="20" cy="20" fill="#FFFFFF" r="3" />
+                        </pattern>
+                      </defs>
+                      <rect fill="url(#edo-lattice)" height="100%" width="100%" />
+                    </svg>
+                  </div>
+
+                  {/* Clip Hole Visual */}
+                  <div className="w-full flex justify-center pt-3 pb-1 relative z-10">
+                    <div className="w-16 h-3 rounded-full bg-[#001712] shadow-inner flex items-center justify-center border border-white/10">
+                      <div className="w-10 h-1.5 rounded-full bg-white/20" />
+                    </div>
+                  </div>
+
+                  {/* Top Brand Header */}
+                  <div className="p-6 pb-4 border-b border-white/10 relative z-10 flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-[#b5efda] border border-white/10">
+                        <Building className="w-5 h-5 text-[#b5efda]" />
+                      </div>
+                      <div>
+                        <span className="text-base font-bold tracking-tight text-white block">
+                          Óghowa Business Week
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be]">
+                          November 16 – 21, 2026 • Benin City
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block px-2.5 py-0.5 rounded bg-[#B45309] text-white text-[10px] font-bold tracking-widest uppercase shadow-xs">
+                        Official Pass
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pass Middle Body */}
+                  <div className="p-6 relative z-10 space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-[#b5efda] text-[#002018] text-xs font-bold shadow-xs">
+                        {confirmedDelegate.persona}
+                      </span>
+                      <span className="px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-bold tracking-wider uppercase border border-white/10">
+                        {confirmedDelegate.attendanceMode}
+                      </span>
+                    </div>
+
+                    <div className="pt-2">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#99d2be]">
+                        Accredited Delegate
+                      </span>
+                      <h2 className="text-2xl font-black text-white tracking-tight mt-0.5">
+                        {confirmedDelegate.name}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-200 mt-0.5">
+                        {confirmedDelegate.role}, {confirmedDelegate.organization}
+                      </p>
+                      <p className="text-[11px] text-[#99d2be] mt-0.5 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#FEF3C7]" />
+                        <span>{confirmedDelegate.location}</span>
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-white/10 text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be] block mb-1">
+                          Summit Venue
+                        </span>
+                        <p className="text-white font-bold leading-snug">Victor Uwaifo Creative Hub</p>
+                        <p className="text-slate-300 text-[11px]">Airport Road, GRA, Benin City</p>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be] block mb-1">
+                          Selected Focus
+                        </span>
+                        <div className="flex flex-col gap-1">
+                          {(confirmedDelegate.interests || []).slice(0, 2).map((t, idx) => (
+                            <span key={idx} className="text-white text-[11px] font-medium flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#B45309]" />
+                              <span>{t}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* QR Code Verification Block */}
+                    <div className="bg-white text-[#181d1b] rounded-xl p-4 shadow-lg flex items-center justify-between gap-4 mt-4">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#52605B]">
+                          On-Site Rapid Accreditation
+                        </span>
+                        <span className="text-base font-extrabold text-[#00231b] tracking-tight">
+                          VIP Fast-Track
+                        </span>
+                        <span className="text-xs text-[#52605B] mt-0.5">
+                          Present at Entrance or Registration Pavilion
+                        </span>
+                        <span className="font-mono text-[9px] text-[#52605B] tracking-widest mt-1">
+                          HASH: 9a7b-04f8-e1c2-obw26
+                        </span>
+                      </div>
+
+                      <div className="w-20 h-20 bg-[#F4EFE6] p-1.5 rounded-lg border border-[#E5DFD5] shrink-0 flex items-center justify-center">
+                        <svg className="w-full h-full text-[#00231b]" fill="currentColor" viewBox="0 0 100 100">
+                          <path d="M10 10 h24 v24 h-24 Z M14 14 v16 h16 v-16 Z M18 18 h8 v8 h-8 Z" />
+                          <path d="M66 10 h24 v24 h-24 Z M70 14 v16 h16 v-16 Z M74 18 h8 v8 h-8 Z" />
+                          <path d="M10 66 h24 v24 h-24 Z M14 70 v16 h16 v-16 Z M18 74 h8 v8 h-8 Z" />
+                          <rect height="6" width="6" x="42" y="12" />
+                          <rect height="6" width="6" x="52" y="16" />
+                          <rect height="6" width="8" x="46" y="24" />
+                          <rect height="8" width="8" x="12" y="44" />
+                          <rect height="6" width="6" x="24" y="48" />
+                          <rect height="8" width="8" x="40" y="40" />
+                          <rect height="8" width="6" x="52" y="42" />
+                          <rect height="6" width="8" x="64" y="44" />
+                          <rect height="6" width="6" x="76" y="42" />
+                          <rect height="8" width="6" x="86" y="48" />
+                          <rect height="6" width="8" x="42" y="58" />
+                          <rect height="8" width="6" x="54" y="54" />
+                          <rect height="8" width="6" x="44" y="70" />
+                          <rect height="6" width="8" x="56" y="68" />
+                          <rect height="8" width="6" x="68" y="64" />
+                          <rect height="6" width="8" x="80" y="72" />
+                          <rect height="8" width="8" x="72" y="80" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Security Barcode */}
+                  <div className="px-6 py-3 bg-[#001712] border-t border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#B45309]" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                        In Collaboration with Benin Tech Fest
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-[2px] h-5">
+                      <span className="w-[2px] h-full bg-white/70" />
+                      <span className="w-[1px] h-full bg-white/40" />
+                      <span className="w-[3px] h-full bg-white/70" />
+                      <span className="w-[1px] h-full bg-white/30" />
+                      <span className="w-[2px] h-full bg-white/70" />
+                      <span className="w-[4px] h-full bg-white/60" />
+                      <span className="w-[1px] h-full bg-white/80" />
+                      <span className="w-[3px] h-full bg-white/50" />
+                      <span className="w-[2px] h-full bg-white/70" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Pass Actions */}
+                <div className="w-full max-w-[500px] mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    onClick={handlePrintBadge}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#00231b] text-white font-bold text-xs hover:bg-[#0e3a2f] transition-all shadow-sm cursor-pointer"
+                  >
+                    <Download className="w-4 h-4 text-[#FEF3C7]" />
+                    <span>Save PDF Pass</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadCalendar}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#00231b] border border-[#C8BFB0] font-bold text-xs hover:bg-[#F4EFE6] transition-colors shadow-xs cursor-pointer"
+                  >
+                    <CalendarPlus className="w-4 h-4 text-[#B45309]" />
+                    <span>Add to Calendar</span>
+                  </button>
+
+                  <button
+                    onClick={handleShareBadge}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#00231b] border border-[#C8BFB0] font-bold text-xs hover:bg-[#F4EFE6] transition-colors shadow-xs cursor-pointer"
+                  >
+                    <Share className="w-4 h-4 text-[#316858]" />
+                    <span>Share Badge</span>
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-[#52605B] mt-2.5 text-center">
+                  Dates: November 16 – 21, 2026. Compatible with Apple Wallet, Google Wallet & offline PDF storage.
+                </p>
+
+                {/* Social Share Prompt */}
+                <div className="w-full max-w-[500px] mt-4 bg-[#b5efda]/30 rounded-xl p-3.5 flex items-center justify-between border border-[#316858]/20">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#316858]" />
+                    <span className="text-xs font-semibold text-[#00231b]">
+                      Announce attendance on LinkedIn or X
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleShareBadge}
+                    className="text-xs font-bold text-[#316858] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Post #OBW2026</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </section>
+
+              {/* Right Column: Logistics & Actions */}
+              <section className="lg:col-span-5 flex flex-col gap-6">
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B45309]">
+                      On-Site Logistics
+                    </span>
+                    <span className="text-xs text-[#52605B] font-semibold">November 16 – 21, 2026</span>
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#F4EFE6] text-[#00231b] flex items-center justify-center shrink-0">
+                        <Calendar className="w-4 h-4 text-[#00231b]" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-[#00231b] block">
+                          November 16 – 21, 2026
+                        </span>
+                        <span className="text-xs text-[#52605B]">
+                          Accreditation opens 08:30 AM • Keynote Plenary at 10:15 AM
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#F4EFE6] text-[#00231b] flex items-center justify-center shrink-0">
+                        <Pin className="w-4 h-4 text-[#B45309]" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-[#181d1b] block">
+                          Victor Uwaifo Creative Hub & Edo Innovates Campus
+                        </span>
+                        <p className="text-xs text-[#52605B]">
+                          Airport Road, GRA, Benin City, Edo State, Nigeria
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#F4EFE6] rounded-xl p-3 flex items-start gap-2 border border-[#E5DFD5]">
+                      <Info className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
+                      <p className="text-xs text-[#52605B] leading-tight">
+                        Physical lanyard and RFID token collection begins <strong>Monday, November 16, 8:30 AM</strong> at the accreditation pavilions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delegate Checklist Card */}
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#316858]">
+                      Delegate Checklist
+                    </span>
+                    <span className="text-[10px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded-full">
+                      Action Items
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 text-emerald-600">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                          ₦50M Deal Room & Pitch Showcase
+                        </span>
+                        <p className="text-xs text-[#52605B]">
+                          As an accredited participant, submit or view investor materials.
+                        </p>
+                        <button
+                          onClick={() => setIsDealRoomModalOpen(true)}
+                          className="text-xs font-bold text-[#316858] hover:underline inline-flex items-center gap-1 mt-1 cursor-pointer"
+                        >
+                          <span>Access Deal Room Portal</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 text-emerald-600">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                            Networking Directory
+                          </span>
+                          <button
+                            onClick={() => setNetworkingEnabled(!networkingEnabled)}
+                            className={`text-[10px] px-2 py-0.5 rounded font-bold transition cursor-pointer ${
+                              networkingEnabled
+                                ? 'bg-[#b5efda] text-[#002018]'
+                                : 'bg-slate-200 text-slate-600'
+                            }`}
+                          >
+                            {networkingEnabled ? 'Enabled' : 'Disabled'}
+                          </button>
+                        </div>
+                        <p className="text-xs text-[#52605B] mt-0.5">
+                          Profile is discoverable by verified founders, investors & corporate partners.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#E5DFD5] flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-[#316858]" />
+                        <span className="text-xs font-semibold text-[#181d1b]">
+                          Participant Concierge Group
+                        </span>
+                      </div>
+                      <a
+                        href="https://whatsapp.com"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-bold text-[#00231b] hover:text-[#316858] transition-colors"
+                      >
+                        Join WhatsApp Group →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Support Liaison Card */}
+                <div className="bg-[#F4EFE6] rounded-2xl p-4.5 flex items-center justify-between gap-4 border border-[#E5DFD5]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#00231b] shadow-xs shrink-0">
+                      <HelpCircle className="w-5 h-5 text-[#00231b]" />
+                    </div>
+                    <div>
+                      <span className="text-xs sm:text-sm font-bold text-[#00231b] block">
+                        Need assistance or hotel protocol?
+                      </span>
+                      <span className="text-xs text-[#52605B]">
+                        Contact protocol desk for airport transfers, partner hotels & queries.
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSupportLiaisonModalOpen(true)}
+                    className="shrink-0 px-3 py-2 bg-white text-[#00231b] font-bold text-xs rounded-xl border border-[#C8BFB0] hover:bg-[#FBF9F5] transition-colors cursor-pointer"
+                  >
+                    Contact Secretariat
+                  </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                  <button
+                    onClick={onBackToBusinessWeek}
+                    className="w-full py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-xs sm:text-sm transition cursor-pointer text-center"
+                  >
+                    Return to Business Week Summit
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setConfirmedDelegate(null);
+                      setActiveTab('registration');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="w-full py-3 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] font-bold text-xs sm:text-sm transition cursor-pointer text-center"
+                  >
+                    Register Another Participant
+                  </button>
+                </div>
+              </section>
             </div>
+          </div>
+        )}
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider">
-                Submission Confirmed
+        {/* ============================================================== */}
+        {/* VIEW 2: PARTICIPANT REGISTRATION FORM (CLEAN & BLANK)          */}
+        {/* ============================================================== */}
+        {activeTab === 'registration' && (
+          <div className="max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10">
+            <div className="max-w-[760px] mx-auto">
+              {/* Header Box */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_16px_rgba(0,35,27,0.06)] border border-[#E5DFD5] mb-6 relative overflow-hidden">
+                <div className="h-2.5 w-full bg-[#00231b] absolute top-0 left-0" />
+
+                <div className="pt-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#B45309]">
+                      ...Our own
+                    </span>
+                    <div className="flex items-center gap-3 text-xs">
+                      {/* Live vacant seats counter */}
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                        <span>{vacantSeats} vacant physical seats remaining</span>
+                      </span>
+                      <span className="text-[#52605B] flex items-center gap-1 text-[11px]">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>~3 mins</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] tracking-tight">
+                    Óghowa Business Week — Participant Registration
+                  </h1>
+                  <p className="text-sm sm:text-base font-semibold text-[#316858] mt-1">
+                    Óghowa Business Week · Innovation for Economic Transformation
+                  </p>
+
+                  <p className="text-xs sm:text-sm text-[#52605B] mt-3 leading-relaxed">
+                    Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.
+                  </p>
+
+                  {/* Real-time countdown strip */}
+                  <div className="mt-4 pt-3 border-t border-[#E5DFD5] flex flex-wrap items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#00231b]">
+                      <Calendar className="w-4 h-4 text-[#B45309]" />
+                      <span>November 16 – 21, 2026 • Live Countdown:</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#00231b]">
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                        {timeLeft.days}d
+                      </span>
+                      <span>:</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                        {String(timeLeft.hours).padStart(2, '0')}h
+                      </span>
+                      <span>:</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                        {String(timeLeft.minutes).padStart(2, '0')}m
+                      </span>
+                      <span>:</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5] text-[#B45309]">
+                        {String(timeLeft.seconds).padStart(2, '0')}s
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-[#E5DFD5] space-y-1">
+                    <p className="text-xs text-[#52605B] font-medium">
+                      Please complete all required questions (*). It takes about 3 minutes.
+                    </p>
+                    <p className="text-[11px] text-[#B45309] font-bold">
+                      * Indicates required question
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {formError && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs font-semibold flex items-center gap-2">
+                    <X className="w-4 h-4 shrink-0 text-red-600" />
+                    <span>{formError}</span>
+                  </div>
+                )}
+
+                {/* Primary Email Card */}
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5] space-y-2">
+                  <label className="text-sm font-bold text-[#181d1b] block">
+                    Email <span className="text-[#B45309] font-bold">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                    <input
+                      type="email"
+                      required
+                      value={formEmail}
+                      onChange={(e) => {
+                        setFormEmail(e.target.value);
+                        if (!contactEmail) setContactEmail(e.target.value);
+                      }}
+                      placeholder="Your email address"
+                      className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                    />
+                  </div>
+                </div>
+
+                {/* SECTION 1: ABOUT YOU */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-6">
+                  <div className="pb-3 border-b border-[#E5DFD5]">
+                    <h2 className="text-xl font-bold text-[#00231b]">About you</h2>
+                    <p className="text-xs text-[#52605B] mt-0.5">Please provide your verified personal identification.</p>
+                  </div>
+
+                  {/* Full Name */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Full name <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Your full name"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email Address */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Email address <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <input
+                        type="email"
+                        required
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="Your contact email"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone / WhatsApp number */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Phone / WhatsApp number <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+                    <p className="text-xs text-[#52605B]">Include your country code, e.g. +234…</p>
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <input
+                        type="tel"
+                        required
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="+234 800 000 0000"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Organisation / business / school */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Organisation / business / school <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+                    <p className="text-xs text-[#52605B]">Write "Independent" if you are not attached to an organisation.</p>
+                    <div className="relative">
+                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <input
+                        type="text"
+                        required
+                        value={organisation}
+                        onChange={(e) => setOrganisation(e.target.value)}
+                        placeholder='Your organisation or "Independent"'
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Job title / role */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Job title / role <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+                    <div className="relative">
+                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <input
+                        type="text"
+                        required
+                        value={jobRole}
+                        onChange={(e) => setJobRole(e.target.value)}
+                        placeholder="e.g. Founder, CEO, Student, Tech Lead"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* City, state and country split */}
+                  <div className="space-y-3 pt-2 border-t border-[#E5DFD5]">
+                    <div>
+                      <label className="text-sm font-bold text-[#181d1b] block">
+                        City, state and country <span className="text-[#B45309] font-bold">*</span>
+                      </label>
+                      <p className="text-xs text-[#52605B]">
+                        Split each: each country listed and all Nigeria states listed with cities too (e.g. Benin City, Edo State, Nigeria)
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Country */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#52605B]">Country *</label>
+                        <select
+                          value={country}
+                          onChange={(e) => {
+                            setCountry(e.target.value);
+                            setState('');
+                            setCity('');
+                          }}
+                          className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                        >
+                          {COUNTRIES.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                        {country === 'Other' && (
+                          <input
+                            type="text"
+                            required
+                            value={otherCountry}
+                            onChange={(e) => setOtherCountry(e.target.value)}
+                            placeholder="Type country name"
+                            className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                          />
+                        )}
+                      </div>
+
+                      {/* State */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#52605B]">State / Province *</label>
+                        {country === 'Nigeria' ? (
+                          <select
+                            value={state}
+                            onChange={(e) => {
+                              setState(e.target.value);
+                              setCity('');
+                            }}
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                            required
+                          >
+                            <option value="">Select State</option>
+                            {NIGERIAN_STATES.map((s) => (
+                              <option key={s} value={s}>
+                                {s} {s === 'Edo' ? '(Host State)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            required
+                            value={otherState}
+                            onChange={(e) => setOtherState(e.target.value)}
+                            placeholder="State or Region"
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b]"
+                          />
+                        )}
+                      </div>
+
+                      {/* City */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#52605B]">City *</label>
+                        {country === 'Nigeria' ? (
+                          <>
+                            <select
+                              value={city}
+                              onChange={(e) => setCity(e.target.value)}
+                              className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                              required
+                            >
+                              <option value="">Select City</option>
+                              {availableCities.map((c) => (
+                                <option key={c} value={c}>
+                                  {c}
+                                </option>
+                              ))}
+                            </select>
+                            {city === 'Other' && (
+                              <input
+                                type="text"
+                                required
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                                placeholder="Type city name"
+                                className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                              />
+                            )}
+                          </>
+                        ) : (
+                          <input
+                            type="text"
+                            required
+                            value={customCity}
+                            onChange={(e) => setCustomCity(e.target.value)}
+                            placeholder="Enter city"
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b]"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 2: YOUR PARTICIPATION */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-6">
+                  <div className="pb-3 border-b border-[#E5DFD5]">
+                    <h2 className="text-xl font-bold text-[#00231b]">Your participation</h2>
+                    <p className="text-xs text-[#52605B] mt-0.5">Tell us about how you wish to engage with the summit.</p>
+                  </div>
+
+                  {/* Question: Which best describes you? */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Which best describes you? <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+
+                    <div className="space-y-2">
+                      {[
+                        'Entrepreneur / business owner',
+                        'Startup founder',
+                        'Tech or digital professional',
+                        'Investor / funder',
+                        'Corporate / business professional',
+                        'Government / public sector',
+                        'Student / young professional',
+                        'Creative / media',
+                        'Other'
+                      ].map((opt) => (
+                        <label
+                          key={opt}
+                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                            persona === opt
+                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
+                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="persona"
+                            checked={persona === opt}
+                            onChange={() => setPersona(opt)}
+                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                          />
+                          <span className="text-xs sm:text-sm">{opt}</span>
+                        </label>
+                      ))}
+
+                      {persona === 'Other' && (
+                        <input
+                          type="text"
+                          required
+                          value={otherPersona}
+                          onChange={(e) => setOtherPersona(e.target.value)}
+                          placeholder="Please specify your role"
+                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Question: What are you most interested in? */}
+                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
+                    <div>
+                      <label className="text-sm font-bold text-[#181d1b] block">
+                        What are you most interested in? <span className="text-[#B45309] font-bold">*</span>
+                      </label>
+                      <p className="text-xs text-[#52605B]">Select all that apply.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      {[
+                        'Keynotes & panel discussions',
+                        'Masterclasses & workshops',
+                        'Startup pitches & showcase',
+                        'Networking & investor meetups',
+                        'Exhibition',
+                        'Mentorship & business support'
+                      ].map((item) => {
+                        const isChecked = selectedInterests.includes(item);
+                        return (
+                          <label
+                            key={item}
+                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#b5efda]/20 border-[#316858] font-bold text-[#00231b]'
+                                : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleInterest(item)}
+                              className="w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                            />
+                            <span className="text-xs sm:text-sm">{item}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Question: Will you attend in person? */}
+                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Will you attend in person? <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+
+                    <div className="space-y-2">
+                      {[
+                        'Yes, in person',
+                        'Not sure yet',
+                        'No, I would like to follow remotely'
+                      ].map((opt) => (
+                        <label
+                          key={opt}
+                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                            attendanceMode === opt
+                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
+                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="attendanceMode"
+                            checked={attendanceMode === opt}
+                            onChange={() => setAttendanceMode(opt)}
+                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                          />
+                          <span className="text-xs sm:text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Question: Are you interested in exhibiting or sponsoring? */}
+                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Are you interested in exhibiting or sponsoring? <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+
+                    <div className="space-y-2">
+                      {[
+                        'No',
+                        'Exhibiting',
+                        'Sponsoring',
+                        'Both'
+                      ].map((opt) => (
+                        <label
+                          key={opt}
+                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                            exhibitSponsorInterest === opt
+                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
+                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="exhibitSponsorInterest"
+                            checked={exhibitSponsorInterest === opt}
+                            onChange={() => setExhibitSponsorInterest(opt)}
+                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                          />
+                          <span className="text-xs sm:text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Question: How did you hear about Óghowa Business Week? */}
+                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      How did you hear about Óghowa Business Week? <span className="text-[#B45309] font-bold">*</span>
+                    </label>
+
+                    <div className="space-y-2">
+                      {[
+                        'Social media',
+                        'WhatsApp / Telegram group',
+                        'Friend or colleague',
+                        'Benin Tech Fest',
+                        'Email / newsletter',
+                        'Radio, TV or press',
+                        'Other'
+                      ].map((opt) => (
+                        <label
+                          key={opt}
+                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                            discoverySource === opt
+                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
+                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="discoverySource"
+                            checked={discoverySource === opt}
+                            onChange={() => setDiscoverySource(opt)}
+                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                          />
+                          <span className="text-xs sm:text-sm">{opt}</span>
+                        </label>
+                      ))}
+
+                      {discoverySource === 'Other' && (
+                        <input
+                          type="text"
+                          required
+                          value={otherDiscoverySource}
+                          onChange={(e) => setOtherDiscoverySource(e.target.value)}
+                          placeholder="How did you hear about us?"
+                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Accessibility or dietary requirements (optional) */}
+                  <div className="space-y-1 pt-3 border-t border-[#E5DFD5]">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      Accessibility or dietary requirements (optional)
+                    </label>
+                    <p className="text-xs text-[#52605B]">Let us know anything we should prepare for.</p>
+                    <input
+                      type="text"
+                      value={accessibility}
+                      onChange={(e) => setAccessibility(e.target.value)}
+                      placeholder="e.g. Wheelchair access, dietary requirements, sign language translation"
+                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                    />
+                  </div>
+
+                  {/* What do you hope to get from the week? (optional) */}
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-[#181d1b] block">
+                      What do you hope to get from the week? (optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={expectations}
+                      onChange={(e) => setExpectations(e.target.value)}
+                      placeholder="e.g. Meet investors for my venture, network with industry partners, gain actionable policy insights"
+                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                    />
+                  </div>
+                </div>
+
+                {/* SECTION 3: CONSENT */}
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-5">
+                  <div className="pb-3 border-b border-[#E5DFD5]">
+                    <h2 className="text-xl font-bold text-[#00231b]">Consent</h2>
+                    <p className="text-xs text-[#52605B] mt-0.5">Please review the summit terms and communication preferences.</p>
+                  </div>
+
+                  {/* Participant declaration */}
+                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={declarationConfirmed}
+                      onChange={(e) => setDeclarationConfirmed(e.target.checked)}
+                      className="mt-1 w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                    />
+                    <div>
+                      <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                        Participant declaration <span className="text-[#B45309] font-bold">*</span>
+                      </span>
+                      <span className="text-xs text-[#52605B] mt-0.5 block leading-relaxed">
+                        I confirm that the information provided is accurate and consent to its use for registration and for communicating with me about Óghowa Business Week.
+                      </span>
+                    </div>
+                  </label>
+
+                  {/* Updates (optional) */}
+                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={receiveUpdates}
+                      onChange={(e) => setReceiveUpdates(e.target.checked)}
+                      className="mt-1 w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                    />
+                    <div>
+                      <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                        Updates (optional)
+                      </span>
+                      <span className="text-xs text-[#52605B] mt-0.5 block leading-relaxed">
+                        Keep me updated about future Óghowa Business Week and Benin Tech Fest events.
+                      </span>
+                    </div>
+                  </label>
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Submit Registration</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center gap-2 text-xs text-[#52605B]">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Instant accreditation pass & calendar sync</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* VIEW 3: FOUR PROGRAM PILLARS OVERVIEW                          */}
+        {/* ============================================================== */}
+        {activeTab === 'schedule-tracks' && (
+          <div className="max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <span className="text-xs font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] px-3 py-1 rounded-full">
+                4-Day Summit Program
               </span>
-              <h3 className="text-2xl font-bold text-[#00231b]">Registration Received</h3>
-              <p className="text-xs sm:text-sm text-[#52605B]">
-                Thank you for enrolling for <strong className="text-[#181d1b]">Óghowa Business Week 2026</strong> in collaboration with <strong className="text-[#181d1b]">Benin Tech Fest</strong>.
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] mt-3">
+                Óghowa Business Week Program Architecture
+              </h2>
+              <p className="text-xs sm:text-sm text-[#52605B] mt-2">
+                November 16 – 21, 2026 at Victor Uwaifo Creative Hub & Edo Innovates Campus.
               </p>
             </div>
 
-            <div className="bg-[#F4EFE6]/80 p-4 rounded-xl space-y-2 text-xs">
-              <div className="flex justify-between items-center pb-2 border-b border-[#E5DFD5]">
-                <span className="text-[#52605B]">Delegate Reference:</span>
-                <span className="font-mono font-bold text-[#00231b] text-sm">{confirmedPass.code}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2 border-b border-[#E5DFD5]">
-                <span className="text-[#52605B]">Enrolled Attendee:</span>
-                <span className="font-semibold text-[#181d1b]">{confirmedPass.name}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#52605B]">Access Format:</span>
-                <span className="font-semibold text-[#316858]">{confirmedPass.mode}</span>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  day: 'Day 1: Mon, 16 Nov 2026',
+                  title: 'The Macro-Economy, Commerce & Policy Forum',
+                  theme: 'Institutional Alignment & Sub-National Trade',
+                  highlights: [
+                    'Grand Opening & Welcome Address (Metaspace / Óghowa Team & ESIPO)',
+                    'Keynote: Decentralized Economic Growth: Positioning Edo as West Africa\'s Innovation Gateway',
+                    'Trade & Commerce Panel: Modernizing Sub-National Channels & Cross-Border Logistics',
+                    'Bank of Industry & Development Finance Masterclass (BOI & iDICE fund allocations)'
+                  ]
+                },
+                {
+                  day: 'Day 2: Tue, 17 Nov 2026',
+                  title: 'Digital Infrastructure, Tech Policy & The Founder’s Blueprint',
+                  theme: 'Digital Sovereignty & System Architecture',
+                  highlights: [
+                    'Morning Keynote: The Edo Tech Stack — Fiber Expansion, Cloud Sovereignty & Public Goods',
+                    'Digital Economy Policy Roundtable: National Startup Act State-Level Adoption',
+                    'Masterclass 1: Product-Market Fit & Scalable System Architecture for Frontier Markets',
+                    'Masterclass 2: Corporate Governance, Tax Structuring & Legal Compliance Clinic'
+                  ]
+                },
+                {
+                  day: 'Day 3: Thu, 19 Nov 2026',
+                  title: 'Venture Capital & Private Equity Day',
+                  theme: 'Capital Mobilization & Deal Rooms',
+                  highlights: [
+                    'Morning Plenary: Unlocking Institutional & Diaspora Capital for Sub-National Ecosystems',
+                    'Investor Panel: What Frontier Investors Look for Beyond Coastal Megacities',
+                    'Masterclass: Deconstructing the Term Sheet — SAFEs, Valuations & Cap Table Hygiene',
+                    'Closed Reverse Pitching & Deal Room Sessions: Fund Managers Pitch to Pre-Screened Founders'
+                  ]
+                },
+                {
+                  day: 'Day 4: Sat, 21 Nov 2026',
+                  title: 'Grand Finale & Demo Day',
+                  theme: 'The Óghowa Demo Day & Ecosystem Awards',
+                  highlights: [
+                    'Live Exhibition & Tech Experience Pavilion',
+                    'Opening Keynote: 2030+ Operational Outlook: Building Sustainable Prosperity in Edo State',
+                    'The Main Event: The Óghowa Demo Day (Top 10 Vetted Portfolio Startups Pitch to Judges)',
+                    'Closing Ceremony, Ecosystem Awards & ₦50M+ Syndicate Co-Investment Commitments'
+                  ]
+                }
+              ].map((p, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-6 border border-[#E5DFD5] shadow-xs flex flex-col justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-[#B45309]">{p.day}</span>
+                    <h3 className="text-lg font-bold text-[#00231b] mt-1">{p.title}</h3>
+                    <span className="inline-block mt-1 text-[11px] font-semibold text-[#316858] bg-[#b5efda]/30 px-2 py-0.5 rounded">
+                      {p.theme}
+                    </span>
+                    <ul className="mt-4 space-y-2 text-xs text-[#52605B]">
+                      {p.highlights.map((h, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#00231b] mt-1.5 shrink-0" />
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="pt-4 mt-4 border-t border-[#E5DFD5]">
+                    <button
+                      onClick={() => {
+                        setActiveTab('registration');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="text-xs font-bold text-[#00231b] hover:text-[#B45309] flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Register for this day</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+        )}
 
-            <p className="text-xs text-[#52605B]">
-              A confirmation dispatch with keynote schedule packets and venue clearance badge has been forwarded to your registered email ({confirmedPass.email}).
-            </p>
+        {/* ============================================================== */}
+        {/* VIEW 4: STATUS LOOKUP PORTAL                                   */}
+        {/* ============================================================== */}
+        {activeTab === 'status-lookup' && (
+          <div className="max-w-[760px] mx-auto px-4 md:px-6 py-8 sm:py-10">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5DFD5] shadow-xs">
+              <h2 className="text-xl font-bold text-[#00231b]">Verify Participant Accreditation</h2>
+              <p className="text-xs text-[#52605B] mt-1">
+                Enter your reference code (e.g. OBW-2026-DELEGATE-8492) or registration email:
+              </p>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSuccessModalOpen(false);
-                  onBackToBusinessWeek();
-                }}
-                className="w-full py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-sm font-bold transition cursor-pointer"
-              >
-                Return to Business Week Summit
+              <form onSubmit={handleStatusSearch} className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={lookupQuery}
+                  onChange={(e) => setLookupQuery(e.target.value)}
+                  placeholder="OBW-2026-DELEGATE-XXXX or email"
+                  className="flex-1 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-[#00231b] text-white font-bold text-xs rounded-lg hover:bg-[#0e3a2f] cursor-pointer"
+                >
+                  Verify
+                </button>
+              </form>
+
+              {lookupSearched && (
+                <div className="mt-6 pt-6 border-t border-[#E5DFD5]">
+                  {lookupResult ? (
+                    <div className="bg-[#b5efda]/20 border border-[#316858]/30 rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#00231b]">{lookupResult.code}</span>
+                        <span className="text-[10px] font-bold uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                          {lookupResult.status}
+                        </span>
+                      </div>
+                      <p className="text-sm font-bold text-[#181d1b]">{lookupResult.name}</p>
+                      <p className="text-xs text-[#52605B]">{lookupResult.role} · {lookupResult.organization}</p>
+                      <p className="text-xs text-[#52605B]">Location: {lookupResult.location}</p>
+                      <p className="text-xs text-[#52605B]">Mode: {lookupResult.attendanceMode}</p>
+                      <button
+                        onClick={() => {
+                          setConfirmedDelegate(lookupResult);
+                          setActiveTab('success');
+                        }}
+                        className="mt-2 text-xs font-bold text-[#00231b] underline cursor-pointer"
+                      >
+                        Open Digital Accreditation Badge Pass →
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
+                      No matching participant record found for "{lookupQuery}". Please check your reference code or register below.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* DEAL ROOM MODAL */}
+      {isDealRoomModalOpen && confirmedDelegate && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E5DFD5]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
+              <h3 className="font-bold text-base text-[#00231b]">₦50M Deal Room & Pitch Submission</h3>
+              <button onClick={() => setIsDealRoomModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
               </button>
-              <button
-                type="button"
-                onClick={() => setIsSuccessModalOpen(false)}
-                className="w-full py-3 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] text-sm font-semibold transition cursor-pointer"
-              >
-                Close
-              </button>
+            </div>
+            <div className="mt-4 space-y-3 text-xs text-[#52605B]">
+              <p>
+                Your accreditation ID <strong className="text-[#00231b] font-mono">{confirmedDelegate.code}</strong> qualifies you for fast-track deal review.
+              </p>
+              <div className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E5DFD5]">
+                <p className="font-bold text-[#00231b]">Deal Room Day: Thursday, 19 November 2026</p>
+                <p className="mt-1">Pitch decks and term sheet submissions close on November 10, 2026.</p>
+              </div>
+              <p>Upload your one-pager or deck to the closed deal portal or email investment@oghowa.africa with your code in the subject.</p>
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => {
+                    setIsDealRoomModalOpen(false);
+                    setShareSuccessToast('Deal Room request acknowledged by Secretariat.');
+                    setTimeout(() => setShareSuccessToast(''), 3000);
+                  }}
+                  className="px-4 py-2 bg-[#00231b] text-white font-bold rounded-lg text-xs"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. DEDICATED BUSINESS WEEK FOOTER */}
-      <footer className="w-full bg-[#F4EFE6] py-8 border-t border-[#E5DFD5] mt-auto">
-        <div className="max-w-[1120px] mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex flex-col items-center md:items-start">
-              <div className="flex items-center gap-2">
-                <BusinessWeekLogo size="sm" />
-                <span className="text-base text-[#00231b] font-bold">Óghowa Business Week</span>
+      {/* SUPPORT LIAISON MODAL */}
+      {supportLiaisonModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E5DFD5]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
+              <h3 className="font-bold text-base text-[#00231b]">Secretariat Protocol Liaison</h3>
+              <button onClick={() => setSupportLiaisonModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="mt-4 space-y-3 text-xs text-[#52605B]">
+              <p>For official delegations, flight arrivals at Benin Airport, and hotel bookings at our partner hotels in GRA:</p>
+              <div className="space-y-1 bg-[#FBF9F5] p-3 rounded-xl border border-[#E5DFD5]">
+                <p><strong>Desk:</strong> Óghowa Business Week Secretariat</p>
+                <p><strong>Email:</strong> secretariat@oghowa.africa</p>
+                <p><strong>Hotline:</strong> +234 803 123 4567</p>
+                <p><strong>Venue:</strong> Victor Uwaifo Creative Hub, Airport Road, GRA, Benin City</p>
               </div>
-              <span className="text-xs text-[#52605B] mt-0.5">Innovation for Economic Transformation</span>
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setSupportLiaisonModalOpen(false)}
+                  className="px-4 py-2 bg-[#00231b] text-white font-bold rounded-lg text-xs"
+                >
+                  Close
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      )}
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-[#316858]">
-                In institutional collaboration with Benin Tech Fest & Edo State Innovation Network
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs text-[#52605B]">
-              <button onClick={onBackToBusinessWeek} className="hover:text-[#00231b] transition-colors cursor-pointer">
-                Summit Main Page
-              </button>
-              <span>•</span>
-              <button onClick={onBackToAccelerator} className="hover:text-[#00231b] transition-colors cursor-pointer">
-                Óghowa Accelerator
-              </button>
-              <span>•</span>
-              <span>© 2026 Óghowa Business Week</span>
-            </div>
+      {/* 3. FOOTER */}
+      <footer className="w-full bg-[#00231b] text-white py-8 border-t border-[#316858]/30">
+        <div className="max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-300">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white">Óghowa Business Week</span>
+            <span>·</span>
+            <span>Innovation for Economic Transformation ...Our own</span>
+          </div>
+          <div className="flex items-center gap-4 text-slate-400">
+            <span>In collaboration with Benin Tech Fest</span>
+            <span>•</span>
+            <button onClick={onBackToAccelerator} className="hover:text-white underline cursor-pointer">
+              Oghowa Homepage
+            </button>
           </div>
         </div>
       </footer>

@@ -13,8 +13,8 @@ import { FeaturedVentures } from './components/FeaturedVentures';
 import { PartnersMarquee } from './components/PartnersMarquee';
 import { Footer } from './components/Footer';
 import { AuthModal } from './components/AuthModal';
-import { EmailNotification, Venture, PartnerItem, CarouselSlide } from './types';
-import { FEATURED_VENTURES, PARTNERS_LIST, DEFAULT_CAROUSEL_EVENTS } from './data/mockData';
+import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig, RegisteredDelegate } from './types';
+import { FEATURED_VENTURES, PARTNERS_LIST, DEFAULT_CAROUSEL_EVENTS, DEFAULT_BUSINESS_WEEK_CONFIG } from './data/mockData';
 
 // Code-split heavy views for high-performance loading
 const ApplicationPortal = lazy(() =>
@@ -65,6 +65,9 @@ export default function App() {
 
   // Dynamic Hero Carousel Slides controlled by Superadmin
   const [carouselEvents, setCarouselEvents] = useState<CarouselSlide[]>(DEFAULT_CAROUSEL_EVENTS);
+
+  // Dynamic Business Week Summit & Registration Configuration controlled by Superadmin
+  const [businessWeekConfig, setBusinessWeekConfig] = useState<BusinessWeekConfig>(DEFAULT_BUSINESS_WEEK_CONFIG);
 
   // Current Logged-in User
   const [currentUser, setCurrentUser] = useState({
@@ -287,6 +290,7 @@ export default function App() {
     return (
       <Suspense fallback={<ViewFallback />}>
         <BusinessWeekLanding
+          config={businessWeekConfig}
           onBackToAccelerator={() => {
             setCurrentView('home');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -303,12 +307,19 @@ export default function App() {
     return (
       <Suspense fallback={<ViewFallback />}>
         <BusinessWeekRegistration
+          config={businessWeekConfig}
           onBackToBusinessWeek={handleOpenBusinessWeek}
           onBackToAccelerator={() => {
             setCurrentView('home');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onTicketReserved={handleTicketReserved}
+          onRegisterDelegate={(newDelegate: RegisteredDelegate) => {
+            setBusinessWeekConfig((prev) => ({
+              ...prev,
+              delegates: [newDelegate, ...prev.delegates]
+            }));
+          }}
         />
       </Suspense>
     );
@@ -344,13 +355,15 @@ export default function App() {
               carouselEvents={carouselEvents}
               onOpenBusinessWeek={handleOpenBusinessWeek}
               onRegisterForBusinessWeek={handleOpenBusinessWeekRegistration}
+              config={businessWeekConfig}
             />
 
-            {/* B. Dynamic Business Startup Week Countdown & Live Seats Tracker */}
+            {/* B. Dynamic Business Week Countdown & Live Seats Tracker */}
             <EventCountdown
               onTicketReserved={handleTicketReserved}
               onOpenBusinessWeek={handleOpenBusinessWeek}
               onRegisterForBusinessWeek={handleOpenBusinessWeekRegistration}
+              config={businessWeekConfig}
             />
 
             {/* C. Who We Serve */}
@@ -440,10 +453,12 @@ export default function App() {
               ventures={ventures}
               partners={partners}
               carouselEvents={carouselEvents}
+              businessWeekConfig={businessWeekConfig}
               onUpdateStatus={handleStatusUpdate}
               onUpdateVentures={handleUpdateVentures}
               onUpdatePartners={handleUpdatePartners}
               onUpdateCarouselEvents={handleUpdateCarouselEvents}
+              onUpdateBusinessWeekConfig={setBusinessWeekConfig}
               onBackToDashboard={() => {
                 setCurrentView('dashboard');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -452,6 +467,8 @@ export default function App() {
                 setCurrentView('home');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              onNavigateToBusinessWeek={handleOpenBusinessWeek}
+              onNavigateToRegistration={handleOpenBusinessWeekRegistration}
             />
           </Suspense>
         )}

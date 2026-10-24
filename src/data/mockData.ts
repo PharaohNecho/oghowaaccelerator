@@ -1,4 +1,4 @@
-import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide } from '../types';
+import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide, BusinessWeekConfig } from '../types';
 
 export const WHO_WE_SERVE_DATA = [
   {
@@ -123,7 +123,7 @@ export const JOURNEY_STEPS = [
 export const FLAGSHIP_PLATFORMS = [
   {
     id: 'innovation-weekend',
-    title: 'Innovation Weekend',
+    title: 'Óghowa Innovation Weekend',
     description: '48-hour hackathon & ideation sprint to prototype solutions for acute regional and global challenges.',
     image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=70',
     cohortSchedule: 'Quarterly · Next: Nov 2026',
@@ -131,11 +131,11 @@ export const FLAGSHIP_PLATFORMS = [
   },
   {
     id: 'venture-studio',
-    title: 'Business Startup Weekend',
-    description: 'Co-build early-stage high-potential ventures with experienced operators, engineers, and product leaders.',
+    title: 'Óghowa Business Week',
+    description: "Africa's flagship annual gathering for innovation, entrepreneurship, governance, capital mobilization, and investment dialogue in collaboration with Benin Tech Fest.",
     image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=500&q=70',
-    cohortSchedule: 'Rolling admissions · 6 months',
-    features: ['Dedicated engineering pod', 'Pre-seed co-funding', 'Shared growth executive']
+    cohortSchedule: 'Annual Summit · Nov 16–21, 2026',
+    features: ['Thematic policy roundtables', '₦50M Deal Syndicate', 'Institutional partnerships']
   },
   {
     id: 'incubation',
@@ -155,10 +155,10 @@ export const FLAGSHIP_PLATFORMS = [
   },
   {
     id: 'business-week',
-    title: 'Business Startup Week',
-    description: "Africa's flagship gathering for innovation, entrepreneurship, governance and investment dialogue.",
+    title: 'Óghowa Business Week',
+    description: "Edo State's flagship sub-national summit connecting ideas with investment, innovation with enterprise, and partnerships with measurable economic impact.",
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=500&q=70',
-    cohortSchedule: 'Annual Summit · Edo, Nigeria',
+    cohortSchedule: 'Annual Summit · Nov 16–21, 2026',
     features: ['Keynote addresses', 'Ecosystem matchmaking', 'Government-founder roundtables']
   },
   {
@@ -567,10 +567,10 @@ export const PARTNERS_LIST: PartnerItem[] = [
 export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
   {
     id: 'event-startup-week',
-    title: 'Óghowa Business Startup Week 2026',
-    subtitle: 'Africa’s Premier Gathering for Frontier Innovation, Investment & Governance',
-    description: 'Join 1,500+ tech founders, angel investors, policy makers, and enterprise executives for 5 intensive days of venture deal rooms, masterclasses, and keynote dialogues.',
-    eventDate: 'Nov 18 - 22, 2026',
+    title: 'Óghowa Business Week 2026',
+    subtitle: 'Innovation for Economic Transformation ...Our own',
+    description: 'Join founders, investors, business leaders and innovators in collaboration with Benin Tech Fest for keynotes, masterclasses, startup pitches and networking in Edo State.',
+    eventDate: 'Nov 16 - 21, 2026',
     location: 'Victor Uwaifo Creative Hub & Edo Innovates Campus, Benin City',
     badge: 'Flagship Summit',
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=75',
@@ -581,7 +581,7 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
   },
   {
     id: 'event-startup-weekend',
-    title: 'Business Startup Weekend',
+    title: 'Óghowa Innovation Weekend',
     subtitle: '48-Hour Rapid Prototyping, Venture Ideation & Co-founder Matchmaking',
     description: 'Pitch ideas, form multi-disciplinary squads, build functional MVPs, and compete for ₦5,000,000 in equity-free grant financing and direct admission into Incubation.',
     eventDate: 'Dec 05 - 07, 2026',
@@ -608,3 +608,189 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
     order: 3
   }
 ];
+
+export const DEFAULT_BUSINESS_WEEK_CONFIG: BusinessWeekConfig = {
+  summitTitle: 'Óghowa Business Week 2026',
+  dates: 'November 16 – 21, 2026',
+  venueName: 'Victor Uwaifo Creative Hub & Edo Innovates Campus',
+  venueAddress: 'Airport Road, GRA, Benin City, Edo State, Nigeria',
+  dealFundAmount: '₦50,000,000',
+  expectedDelegates: '2,500+',
+  capacityWindowText: 'Limited Delegates — Registrations are reviewed systematically by the summit committee.',
+  isRegistrationOpen: true,
+  tracks: [
+    {
+      id: 'digital_economy',
+      tag: 'Pillar 01',
+      title: 'Institutional Alignment & Policy Forum',
+      desc: 'Decentralized economic growth, government partnerships, regulatory sandboxes, and modernizing sub-national trade channels.',
+      isDisplayed: true
+    },
+    {
+      id: 'agritech',
+      tag: 'Pillar 02',
+      title: 'Digital Infrastructure & Founder Blueprint',
+      desc: 'The Edo Tech Stack, fiber expansion, cloud sovereignty, system architecture, and corporate governance for high-growth ventures.',
+      isDisplayed: true
+    },
+    {
+      id: 'investment_pitches',
+      tag: 'Pillar 03',
+      title: 'Venture Capital, Private Equity & Deal Syndicate',
+      desc: 'Unlocking institutional and diaspora capital, reverse pitching, term sheet hygiene, and the ₦50M Deal Room.',
+      isDisplayed: true
+    },
+    {
+      id: 'demo_day',
+      tag: 'Pillar 04',
+      title: 'The Óghowa Demo Day & Grand Finale',
+      desc: 'The top 10 vetted portfolio startups pitch live to Pan-African investors, with ecosystem awards and capital co-investments.',
+      isDisplayed: true
+    }
+  ],
+  speakers: [
+    {
+      id: 'spk-1',
+      name: 'Dr. Aisosa Edebiri',
+      role: 'Managing Partner, Sahara Frontier Capital',
+      topic: 'Sub-National Venture Economics & Early-Stage Syndicates',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+      isDisplayed: true
+    },
+    {
+      id: 'spk-2',
+      name: 'Osagie Egharevba',
+      role: 'Founder & CEO, Benin Mobility Tech',
+      topic: 'Building Clean Transport Infrastructure for Tier-2 Cities',
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      isDisplayed: true
+    },
+    {
+      id: 'spk-3',
+      name: 'Engr. Osayande Ighodaro',
+      role: 'Director of Technology, Edo State Innovation Hub',
+      topic: 'Bridging Academic Research & High-Growth Commercial Startups',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      isDisplayed: true
+    },
+    {
+      id: 'spk-4',
+      name: 'Nosa Igiehon',
+      role: 'Principal, Great Benin Creative Fund',
+      topic: 'Commercialising African Cultural IP and Digital Media',
+      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+      isDisplayed: true
+    }
+  ],
+  schedule: [
+    {
+      day: 1,
+      title: 'Day 1: The Macro-Economy, Commerce & Policy Forum',
+      date: 'Monday, 16 November 2026',
+      theme: 'Institutional Alignment & Sub-National Commerce',
+      events: [
+        { time: '08:30 – 09:30 AM', title: 'Accreditation, Networking & Exhibition Walkthrough', speaker: 'Summit Secretariat' },
+        { time: '09:30 – 10:15 AM', title: 'Grand Opening & Welcome Address', speaker: 'Metaspace / Óghowa Team & ESIPO' },
+        { time: '10:15 – 11:30 AM', title: 'Keynote & High-Level Policy Dialogue: "Decentralized Economic Growth: Positioning Edo as West Africa\'s Innovation Gateway"', speaker: 'Government Leaders & Key Stakeholders' },
+        { time: '11:45 – 01:15 PM', title: 'Trade & Commerce Panel: Modernizing Sub-National Trade Channels, Cross-Border Payments, and Logistics', speaker: 'Ministry of Trade, Commercial Bank Directors & Logistics Operators' },
+        { time: '01:15 – 02:15 PM', title: 'Executive Networking Lunch & Curated Deal Lounge', speaker: 'VIP Delegation' },
+        { time: '02:15 – 03:45 PM', title: 'Bank of Industry & Development Finance Masterclass: Accessing Catalytic Capital & iDICE Fund Allocations', speaker: 'BOI & Development Partners' },
+        { time: '03:45 – 04:45 PM', title: 'Day 1 Fireside Chat & Day Close', speaker: 'Industry Pioneers' }
+      ]
+    },
+    {
+      day: 2,
+      title: 'Day 2: Digital Infrastructure, Tech Policy & The Founder’s Blueprint',
+      date: 'Tuesday, 17 November 2026',
+      theme: 'Sovereignty, Scalable Systems & Legal Compliance',
+      events: [
+        { time: '09:00 – 09:30 AM', title: 'Morning Keynote: The Edo Tech Stack — Fiber Expansion, Cloud Sovereignty & Public Digital Goods', speaker: 'Edo ICTA & Edo Cloud' },
+        { time: '09:30 – 11:00 AM', title: 'Digital Economy Policy Roundtable: National Startup Act State-Level Adoption & Regulatory Sandboxes', speaker: 'MDEST, NITDA & Gates Foundation Initiative' },
+        { time: '11:15 – 01:00 PM', title: 'Masterclass 1: Product-Market Fit & Scalable System Architecture for Frontier Markets', speaker: 'Senior Tech Leads & CTOs' },
+        { time: '01:00 – 02:00 PM', title: 'Lunch Break & Live Exhibition Showcase', speaker: 'All Delegates' },
+        { time: '02:00 – 03:30 PM', title: 'Masterclass 2: Corporate Governance, Tax Structuring & Legal Compliance Clinic', speaker: 'Legal & Tax Practitioners' },
+        { time: '03:30 – 05:00 PM', title: 'Panel Session: "Tech in the Trenches — Building Resilient Systems in AgriTech, Mobility & Commodity Trade"', speaker: 'Frontline Founders' }
+      ]
+    },
+    {
+      day: 3,
+      title: 'Day 3: Venture Capital & Private Equity Day',
+      date: 'Thursday, 19 November 2026',
+      theme: 'Capital Mobilization & Term Sheet Hygiene',
+      events: [
+        { time: '09:00 – 09:45 AM', title: 'Morning Plenary: Unlocking Institutional & Diaspora Capital for Sub-National Ecosystems', speaker: 'Capital Network Leads' },
+        { time: '09:45 – 11:15 AM', title: 'Investor Panel: What Frontier Investors Look for Beyond Coastal Megacities', speaker: 'Leading West African VCs & Angel Networks' },
+        { time: '11:30 – 01:00 PM', title: 'The Masterclass: Deconstructing the Term Sheet — SAFEs, Valuations, Liquidation Preferences & Cap Table Hygiene', speaker: 'Venture Partners & Syndicate Leads' },
+        { time: '01:00 – 02:00 PM', title: 'VIP Investor Networking Luncheon', speaker: 'Accredited Investors & Founders' },
+        { time: '02:00 – 04:30 PM', title: 'Closed Reverse Pitching & Deal Room Sessions: Fund Managers Pitch Their Theses to Pre-Screened Founders', speaker: 'Fund Managers & Finalist Founders' }
+      ]
+    },
+    {
+      day: 4,
+      title: 'Day 4: Grand Finale & Demo Day',
+      date: 'Saturday, 21 November 2026',
+      theme: 'The Óghowa Demo Day & Ecosystem Awards',
+      events: [
+        { time: '09:30 – 10:15 AM', title: 'Arrival, Live Exhibition & Tech Experience Pavilion', speaker: 'Summit Delegates & Guests' },
+        { time: '10:15 – 11:00 AM', title: 'Opening Keynote: 2030+ Operational Outlook: Building Sustainable Prosperity in Edo State', speaker: 'Keynote Speaker' },
+        { time: '11:00 – 01:30 PM', title: 'The Main Event: The Óghowa Demo Day (Top 10 Vetted Portfolio Startups Pitch to Local & International Investor Panel)', speaker: 'Cohort Finalists & Judges' },
+        { time: '01:30 – 02:30 PM', title: 'Lunch, Deliberations & Live Audience Choice Voting', speaker: 'Delegates & Evaluation Jury' },
+        { time: '02:30 – 04:00 PM', title: 'Closing Ceremony, Ecosystem Awards, ₦50M+ Syndicate Co-Investment Commitments Announcement & Official Communiqué', speaker: 'Óghowa Investment Committee & Partners' }
+      ]
+    }
+  ],
+  delegates: [
+    {
+      id: 'del-1',
+      code: 'OBW-2026-DELEGATE-8492',
+      name: 'Osagie Egharevba',
+      email: 'osagie.e@innovateafrica.com',
+      phone: '+234 801 234 5678',
+      organization: 'Benin Hub Ventures',
+      role: 'Founder & Managing Partner',
+      location: 'Benin City, Edo State, Nigeria',
+      persona: 'founder',
+      tracks: ['digital_economy', 'investment_pitches'],
+      masterclass: 'early_stage_fundraising',
+      attendanceMode: 'in_person',
+      registeredAt: '2026-10-20 14:15',
+      status: 'Accreditation Issued',
+      dealRoomInterest: true
+    },
+    {
+      id: 'del-2',
+      code: 'OBW-2026-DELEGATE-1029',
+      name: 'Dr. Aisosa Edebiri',
+      email: 'aisosa@edutech.ng',
+      phone: '+234 803 987 6543',
+      organization: 'Sahara Frontier Capital',
+      role: 'Managing Partner',
+      location: 'Lagos & Benin City, Nigeria',
+      persona: 'investor',
+      tracks: ['investment_pitches', 'digital_economy'],
+      masterclass: 'early_stage_fundraising',
+      attendanceMode: 'in_person',
+      registeredAt: '2026-10-21 09:30',
+      status: 'Fast-Track VIP',
+      dealRoomInterest: true
+    },
+    {
+      id: 'del-3',
+      code: 'OBW-2026-DELEGATE-4719',
+      name: 'Victory Usiobaifo',
+      email: 'usiobaifovictory245@gmail.com',
+      phone: '+234 803 123 4567',
+      organization: 'Ugbekun SMP',
+      role: 'CEO & Founder',
+      location: 'Benin City, Edo State',
+      persona: 'founder',
+      tracks: ['digital_economy', 'agritech'],
+      masterclass: 'ai_sme_adoption',
+      attendanceMode: 'in_person',
+      registeredAt: '2026-10-22 11:20',
+      status: 'Accreditation Issued',
+      dealRoomInterest: true
+    }
+  ]
+};
+

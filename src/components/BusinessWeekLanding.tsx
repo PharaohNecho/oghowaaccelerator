@@ -19,40 +19,47 @@ import {
   BookOpen,
   Briefcase,
   HelpCircle,
-  FileText
+  FileText,
+  Target,
+  Compass,
+  TrendingUp,
+  Cpu,
+  GraduationCap
 } from 'lucide-react';
 import { BusinessWeekLogo } from './BusinessWeekLogo';
+import { BusinessWeekConfig } from '../types';
 
 interface BusinessWeekLandingProps {
   onBackToAccelerator: () => void;
   onOpenRegistration: () => void;
   onOpenApply: () => void;
+  config?: BusinessWeekConfig;
 }
+
+// Target Date: November 16, 2026 at 09:00:00 WAT (UTC+1)
+const SUMMIT_START_TIME = new Date('2026-11-16T09:00:00+01:00').getTime();
+const TOTAL_PHYSICAL_SEATS = 500;
 
 export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
   onBackToAccelerator,
   onOpenRegistration,
-  onOpenApply
+  onOpenApply,
+  config
 }) => {
-  // Live Countdown to Summit Opening (October 24, 2026)
+  // Live accurate countdown to November 16, 2026 09:00:00 WAT
   const [timeLeft, setTimeLeft] = useState({
-    days: 18,
-    hours: 7,
-    minutes: 42,
-    seconds: 15
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
   });
 
   const [activeDayTab, setActiveDayTab] = useState<number>(1);
 
   useEffect(() => {
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 18);
-    targetDate.setHours(targetDate.getHours() + 7);
-    targetDate.setMinutes(targetDate.getMinutes() + 42);
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetDate.getTime() - now;
+    const updateCountdown = () => {
+      const now = Date.now();
+      const difference = SUMMIT_START_TIME - now;
 
       if (difference > 0) {
         setTimeLeft({
@@ -61,11 +68,19 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
           minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((difference % (1000 * 60)) / 1000)
         });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
-    }, 1000);
+    };
 
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Live Vacant Seats calculation
+  const totalRegistered = 342 + (config?.delegates?.length || 0);
+  const vacantSeats = Math.max(0, TOTAL_PHYSICAL_SEATS - totalRegistered);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -76,88 +91,160 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
     }
   };
 
+  // Exact 4-Day Timetable from the official PDF program
   const scheduleDays = [
     {
       day: 1,
-      title: 'Day 1: Opening Plenary & Policy Debates',
-      date: 'Monday, Oct 24, 2026',
-      theme: 'The Sub-National Innovation Blueprint',
+      title: 'Day 1: The Macro-Economy, Commerce & Policy Forum',
+      date: 'Monday, 16 November 2026',
+      theme: '"Setting the Framework for Sub-National Growth"',
+      summary: "This day brings out high-level policy enablers, regulatory heads, and major financial institutions to set the state's economic and trade agenda.",
       events: [
-        { time: '08:30 AM', title: 'Accreditation, RFID Badge Collection & Delegate Breakfast', speaker: 'Summit Secretariat' },
-        { time: '10:00 AM', title: 'Keynote: Building Africa\'s Next Innovation Corridor from Benin City', speaker: 'Edo State Innovation Council & Guests' },
-        { time: '12:30 PM', title: 'Ministerial & Regulatory Roundtable: Digital Economy & SME Policy', speaker: 'Public Sector Delegation' },
-        { time: '02:30 PM', title: 'Panel: Cross-Border Capital Flows into Emerging City Hubs', speaker: 'Pan-African Venture Leaders' }
+        {
+          time: '09:00 AM – 10:15 AM',
+          title: 'Grand Opening Ceremony',
+          description: 'Welcome Address by the Organizers (Metaspace / Óghowa Team). Executive Keynote by the Edo State Government (The Executive Office / ESIPO) on the sub-national roadmap for economic stability.',
+          speaker: 'Metaspace / Óghowa Team & Edo State Government (ESIPO)'
+        },
+        {
+          time: '10:30 AM – 12:00 PM',
+          title: 'Part 1: The High-Level Trade & Commerce Panel',
+          description: 'The Ministry of Trade, Industry and Commerce alongside Commercial Bank Directors address regulatory updates, automating trade registries, ease of doing business, and credit lines for formalized regional MSMEs.',
+          speaker: 'Ministry of Trade, Industry and Commerce & Commercial Bank Directors'
+        },
+        {
+          time: '12:15 PM – 01:45 PM',
+          title: 'Part 2: The Bank of Industry & Development Finance Masterclass',
+          description: 'The Bank of Industry (BOI) details its operational intervention programs (including tech/creative initiatives like the iDICE fund framework), clarifying the exact compliance and governance checklist required for local ventures to access long-term capital.',
+          speaker: 'Bank of Industry (BOI) Leadership'
+        },
+        {
+          time: '01:45 PM – 03:00 PM',
+          title: 'Networking Lunch',
+          description: 'Curated networking between institutional executives, bank directors, policymakers, and regional business leaders.',
+          speaker: 'Delegates & Partners'
+        }
       ]
     },
     {
       day: 2,
-      title: 'Day 2: Masterclasses & Scale-Up Bootcamps',
-      date: 'Tuesday, Oct 25, 2026',
-      theme: 'Operational Excellence & Commercial Traction',
+      title: 'Day 2: Digital Infrastructure, Tech Policy & The Founder’s Blueprint',
+      date: 'Tuesday, 17 November 2026',
+      theme: '"Governing the Stack, Deploying Local Clouds & Real-Sector Integration"',
+      summary: "A morning forum with technical government arms on data security and local networks, followed by an afternoon track on operational mechanics and real-world brick-and-mortar integration.",
       events: [
-        { time: '09:00 AM', title: 'Masterclass: Early-Stage Fundraising, Term Sheets & SAFE Notes', speaker: 'Top Venture Partners' },
-        { time: '11:15 AM', title: 'Masterclass: AI Adoption & Process Automation for African SMEs', speaker: 'AI Engineering Leads' },
-        { time: '02:00 PM', title: 'Masterclass: Scaling Agricultural Cold-Chain & Cross-Border Logistics', speaker: 'Agritech Operators' },
-        { time: '04:00 PM', title: 'Founder Office Hours: 1-on-1 Mentorship Speed Networking', speaker: 'Ecosystem Mentors' }
+        {
+          time: '08:30 AM – 10:00 AM',
+          title: 'Part 1: The Tech Stack & Local Sovereignty Panel',
+          description: 'The Information and Communication Technology Agency (ICTA) outlines modern sub-national cloud deployments (like the Edo Cloud homegrown e-governance infrastructure), public infrastructure access, and local software procurement rules.',
+          speaker: 'ICTA & Infrastructure Leads'
+        },
+        {
+          time: '10:15 AM – 11:45 AM',
+          title: 'Part 2: Digital Economy Policy & Ecosystem Grants',
+          description: 'The Ministry of Digital Economy, Science and Technology (MDEST) unpacks the state’s overarching data management policies, digital security frameworks, and multi-sector intervention programs (such as the Bill & Melinda Gates Foundation-backed Strengthening Edo State’s Digital Solutions Ecosystem initiative).',
+          speaker: 'MDEST & Foundation Representatives'
+        },
+        {
+          time: '11:45 AM – 12:45 PM',
+          title: 'Open Networking Floor',
+          description: 'Interactive exhibition showcase, founder-to-developer matchmaking, and technical networking.',
+          speaker: 'Ecosystem Participants'
+        },
+        {
+          time: '12:45 PM – 02:45 PM',
+          title: 'Masterclass: Product-Market Fit (PMF) & System Architecture',
+          description: 'Engineering scalable multi-tenant architectures, digital service workflows, and localized user onboarding strategies designed specifically for West African tech ecosystems (EdTech, Logistics, Fintech).',
+          speaker: 'Senior Tech Leads & Venture Architects'
+        },
+        {
+          time: '03:00 PM – 04:45 PM',
+          title: 'Clinic: Corporate Governance & Legal Compliance',
+          description: 'Structuring IP assignment, drafting ironclad NDAs, implementing clean financial tracking systems, and setting up founding teams to survive investor due diligence.',
+          speaker: 'Corporate Attorneys & Venture Counsel'
+        },
+        {
+          time: '05:00 PM – 07:00 PM',
+          title: 'Panel Focus: Tech in the Trenches — AgriTech, Logistics & Commodity Trade',
+          description: 'Bridging code with distribution: Local agro-processors, oil palm ecosystem players, and transport networks debate with tech founders on how to digitize supply chains, leverage data frameworks, and onboard local traders into automated market systems.',
+          speaker: 'Agro-processors, Logistics Operators & Tech Founders'
+        }
       ]
     },
     {
       day: 3,
-      title: 'Day 3: The ₦50M Great Venture Pitch & Deal Rooms',
-      date: 'Wednesday, Oct 26, 2026',
-      theme: 'High-Impact Capital Syndication',
+      title: 'Day 3: Venture Capital & Private Equity Day',
+      date: 'Thursday, 19 November 2026',
+      theme: '"Unlocking Private Runway and Global Networks"',
+      summary: 'Shifting the focus from public institutional funding to private markets, angel networks, and venture capital syndicates.',
       events: [
-        { time: '09:30 AM', title: 'Opening: The State of Venture Capital in South-South Nigeria', speaker: 'Deal Syndicate Leads' },
-        { time: '11:00 AM', title: 'Top 10 Finalist Venture Showcase: Live Pitch Arena', speaker: 'Venture Finalists' },
-        { time: '02:00 PM', title: 'Closed-Door Investor Syndicate Deal Rooms', speaker: 'Accredited Investors & Angels' },
-        { time: '05:00 PM', title: 'Announcement of ₦50,000,000 Deal Commitments & Co-Investments', speaker: 'Óghowa Investment Committee' }
+        {
+          time: '10:00 AM – 11:30 AM',
+          title: 'Investor Panel: What Venture Capital Looks For',
+          description: 'Venture capitalists, angel syndicates, and seed-stage fund managers discuss metric expectations, evaluating tech talent, risk mitigation, and how they view sub-national markets.',
+          speaker: 'VC Partners & Angel Syndicate Leads'
+        },
+        {
+          time: '11:45 AM – 01:15 PM',
+          title: 'Workshop: Deconstructing the Term Sheet',
+          description: 'A practical workshop teaching tech founders how to navigate valuation, cap-table dilution, investor clauses, and board seats without losing corporate control.',
+          speaker: 'Venture Legal & Financial Specialists'
+        },
+        {
+          time: '02:30 PM – 04:00 PM',
+          title: 'Closed Reverse Pitching Session',
+          description: 'Visiting fund managers and ecosystem builders present their investment focus, sectors of interest, and ticket sizes directly to the general hub audience.',
+          speaker: 'Fund Managers & Ecosystem Builders'
+        }
       ]
     },
     {
       day: 4,
-      title: 'Day 4: Creative Economy & Benin Tech Fest Synergy',
-      date: 'Thursday, Oct 27, 2026',
-      theme: 'Heritage Preservation & Frontier Digital Media',
+      title: 'Day 4: Grand Finale & Demo Day',
+      date: 'Saturday, 21 November 2026',
+      theme: '"Showcasing Ecosystem Transformation"',
+      summary: 'The high-stakes culmination of the business week, celebrating tech landmarks and pitching verified local models to the market.',
       events: [
-        { time: '10:00 AM', title: 'Keynote: Ancient Benin Metallurgy to Web3 & Digital 3D Archiving', speaker: 'Creative Technologists' },
-        { time: '12:00 PM', title: 'Panel: African Film, Sound Sync & Global Streaming Distribution', speaker: 'Nollywood & Music Producers' },
-        { time: '02:30 PM', title: 'Interactive Demo: Robotics, Drone Tech & Interactive Software Showcase', speaker: 'Benin Tech Fest Fellows' },
-        { time: '06:00 PM', title: 'Cultural Heritage Night & Creator Showcase at Victor Uwaifo Amphitheatre', speaker: 'Special Performances' }
-      ]
-    },
-    {
-      day: 5,
-      title: 'Day 5: Awards Gala & Executive Network Dinner',
-      date: 'Friday, Oct 28, 2026',
-      theme: 'Celebration of Ecosystem Milestones',
-      events: [
-        { time: '10:00 AM', title: 'Summary Communiqué: Economic Resolution for Edo Innovation Network', speaker: 'Drafting Committee' },
-        { time: '12:30 PM', title: 'Venture Cohort 2026 Official Graduation Ceremony', speaker: 'Óghowa Accelerator Leadership' },
-        { time: '06:30 PM', title: 'Annual Ecosystem Excellence Awards & Executive Dinner', speaker: 'VIP Delegation' }
+        {
+          time: '10:00 AM – 11:30 AM',
+          title: 'Ecosystem Keynote: The 2030+ Operational Outlook',
+          description: 'A closing presentation mapping regional expansion goals, scalability milestones, student mobility frameworks, and the compounding growth of technology clusters in Edo.',
+          speaker: 'Keynote Visionary & Ecosystem Leaders'
+        },
+        {
+          time: '11:45 AM – 02:00 PM',
+          title: 'The Main Event: The Óghowa Demo Day',
+          description: 'Pre-vetted, high-traction startup cohorts pitch their working software models and business pipelines live on stage to our assembled panel of banks, institutional VCs, and angel networks.',
+          speaker: 'Cohort Finalists & Investor Jury'
+        },
+        {
+          time: '02:00 PM – 03:30 PM',
+          title: 'Closing Ceremony & Ecosystem Awards',
+          description: 'Presentation of startup grant acknowledgments, hackathon/innovation awards, and recognition of corporate, ministerial, and banking partners.',
+          speaker: 'Óghowa Leadership & State Dignitaries'
+        }
       ]
     }
   ];
 
+  const summitDates = config?.dates || 'November 16 – 21, 2026';
+  const summitVenue = config?.venueName || 'Victor Uwaifo Creative Hub & Edo Innovates Campus';
+  const isRegOpen = config?.isRegistrationOpen !== false;
+
   return (
     <div className="bg-[#FBF9F5] text-[#181d1b] min-h-screen flex flex-col font-sans selection:bg-[#00231b] selection:text-white">
-      {/* 1. SUMMIT NAVIGATION HEADER */}
+      {/* 1. SUMMIT NAVIGATION HEADER (Logo ONLY on left, clean navigation, Oghowa Homepage button) */}
       <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#E5DFD5]">
         <div className="h-20 max-w-[1240px] mx-auto px-4 md:px-6 flex items-center justify-between">
-          {/* Logo with Benin Queen Idia emblem */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center">
+          {/* Logo ONLY - removed title and badge text as requested */}
+          <div className="flex items-center">
+            <button
+              onClick={() => scrollToSection('bw-overview')}
+              className="focus:outline-hidden hover:opacity-90 transition-opacity cursor-pointer"
+              title="Óghowa Business Week"
+            >
               <BusinessWeekLogo size="sm" />
-            </div>
-            <div className="hidden sm:flex flex-col">
-              <span className="text-base text-[#00231b] font-bold tracking-tight leading-tight">
-                Óghowa Business Week
-              </span>
-              <span className="text-[11px] text-[#52605B]">The Frontier Business Summit</span>
-            </div>
-            <div className="hidden md:flex items-center px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-[10px] font-bold uppercase tracking-wider ml-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B45309] mr-1.5 animate-pulse" />
-              With Benin Tech Fest
-            </div>
+            </button>
           </div>
 
           {/* Navigation Links */}
@@ -165,14 +252,14 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
             <button onClick={() => scrollToSection('bw-overview')} className="hover:text-[#00231b] transition-colors cursor-pointer">
               Overview
             </button>
-            <button onClick={() => scrollToSection('bw-tracks')} className="hover:text-[#00231b] transition-colors cursor-pointer">
-              Tracks
+            <button onClick={() => scrollToSection('bw-problem-vision')} className="hover:text-[#00231b] transition-colors cursor-pointer">
+              Vision & Pillars
             </button>
-            <button onClick={() => scrollToSection('bw-speakers')} className="hover:text-[#00231b] transition-colors cursor-pointer">
-              Speakers
+            <button onClick={() => scrollToSection('bw-goals')} className="hover:text-[#00231b] transition-colors cursor-pointer">
+              Outcomes
             </button>
             <button onClick={() => scrollToSection('bw-agenda')} className="hover:text-[#00231b] transition-colors cursor-pointer">
-              5-Day Schedule
+              4-Day Program
             </button>
             <button onClick={() => scrollToSection('bw-venue')} className="hover:text-[#00231b] transition-colors cursor-pointer">
               Venue
@@ -182,7 +269,7 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
             </button>
           </nav>
 
-          {/* Action Buttons: Register for Business Week & Return to Accelerator */}
+          {/* Action Buttons: Register for Business Week & Oghowa Homepage button */}
           <div className="flex items-center gap-3">
             <button
               onClick={onOpenRegistration}
@@ -195,10 +282,10 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
             <button
               onClick={onBackToAccelerator}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#52605B] hover:text-[#00231b] border border-[#E5DFD5] text-xs font-semibold transition-colors cursor-pointer"
-              title="Return to Óghowa Accelerator Mother Group"
+              title="Return to Óghowa Accelerator Homepage"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Mother Site</span>
+              <span>Oghowa Homepage</span>
             </button>
           </div>
         </div>
@@ -220,41 +307,58 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Column: Headline, Tags, CTAs */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              {/* Event Badge Ribbon */}
+              {/* Event Badge Ribbon with Óghowa Business Week 2026 */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] text-[#B45309] text-xs font-bold uppercase tracking-wider border border-[#B45309]/20">
                   <span className="w-2 h-2 rounded-full bg-[#B45309] animate-ping" />
-                  Official Flagship Summit 2026
+                  Óghowa Business Week 2026
                 </span>
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#00231b]/10 text-[#00231b] text-xs font-bold">
                   <MapPin className="w-3.5 h-3.5 text-[#316858]" />
                   Benin City, Edo State
                 </span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse" />
+                  {vacantSeats} vacant physical seats remaining
+                </span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#00231b] tracking-tight leading-[1.12]">
-                Powering Africa’s <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00231b] via-[#316858] to-[#B45309]">
-                  Innovation Economy
+              <div className="space-y-1">
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#B45309] block">
+                  ...Our own
                 </span>
-              </h1>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#00231b] tracking-tight leading-[1.12]">
+                  Óghowa Business Week <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00231b] via-[#316858] to-[#B45309]">
+                    Innovation for Economic Transformation
+                  </span>
+                </h1>
+              </div>
 
-              {/* Subhead */}
+              {/* Subhead matching user's exact brief */}
               <p className="text-base sm:text-lg text-[#52605B] leading-relaxed max-w-2xl font-normal">
-                Join 2,500+ ambitious founders, venture capitalists, corporate leaders, and policymaking titans for five transformative days of high-stakes keynote debates, masterclasses, and the ₦50M Closed Deal Syndicate room.
+                Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.
               </p>
 
               {/* Date & Collaboration Tag */}
               <div className="p-4 rounded-xl bg-white border border-[#E5DFD5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5 text-[#181d1b]">
                   <Calendar className="w-4 h-4 text-[#B45309]" />
-                  <span className="font-bold">October 24 – 28, 2026</span>
+                  <span className="font-bold">{summitDates}</span>
                   <span className="text-[#52605B] hidden sm:inline">•</span>
-                  <span className="text-[#52605B]">Victor Uwaifo Creative Hub & Edo Innovates</span>
+                  <span className="text-[#52605B]">{summitVenue}</span>
                 </div>
                 <span className="text-[#316858] font-bold">In Collaboration with Benin Tech Fest</span>
               </div>
+
+              {/* Registration Gateway Alert if paused */}
+              {!isRegOpen && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Public registration is currently in closed review by the Summit Secretariat. Registered passes remain valid.</span>
+                </div>
+              )}
 
               {/* CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -263,7 +367,7 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                   className="px-7 py-4 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-98 transition-all flex items-center gap-2.5 cursor-pointer group"
                 >
                   <Ticket className="w-5 h-5 text-[#FEF3C7]" />
-                  <span>Register for Business Week</span>
+                  <span>{isRegOpen ? 'Register for Business Week' : 'View Accreditation Status'}</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -271,7 +375,7 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                   onClick={() => scrollToSection('bw-agenda')}
                   className="px-6 py-4 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] font-bold text-sm sm:text-base transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <span>Explore 5-Day Agenda</span>
+                  <span>Explore 4-Day Agenda</span>
                 </button>
               </div>
 
@@ -284,14 +388,13 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                 <span>•</span>
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-[#B45309]" />
-                  <span>Exclusive Pitch Deal Rooms</span>
+                  <span>Demo Day & Syndicate Pitch Rooms</span>
                 </span>
               </div>
             </div>
 
-            {/* Right Column: Live Ticking Countdown & High-Impact Stat Card */}
+            {/* Right Column: Real-Time Accurate Ticking Countdown & Vacant Seats Counter Card */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Countdown Card */}
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,35,27,0.08)] border border-[#E5DFD5]">
                 <div className="flex items-center justify-between pb-4 border-b border-[#E5DFD5] mb-5">
                   <div className="flex items-center gap-2">
@@ -335,36 +438,59 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                   </div>
                 </div>
 
+                {/* Live Vacant Seats Progress Bar */}
+                <div className="p-3.5 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] mb-5 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-[#00231b] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                      Physical Seats Status
+                    </span>
+                    <span className="text-rose-700 font-extrabold">
+                      {vacantSeats} vacant of {TOTAL_PHYSICAL_SEATS}
+                    </span>
+                  </div>
+                  <div className="w-full bg-[#E5DFD5] h-2 rounded-full overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-[#00231b] to-rose-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (totalRegistered / TOTAL_PHYSICAL_SEATS) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-[#52605B] flex justify-between">
+                    <span>{totalRegistered} registered</span>
+                    <span className="text-rose-600 font-semibold">{vacantSeats} seats remaining</span>
+                  </p>
+                </div>
+
                 {/* Direct Register Action */}
                 <button
                   onClick={onOpenRegistration}
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#00231b] to-[#0e3a2f] hover:from-[#0e3a2f] hover:to-[#00231b] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Ticket className="w-4 h-4 text-[#FEF3C7]" />
-                  <span>Secure Your Delegate Registration Pass</span>
+                  <span>Secure Your Participant Registration Pass</span>
                 </button>
                 <p className="text-[11px] text-center text-[#52605B] mt-2.5">
                   Accreditation badges are strictly limited per hall capacity.
                 </p>
               </div>
 
-              {/* Four Impact Pillars */}
+              {/* Key Highlights */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white p-4 rounded-xl border border-[#E5DFD5] shadow-xs">
-                  <p className="text-2xl font-extrabold text-[#00231b]">2,500+</p>
-                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Expected Delegates</p>
+                  <p className="text-2xl font-extrabold text-[#00231b]">4 Days</p>
+                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Focused Program</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-[#E5DFD5] shadow-xs">
-                  <p className="text-2xl font-extrabold text-[#B45309]">₦50,000,000</p>
-                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Deal Room Syndicate</p>
+                  <p className="text-2xl font-extrabold text-[#B45309]">8–10</p>
+                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Demo Day Cohorts</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-[#E5DFD5] shadow-xs">
-                  <p className="text-2xl font-extrabold text-[#00231b]">150+</p>
-                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Startups & Scale-ups</p>
+                  <p className="text-2xl font-extrabold text-[#00231b]">3 Tier-1</p>
+                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Institutional Banks</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-[#E5DFD5] shadow-xs">
-                  <p className="text-2xl font-extrabold text-[#316858]">40+</p>
-                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Masterclass Sessions</p>
+                  <p className="text-2xl font-extrabold text-[#316858]">50+</p>
+                  <p className="text-xs text-[#52605B] mt-0.5 font-medium">Talent Placements</p>
                 </div>
               </div>
             </div>
@@ -372,16 +498,16 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
         </div>
       </section>
 
-      {/* 3. COLLABORATION WITH BENIN TECH FEST MARQUEE */}
-      <section className="bg-[#00231b] text-white py-4 border-y border-[#316858]/40">
+      {/* 3. COLLABORATION MARQUEE */}
+      <section className="bg-[#00231b] text-white py-3.5 border-y border-[#316858]/40">
         <div className="max-w-[1240px] mx-auto px-4 flex flex-wrap items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-[#FEF3C7] animate-pulse" />
             <span className="font-bold tracking-wide uppercase text-[#b5efda]">
-              Institutional Partnership:
+              Institutional Collaboration:
             </span>
             <span className="text-slate-200">
-              Óghowa Business Week × Benin Tech Fest × Edo State Innovation Network
+              Óghowa Business Week × Benin Tech Fest
             </span>
           </div>
 
@@ -394,120 +520,296 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
               onClick={onOpenRegistration}
               className="text-[#FEF3C7] font-bold hover:underline cursor-pointer"
             >
-              Get Accredited →
+              Participant Registration →
             </button>
           </div>
         </div>
       </section>
 
-      {/* 4. THEMATIC TRACKS SECTION */}
-      <section id="bw-tracks" className="py-20 bg-white border-b border-[#E5DFD5]">
+      {/* 4. OFFICIAL PROBLEM STATEMENT & VISION STATEMENT (From PDF Page 1) */}
+      <section id="bw-problem-vision" className="py-20 bg-white border-b border-[#E5DFD5]">
         <div className="max-w-[1240px] mx-auto px-4 md:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest bg-[#FEF3C7] px-3 py-1 rounded-full">
-              Thematic Focus Areas
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
-              Six Frontline Tracks Driving African Growth
-            </h2>
-            <p className="text-sm sm:text-base text-[#52605B] mt-2">
-              Deep-dive into sectoral debates, cross-border commercial opportunities, and practical execution frameworks.
-            </p>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Problem Statement Card */}
+            <div className="lg:col-span-7 bg-[#FBF9F5] p-8 sm:p-10 rounded-3xl border border-[#E5DFD5] space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-bold uppercase tracking-wider">
+                <Target className="w-3.5 h-3.5" />
+                <span>Problem Statement</span>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Rocket,
-                title: 'Digital Economy & Software Ecosystem',
-                tag: 'Track 01',
-                desc: 'Fintech rails, cross-border API payments, AI integration for African trade, and sub-national tech talent pipelines from UNIBEN and Edo Innovates.'
-              },
-              {
-                icon: Layers,
-                title: 'Agriculture, Agritech & Cold-Chain',
-                tag: 'Track 02',
-                desc: 'Mechanized food processing, high-yield agro commodities, rural aggregation depots, and digital commodity marketplace solutions.'
-              },
-              {
-                icon: Award,
-                title: 'Creative Economy, Film & Digital Heritage',
-                tag: 'Track 03',
-                desc: 'Ancient Benin bronze heritage preservation, digital 3D archives, animation, film sound sync, and monetizing African intellectual property.'
-              },
-              {
-                icon: Building,
-                title: 'Manufacturing, Energy & Infrastructure',
-                tag: 'Track 04',
-                desc: 'Clean mobility, local assembly plants, IPP industrial electricity zones, and sub-national enterprise manufacturing incentives.'
-              },
-              {
-                icon: Sparkles,
-                title: 'Investment, VC & Closed Deal Syndicates',
-                tag: 'Track 05',
-                desc: 'The ₦50M Great Venture Pitch, closed-door deal rooms, co-investment syndicates, and direct founder-investor term sheet negotiations.'
-              },
-              {
-                icon: BookOpen,
-                title: 'Policy, Governance & Sub-National Transformation',
-                tag: 'Track 06',
-                desc: 'Sub-national tax incentives, digital identity frameworks, state regulatory sandboxes, and commercial court arbitration.'
-              }
-            ].map((track, idx) => {
-              const IconComp = track.icon;
-              return (
-                <div
-                  key={idx}
-                  className="p-6 rounded-2xl bg-[#FBF9F5] border border-[#E5DFD5] hover:border-[#00231b]/40 hover:shadow-lg transition-all flex flex-col justify-between group"
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-white border border-[#E5DFD5] flex items-center justify-center group-hover:bg-[#00231b] group-hover:text-white transition-colors">
-                        <IconComp className="w-5 h-5 text-[#00231b] group-hover:text-white" />
-                      </div>
-                      <span className="text-[11px] font-bold text-[#B45309] bg-[#FEF3C7] px-2.5 py-0.5 rounded-full">
-                        {track.tag}
-                      </span>
-                    </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] tracking-tight">
+                Addressing Ecosystem Fragmentation in Edo State
+              </h2>
 
-                    <div>
-                      <h3 className="text-lg font-bold text-[#00231b] group-hover:text-[#316858] transition-colors">
-                        {track.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-[#52605B] mt-2 leading-relaxed">
-                        {track.desc}
-                      </p>
-                    </div>
-                  </div>
+              <div className="text-sm sm:text-base text-[#414845] space-y-4 leading-relaxed font-normal">
+                <p>
+                  There is one prevailing challenge in our business ecosystem; <strong className="text-[#00231b]">Inability to work together to transform Edo state</strong>. Despite the growing number of entrepreneurs, SMEs, innovators, and research institutions in Edo State, collaboration between business, government, academia, investors, and development partners remains fragmented. This has limited access to finance, technology, strategic partnerships, markets, and policies needed to transform innovative ideas into sustainable businesses and economic opportunities.
+                </p>
+                <p>
+                  In today's global economy, businesses are increasingly driven by innovation and technology, thereby, there's an urgent need for a platform that convenes key stakeholders to foster collaboration, promote investment, encourage digital transformation, and accelerate business growth.
+                </p>
+              </div>
 
-                  <div className="pt-4 mt-4 border-t border-[#E5DFD5]">
-                    <button
-                      onClick={onOpenRegistration}
-                      className="text-xs font-bold text-[#00231b] hover:text-[#B45309] flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>Enroll for this track</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+              <div className="p-4 rounded-2xl bg-white border border-[#E5DFD5] shadow-xs text-xs sm:text-sm text-[#00231b] font-medium leading-relaxed">
+                <p className="font-bold text-[#B45309] mb-1">Welcome to Óghowa Business Week:</p>
+                Under the theme <strong className="font-bold">"Innovation for Economic Transformation,"</strong> we address this need by providing a flagship platform that connects ideas with investment, innovation with enterprise, and partnerships with measurable economic impact, positioning Edo State as a leading hub for business and innovation.
+              </div>
+            </div>
+
+            {/* Vision Statement & Theme Card */}
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+              <div className="bg-gradient-to-br from-[#00231b] to-[#0e3a2f] text-white p-8 sm:p-10 rounded-3xl shadow-lg space-y-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#FEF3C7] text-xs font-bold uppercase tracking-wider">
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>What's Our Vision Statement</span>
                 </div>
-              );
-            })}
+
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#FEF3C7]">
+                  "Innovation for Economic Transformation"
+                </h3>
+
+                <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-light">
+                  Oghowa Business Week is an annual platform that brings together entrepreneurs, businesses, investors, policymakers, researchers, development partners, and innovators to accelerate economic transformation through innovation, technology, entrepreneurship, strategic partnerships, and investment.
+                </p>
+
+                <div className="pt-2 border-t border-white/15 flex items-center justify-between text-xs text-[#b5efda]">
+                  <span>...Our own</span>
+                  <span>Benin City, Edo State</span>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-[#FEF3C7]/60 border border-[#B45309]/20 space-y-2">
+                <span className="text-xs font-bold text-[#B45309] uppercase tracking-wider block">
+                  Delegate Accreditation
+                </span>
+                <p className="text-xs text-[#78350F] leading-relaxed">
+                  Join founders, investors, corporate leaders, developers, and public sector champions for 4 intensive days of deal-making and policy alignment.
+                </p>
+                <button
+                  onClick={onOpenRegistration}
+                  className="text-xs font-bold text-[#00231b] hover:text-[#B45309] flex items-center gap-1 cursor-pointer pt-1"
+                >
+                  <span>Open Participant Registration Form</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 5. SUMMIT 5-DAY SCHEDULE */}
+      {/* 5. WHY US? 3 STRATEGIC PILLARS (From PDF Pages 1–2) */}
+      <section className="py-20 bg-[#FBF9F5] border-b border-[#E5DFD5]">
+        <div className="max-w-[1240px] mx-auto px-4 md:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest bg-[#FEF3C7] px-3 py-1 rounded-full">
+              Why Us?
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
+              Three Strategic Pillars of Transformation
+            </h2>
+            <p className="text-sm sm:text-base text-[#52605B] mt-2">
+              How Óghowa Business Week bridges regulatory frameworks, de-risks frontier capital, and connects tech to the real economy.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Pillar 1 */}
+            <div className="bg-white p-7 rounded-3xl border border-[#E5DFD5] shadow-xs hover:border-[#00231b]/40 hover:shadow-lg transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#FBF9F5] border border-[#E5DFD5] flex items-center justify-center text-[#00231b] font-bold text-lg">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#00231b]">
+                    Institutional Alignment & Policy Activation
+                  </h3>
+                  <p className="text-xs text-[#B45309] font-bold uppercase tracking-wider mt-1">
+                    Regulatory Bridging
+                  </p>
+                </div>
+                <p className="text-xs sm:text-sm text-[#52605B] leading-relaxed">
+                  To serve as the primary sub-national platform that bridges state regulatory frameworks (like MDEST and ICTA) with active private-sector innovations, turning public policy into executable business advantages.
+                </p>
+              </div>
+              <div className="pt-5 mt-5 border-t border-[#E5DFD5] text-xs text-[#316858] font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>MDEST, ICTA & Startup Act Adoption</span>
+              </div>
+            </div>
+
+            {/* Pillar 2 */}
+            <div className="bg-white p-7 rounded-3xl border border-[#E5DFD5] shadow-xs hover:border-[#00231b]/40 hover:shadow-lg transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#FEF3C7] border border-[#B45309]/30 flex items-center justify-center text-[#B45309] font-bold text-lg">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#00231b]">
+                    Capital Mobilization for the Local Frontier
+                  </h3>
+                  <p className="text-xs text-[#B45309] font-bold uppercase tracking-wider mt-1">
+                    De-risking Investment
+                  </p>
+                </div>
+                <p className="text-xs sm:text-sm text-[#52605B] leading-relaxed">
+                  To de-risk the Edo tech ecosystem by bringing public intervention funds (like BOI's iDICE framework) and private venture capital directly to Benin City, establishing formal funding pipelines for early-stage founders.
+                </p>
+              </div>
+              <div className="pt-5 mt-5 border-t border-[#E5DFD5] text-xs text-[#B45309] font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>BOI iDICE & Venture Syndicate Lines</span>
+              </div>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="bg-white p-7 rounded-3xl border border-[#E5DFD5] shadow-xs hover:border-[#00231b]/40 hover:shadow-lg transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#FBF9F5] border border-[#E5DFD5] flex items-center justify-center text-[#00231b] font-bold text-lg">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#00231b]">
+                    Integration of the Real Sector & Remote Economy
+                  </h3>
+                  <p className="text-xs text-[#B45309] font-bold uppercase tracking-wider mt-1">
+                    Direct Economic Impact
+                  </p>
+                </div>
+                <p className="text-xs sm:text-sm text-[#52605B] leading-relaxed">
+                  To drive true economic transformation by matching digital solutions with brick-and-mortar industries (AgriTech and Logistics) while formalizing global outsourcing tracks (such as AI data annotation and digital media) for local talents.
+                </p>
+              </div>
+              <div className="pt-5 mt-5 border-t border-[#E5DFD5] text-xs text-[#316858] font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>AgriTech, Logistics & Remote Talents</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. WHAT WE WANT TO ACHIEVE (From PDF Page 2) */}
+      <section id="bw-goals" className="py-20 bg-white border-b border-[#E5DFD5]">
+        <div className="max-w-[1240px] mx-auto px-4 md:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold text-[#00231b] uppercase tracking-widest bg-[#00231b]/10 px-3 py-1 rounded-full">
+              Measurable Impact
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
+              What We Want to Achieve
+            </h2>
+            <p className="text-sm sm:text-base text-[#52605B] mt-2">
+              Tracking success dynamically broken down across core ecosystem stakeholders.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Stakeholder 1: Government & Financial Institutions */}
+            <div className="bg-[#FBF9F5] p-7 rounded-3xl border border-[#E5DFD5] space-y-5">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E5DFD5] flex items-center justify-center text-[#00231b]">
+                <Building className="w-6 h-6" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-[#00231b]">
+                  For Government & Financial Institutions
+                </h3>
+                <p className="text-xs text-[#52605B] mt-0.5 font-medium">Policy and catalytic funding activation</p>
+              </div>
+
+              <div className="space-y-4 text-xs sm:text-sm text-[#414845]">
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Secure Financial Commitments:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Onboard at least 3 tier-1 institutional partners (e.g., Bank of Industry, Ministry of Trade, and commercial bank SME divisions) to clarify and open application access lines directly for the ecosystem during the week.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Policy Simplification:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Deliver 1 clear, actionable feedback brief from local founders directly to the Ministry of Digital Economy (MDEST) regarding local cloud procurement and startup incentives.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stakeholder 2: Founders & Private Investors */}
+            <div className="bg-[#FBF9F5] p-7 rounded-3xl border border-[#E5DFD5] space-y-5">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E5DFD5] flex items-center justify-center text-[#B45309]">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-[#00231b]">
+                  For Founders & Private Investors
+                </h3>
+                <p className="text-xs text-[#52605B] mt-0.5 font-medium">Capital velocity and corporate readiness</p>
+              </div>
+
+              <div className="space-y-4 text-xs sm:text-sm text-[#414845]">
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Capital Pipeline Velocity:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Pre-vet and showcase at least 8 to 10 high-traction startup cohorts on Demo Day to a panel of visiting angel investors and venture capitalists.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Corporate Readiness:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Transition at least 20 early-stage ventures through the Day 2 Corporate Governance and legal compliance clinics, ensuring they leave with clean regulatory foundations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stakeholder 3: Developers & Digital Talents */}
+            <div className="bg-[#FBF9F5] p-7 rounded-3xl border border-[#E5DFD5] space-y-5">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E5DFD5] flex items-center justify-center text-[#316858]">
+                <Cpu className="w-6 h-6" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-[#00231b]">
+                  For Developers & Digital Talents
+                </h3>
+                <p className="text-xs text-[#52605B] mt-0.5 font-medium">Global integration and rapid prototyping</p>
+              </div>
+
+              <div className="space-y-4 text-xs sm:text-sm text-[#414845]">
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Talent Placement:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Facilitate real-world workspace integration by connecting at least 50 skilled engineers, data specialists, and product managers directly to hiring founders or global remote outsourcing networks during the Day 5 Talent Expo.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-xl border border-[#E5DFD5] space-y-1">
+                  <span className="font-bold text-[#00231b] block">Rapid Prototyping Output:</span>
+                  <p className="text-[#52605B] leading-relaxed">
+                    Produce at least 4 working developer prototypes during the 24-hour Hackathon sprint that directly address localized bottlenecks in regional logistics or commodity distribution.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FULL 4-DAY EVENT SCHEDULE & PROGRAM ARCHITECTURE (From PDF Pages 3–5) */}
       <section id="bw-agenda" className="py-20 bg-[#FBF9F5] border-b border-[#E5DFD5]">
         <div className="max-w-[1240px] mx-auto px-4 md:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-bold text-[#00231b] uppercase tracking-widest bg-[#00231b]/10 px-3 py-1 rounded-full">
-              Full Program of Events
+              Event Schedule & Program Architecture
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
-              5 Days of High-Impact Sessions
+              4-Day Official Timetable
             </h2>
             <p className="text-sm sm:text-base text-[#52605B] mt-2">
-              From high-level policy roundtables to late-night deal rooms and creative tech showcases.
+              From macroeconomic policy forums to deep technical clinics and the Grand Finale Demo Day.
             </p>
           </div>
 
@@ -535,7 +837,7 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
           {(() => {
             const current = scheduleDays.find((d) => d.day === activeDayTab) || scheduleDays[0];
             return (
-              <div className="bg-white rounded-2xl p-6 sm:p-10 border border-[#E5DFD5] shadow-xs max-w-4xl mx-auto">
+              <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E5DFD5] shadow-xs max-w-4xl mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#E5DFD5] gap-3">
                   <div>
                     <span className="text-xs font-bold text-[#B45309] uppercase tracking-wider">
@@ -544,8 +846,11 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                     <h3 className="text-xl sm:text-2xl font-bold text-[#00231b] mt-0.5">
                       {current.title}
                     </h3>
+                    <p className="text-xs text-[#52605B] mt-1 max-w-xl">
+                      {current.summary}
+                    </p>
                   </div>
-                  <span className="inline-block px-3 py-1 bg-[#FEF3C7] text-[#B45309] font-bold text-xs rounded-full">
+                  <span className="inline-block px-3 py-1 bg-[#FEF3C7] text-[#B45309] font-bold text-xs rounded-full self-start sm:self-center">
                     {current.theme}
                   </span>
                 </div>
@@ -553,8 +858,8 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                 <div className="divide-y divide-[#E5DFD5] mt-4">
                   {current.events.map((evt, idx) => (
                     <div key={idx} className="py-4.5 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                      <div className="sm:w-32 shrink-0">
-                        <span className="font-mono text-xs sm:text-sm font-bold text-[#00231b] bg-[#F4EFE6] px-2.5 py-1 rounded-md">
+                      <div className="sm:w-40 shrink-0">
+                        <span className="font-mono text-xs font-bold text-[#00231b] bg-[#F4EFE6] px-2.5 py-1 rounded-md block sm:inline-block">
                           {evt.time}
                         </span>
                       </div>
@@ -562,16 +867,19 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                         <h4 className="text-sm sm:text-base font-bold text-[#181d1b]">
                           {evt.title}
                         </h4>
-                        <p className="text-xs text-[#52605B] flex items-center gap-1.5">
-                          <Users className="w-3.5 h-3.5 text-[#316858]" />
-                          <span>Led by: <strong>{evt.speaker}</strong></span>
+                        <p className="text-xs text-[#52605B] leading-relaxed">
+                          {evt.description}
+                        </p>
+                        <p className="text-[11px] text-[#316858] font-medium pt-0.5 flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>Session: <strong>{evt.speaker}</strong></span>
                         </p>
                       </div>
                       <button
                         onClick={onOpenRegistration}
                         className="text-xs font-semibold text-[#00231b] hover:text-[#B45309] underline shrink-0 cursor-pointer self-start sm:self-center"
                       >
-                        Reserve Seat
+                        Register
                       </button>
                     </div>
                   ))}
@@ -579,13 +887,14 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
 
                 <div className="pt-6 mt-6 border-t border-[#E5DFD5] flex flex-col sm:flex-row items-center justify-between gap-4">
                   <span className="text-xs text-[#52605B]">
-                    Full session briefing packets are emailed to registered delegates upon pass verification.
+                    Full session briefing packets are provided to accredited participants.
                   </span>
                   <button
                     onClick={onOpenRegistration}
-                    className="px-6 py-2.5 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-xs font-bold transition cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                   >
-                    Register for Day {current.day} Access →
+                    <span>Register for Day {current.day} Pass</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -594,88 +903,17 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
         </div>
       </section>
 
-      {/* 6. SPEAKERS & ECOSYSTEM LEADERS */}
-      <section id="bw-speakers" className="py-20 bg-white border-b border-[#E5DFD5]">
+      {/* 8. VENUE SECTION */}
+      <section id="bw-venue" className="py-20 bg-white border-b border-[#E5DFD5]">
         <div className="max-w-[1240px] mx-auto px-4 md:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-bold text-[#316858] uppercase tracking-widest bg-[#b5efda]/40 px-3 py-1 rounded-full">
-              Keynote Faculty & Speakers
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
-              Ecosystem Titans & Frontier Thinkers
-            </h2>
-            <p className="text-sm sm:text-base text-[#52605B] mt-2">
-              Learn directly from operators who have founded, funded, and scaled high-growth ventures across Nigeria and the diaspora.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                name: 'Dr. Aisosa Edebiri',
-                role: 'Managing Partner, Sahara Frontier Capital',
-                topic: 'Sub-National Venture Economics & Early-Stage Syndicates',
-                image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80'
-              },
-              {
-                name: 'Osagie Egharevba',
-                role: 'Founder & CEO, Benin Mobility Tech',
-                topic: 'Building Clean Transport Infrastructure for Tier-2 Cities',
-                image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-              },
-              {
-                name: 'Engr. Osayande Ighodaro',
-                role: 'Director of Technology, Edo State Innovation Hub',
-                topic: 'Bridging Academic Research & High-Growth Commercial Startups',
-                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'
-              },
-              {
-                name: 'Nosa Igiehon',
-                role: 'Principal, Great Benin Creative Fund',
-                topic: 'Commercialising African Cultural IP and Digital Media',
-                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80'
-              }
-            ].map((spk, idx) => (
-              <div key={idx} className="bg-[#FBF9F5] rounded-2xl overflow-hidden border border-[#E5DFD5] shadow-xs flex flex-col justify-between">
-                <div className="relative h-60 overflow-hidden bg-slate-200">
-                  <img
-                    src={spk.image}
-                    alt={spk.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#00231b]/90 via-transparent to-transparent" />
-                  <div className="absolute bottom-3 left-4 right-4 text-white">
-                    <h3 className="font-bold text-base">{spk.name}</h3>
-                    <p className="text-[11px] text-[#b5efda] font-medium">{spk.role}</p>
-                  </div>
-                </div>
-
-                <div className="p-4 space-y-2">
-                  <span className="text-[10px] font-bold text-[#B45309] uppercase tracking-wider block">
-                    Session Keynote
-                  </span>
-                  <p className="text-xs text-[#181d1b] font-medium leading-relaxed">
-                    "{spk.topic}"
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. VENUE & HOST CITY SECTION */}
-      <section id="bw-venue" className="py-20 bg-[#FBF9F5] border-b border-[#E5DFD5]">
-        <div className="max-w-[1240px] mx-auto px-4 md:px-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-12 border border-[#E5DFD5] shadow-xs">
+          <div className="bg-[#FBF9F5] rounded-3xl p-6 sm:p-12 border border-[#E5DFD5] shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-6 space-y-5">
                 <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest bg-[#FEF3C7] px-3 py-1 rounded-full">
                   Host City & Venue
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] tracking-tight">
-                  Victor Uwaifo Creative Hub & Edo Innovates Campus
+                  {summitVenue}
                 </h2>
                 <p className="text-sm sm:text-base text-[#52605B] leading-relaxed">
                   Located along Airport Road in the cultural heart of Benin City, the Victor Uwaifo Creative Hub features state-of-the-art auditorium facilities, acoustic breakout halls, high-speed fiber connectivity, and outdoor networking plazas.
@@ -683,52 +921,51 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
 
                 <div className="space-y-3 pt-2 text-xs sm:text-sm text-[#181d1b]">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4EFE6] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#E5DFD5] flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4 text-[#00231b]" />
                     </div>
                     <span>Airport Road, GRA, Benin City, Edo State, Nigeria</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4EFE6] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#E5DFD5] flex items-center justify-center shrink-0">
                       <ShieldCheck className="w-4 h-4 text-emerald-700" />
                     </div>
                     <span>Full Security Perimeter & Dedicated Accreditation Desks</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4EFE6] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#E5DFD5] flex items-center justify-center shrink-0">
                       <Rocket className="w-4 h-4 text-[#B45309]" />
                     </div>
-                    <span>Official Airport Shuttle Services for Confirmed Delegates</span>
+                    <span>Airport Shuttle Access for Confirmed Delegates</span>
                   </div>
                 </div>
 
                 <div className="pt-4 flex items-center gap-4">
                   <button
                     onClick={onOpenRegistration}
-                    className="px-6 py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-xs sm:text-sm font-bold transition cursor-pointer"
+                    className="px-6 py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-2"
                   >
-                    Register for Live Physical Pass
-                  </button>
-                  <button
-                    onClick={onOpenRegistration}
-                    className="px-5 py-3 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] text-xs sm:text-sm font-semibold transition cursor-pointer"
-                  >
-                    Virtual Global Stream Pass
+                    <span>Register to Attend in Person</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <div className="lg:col-span-6 relative rounded-2xl overflow-hidden shadow-lg border border-[#E5DFD5] h-80 sm:h-96">
-                <img
-                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80"
-                  alt="Victor Uwaifo Hub Auditorium"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#00231b]/80 via-transparent to-transparent flex items-end p-6">
-                  <div className="text-white">
-                    <span className="text-xs uppercase font-bold text-[#FEF3C7] tracking-wider">Main Plenary Hall</span>
-                    <h3 className="text-xl font-bold">Victor Uwaifo Creative Hub Auditorium</h3>
-                    <p className="text-xs text-slate-200 mt-1">Hosting opening keynotes, the ₦50M deal pitches, and gala night.</p>
+              <div className="lg:col-span-6">
+                <div className="rounded-2xl overflow-hidden border border-[#E5DFD5] shadow-md relative bg-[#00231b] text-white p-8 space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#FEF3C7]">
+                    In-Person & Remote Access
+                  </span>
+                  <h3 className="text-2xl font-bold">
+                    Join Edo State's Landmark Business & Innovation Summit
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-light">
+                    Whether you are an entrepreneur seeking venture capital, a corporate leader modernizing trade channels, or a government partner activating policy, Óghowa Business Week is built for high-value collaboration.
+                  </p>
+                  <div className="pt-2 flex items-center gap-3 text-xs text-[#b5efda]">
+                    <span>Capacity: 500 Delegates</span>
+                    <span>•</span>
+                    <span className="text-rose-300 font-bold">{vacantSeats} Seats Vacant</span>
                   </div>
                 </div>
               </div>
@@ -737,38 +974,42 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
         </div>
       </section>
 
-      {/* 8. FAQS */}
-      <section id="bw-faq" className="py-20 bg-white border-b border-[#E5DFD5]">
+      {/* 9. FREQUENTLY ASKED QUESTIONS */}
+      <section id="bw-faq" className="py-20 bg-[#FBF9F5] border-b border-[#E5DFD5]">
         <div className="max-w-[900px] mx-auto px-4 md:px-6">
-          <div className="text-center max-w-xl mx-auto mb-12">
+          <div className="text-center mb-12">
             <span className="text-xs font-bold text-[#00231b] uppercase tracking-widest bg-[#00231b]/10 px-3 py-1 rounded-full">
               Frequently Asked Questions
             </span>
-            <h2 className="text-3xl font-extrabold text-[#00231b] mt-3 tracking-tight">
-              Everything You Need to Know
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#00231b] mt-3 tracking-tight">
+              Registration & Participation Details
             </h2>
           </div>
 
           <div className="space-y-4">
             {[
               {
-                q: 'Is registration free for participants?',
-                a: 'Standard physical delegate accreditation and virtual global streaming are completely free for accepted participants, supported by the Edo State Innovation Network and Benin Tech Fest.'
+                q: 'What is Óghowa Business Week?',
+                a: 'Óghowa Business Week is an annual platform under the theme "Innovation for Economic Transformation," bringing together entrepreneurs, businesses, investors, policymakers, researchers, development partners, and innovators in collaboration with Benin Tech Fest.'
               },
               {
-                q: 'How do I pitch my company in the ₦50M Deal Syndicate room?',
-                a: 'During the registration process, check the "Startup Pitch Applications & Investor Deal Rooms" box in Section C. Shortlisted founders are contacted by the investment committee for deck review.'
+                q: 'How do I register for Óghowa Business Week?',
+                a: 'Click the "Register Now" button anywhere on this page to access the official participant registration form. It takes approximately 3 minutes to complete.'
               },
               {
-                q: 'What is the relationship between Óghowa Business Week and Óghowa Accelerator?',
-                a: 'Óghowa Accelerator is the parent venture-building ecosystem that funds and builds startups year-round. Óghowa Business Week is our annual flagship conference convening the wider African innovation and investment community.'
+                q: 'Can I participate remotely?',
+                a: 'Yes. In the registration form under "Will you attend in person?", you can select "No, I would like to follow remotely" or "Not sure yet" to receive virtual streaming access.'
               },
               {
-                q: 'Can international delegates participate virtually?',
-                a: 'Yes. All keynote debates and masterclasses are streamed live with interactive Q&A and virtual networking lounges for global delegates.'
+                q: 'How can my company pitch at the Demo Day?',
+                a: 'Select "Startup pitches & showcase" and "Startup founder" on the participant registration form. Shortlisted founders are contacted for the Demo Day cohort selection.'
+              },
+              {
+                q: 'How can organizations exhibit or sponsor?',
+                a: 'In the registration form, answer "Are you interested in exhibiting or sponsoring?" with Exhibiting, Sponsoring, or Both, and our secretariat team will contact you with the sponsorship prospectus.'
               }
             ].map((faq, idx) => (
-              <div key={idx} className="p-5 rounded-2xl bg-[#FBF9F5] border border-[#E5DFD5] space-y-2">
+              <div key={idx} className="p-5 rounded-2xl bg-white border border-[#E5DFD5] space-y-2">
                 <h3 className="text-base font-bold text-[#00231b] flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-[#B45309] shrink-0" />
                   <span>{faq.q}</span>
@@ -782,20 +1023,20 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
         </div>
       </section>
 
-      {/* 9. PRE-FOOTER CALL TO ACTION */}
+      {/* 10. PRE-FOOTER CALL TO ACTION */}
       <section className="py-16 sm:py-20 bg-gradient-to-r from-[#00231b] via-[#0e3a2f] to-[#00231b] text-white">
         <div className="max-w-[1000px] mx-auto px-4 text-center space-y-6">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#FEF3C7] text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Join 2,500+ Innovators in Benin City</span>
+            <span>Join Founders, Investors & Innovators</span>
           </span>
 
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-            Ready to Accelerate Your Venture or Network with African Giants?
+            Ready to Take Part in Óghowa Business Week 2026?
           </h2>
 
           <p className="text-sm sm:text-base text-[#eaefeb] max-w-xl mx-auto leading-relaxed">
-            Enroll today for Óghowa Business Week 2026. Secure your accreditation badge and receive full masterclass timetables.
+            Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
@@ -811,51 +1052,41 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
               onClick={onBackToAccelerator}
               className="px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-base border border-white/20 transition cursor-pointer"
             >
-              <span>Explore Mother Accelerator</span>
+              <span>Oghowa Homepage</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 10. DEDICATED BUSINESS WEEK FOOTER */}
+      {/* 11. DEDICATED BUSINESS WEEK FOOTER (Updated as requested) */}
       <footer className="w-full bg-[#F4EFE6] py-12 border-t border-[#E5DFD5]">
         <div className="max-w-[1240px] mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#E5DFD5]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10 border-b border-[#E5DFD5]">
             <div className="md:col-span-2 space-y-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <BusinessWeekLogo size="md" />
               </div>
               <p className="text-xs sm:text-sm text-[#52605B] max-w-md leading-relaxed">
                 Óghowa Business Week is West Africa's frontline venture, tech, and economic policy summit, powered in direct institutional collaboration with Benin Tech Fest & Edo State Innovation Network.
               </p>
-              <div className="flex items-center gap-2 text-xs text-[#316858] font-bold">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Victor Uwaifo Creative Hub & Edo Innovates, Airport Road, Benin City</span>
-              </div>
             </div>
 
             <div>
               <h4 className="text-xs font-bold text-[#00231b] uppercase tracking-wider mb-3">
-                Summit Navigation
+                Business Week Navigation
               </h4>
               <ul className="space-y-2 text-xs text-[#52605B]">
-                <li><button onClick={() => scrollToSection('bw-overview')} className="hover:text-[#00231b]">Summit Overview</button></li>
-                <li><button onClick={() => scrollToSection('bw-tracks')} className="hover:text-[#00231b]">Thematic Tracks</button></li>
-                <li><button onClick={() => scrollToSection('bw-speakers')} className="hover:text-[#00231b]">Keynote Speakers</button></li>
-                <li><button onClick={() => scrollToSection('bw-agenda')} className="hover:text-[#00231b]">5-Day Program</button></li>
-                <li><button onClick={onOpenRegistration} className="text-[#B45309] font-bold hover:underline">Delegate Registration</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-bold text-[#00231b] uppercase tracking-wider mb-3">
-                Ecosystem & Mother Group
-              </h4>
-              <ul className="space-y-2 text-xs text-[#52605B]">
-                <li><button onClick={onBackToAccelerator} className="hover:text-[#00231b]">Óghowa Accelerator Homepage</button></li>
-                <li><button onClick={onOpenApply} className="hover:text-[#00231b]">Cohort 2026 Founder Applications</button></li>
-                <li><span className="text-[#52605B]">In Collaboration with Benin Tech Fest</span></li>
-                <li><span className="text-[#52605B]">Edo State Innovation Network</span></li>
+                <li>
+                  <button onClick={onBackToAccelerator} className="font-semibold text-[#00231b] hover:underline">
+                    Óghowa Accelerator Homepage
+                  </button>
+                </li>
+                <li><button onClick={() => scrollToSection('bw-overview')} className="hover:text-[#00231b]">Business Week Overview</button></li>
+                <li><button onClick={() => scrollToSection('bw-problem-vision')} className="hover:text-[#00231b]">Vision & Strategic Pillars</button></li>
+                <li><button onClick={() => scrollToSection('bw-goals')} className="hover:text-[#00231b]">Stakeholder Outcomes</button></li>
+                <li><button onClick={() => scrollToSection('bw-agenda')} className="hover:text-[#00231b]">4-Day Schedule</button></li>
+                <li><button onClick={() => scrollToSection('bw-venue')} className="hover:text-[#00231b]">Host City & Venue</button></li>
+                <li><button onClick={onOpenRegistration} className="text-[#B45309] font-bold hover:underline">Participant Registration</button></li>
               </ul>
             </div>
           </div>
@@ -864,11 +1095,11 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
             <p>© 2026 Óghowa Business Week. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <button onClick={onOpenRegistration} className="hover:text-[#00231b] font-bold">
-                Register for Summit
+                Participant Registration
               </button>
               <span>•</span>
               <button onClick={onBackToAccelerator} className="hover:text-[#00231b]">
-                Back to Accelerator
+                Oghowa Homepage
               </button>
             </div>
           </div>

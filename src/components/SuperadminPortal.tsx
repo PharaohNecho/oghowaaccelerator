@@ -26,7 +26,9 @@ import {
   RotateCcw,
   Check
 } from 'lucide-react';
-import { EmailNotification, Venture, PartnerItem, CarouselSlide } from '../types';
+import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig } from '../types';
+import { SuperadminSummitManager } from './SuperadminSummitManager';
+import { SuperadminRegistrationManager } from './SuperadminRegistrationManager';
 
 interface SuperadminPortalProps {
   appData: {
@@ -49,12 +51,16 @@ interface SuperadminPortalProps {
   ventures: Venture[];
   partners: PartnerItem[];
   carouselEvents: CarouselSlide[];
+  businessWeekConfig: BusinessWeekConfig;
   onUpdateStatus: (newStatus: string, feedbackMsg: string) => void;
   onUpdateVentures: (updated: Venture[]) => void;
   onUpdatePartners: (updated: PartnerItem[]) => void;
   onUpdateCarouselEvents: (updated: CarouselSlide[]) => void;
+  onUpdateBusinessWeekConfig: (updated: BusinessWeekConfig) => void;
   onBackToDashboard: () => void;
   onBackToHome: () => void;
+  onNavigateToBusinessWeek?: () => void;
+  onNavigateToRegistration?: () => void;
 }
 
 export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
@@ -65,19 +71,23 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   ventures,
   partners,
   carouselEvents,
+  businessWeekConfig,
   onUpdateStatus,
   onUpdateVentures,
   onUpdatePartners,
   onUpdateCarouselEvents,
+  onUpdateBusinessWeekConfig,
   onBackToDashboard,
-  onBackToHome
+  onBackToHome,
+  onNavigateToBusinessWeek,
+  onNavigateToRegistration
 }) => {
   // Authentication & Auto-Lock State
   // Default credentials: Admin01 / OghAdmin@26
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLocked, setIsLocked] = useState<boolean>(false);
-  const [usernameInput, setUsernameInput] = useState<string>('Admin01');
-  const [passwordInput, setPasswordInput] = useState<string>('OghAdmin@26');
+  const [usernameInput, setUsernameInput] = useState<string>('');
+  const [passwordInput, setPasswordInput] = useState<string>('');
   const [unlockPasswordInput, setUnlockPasswordInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
 
@@ -86,7 +96,10 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   const [secondsRemaining, setSecondsRemaining] = useState<number>(TIMEOUT_SECONDS);
   const timerRef = useRef<number | null>(null);
 
-  // Active Management Tab
+  // 3 Central Websites / Portals Selection
+  const [activeSiteSection, setActiveSiteSection] = useState<'home' | 'summit' | 'registration'>('home');
+
+  // Active Management Tab within Main Home site
   const [activeTab, setActiveTab] = useState<'ventures' | 'partners' | 'carousel' | 'applications' | 'emails'>('ventures');
 
   // Application Review State
@@ -597,7 +610,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
               Platform & Ecosystem Superadmin
             </h1>
             <p className="text-xs text-slate-300 mt-1">
-              Manage Featured Ventures, Partners, Hero Carousel upcoming events, and Cohort applicant evaluations.
+              Manage Portfolio Companies, Partners, Hero Carousel upcoming events, and Cohort applicant evaluations.
             </p>
           </div>
 
@@ -637,19 +650,90 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab('ventures')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
-              activeTab === 'ventures'
-                ? 'bg-[#0B1E48] text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Featured Ventures ({ventures.length})</span>
-          </button>
+        {/* ================= PRIMARY WEBSITE CONTEXT SWITCHER ================= */}
+        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs mb-6">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">
+            Superadmin Context: Select Website or Page to Control & Edit
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <button
+              onClick={() => setActiveSiteSection('home')}
+              className={`p-3.5 rounded-xl font-bold text-xs transition flex items-center justify-between cursor-pointer border ${
+                activeSiteSection === 'home'
+                  ? 'bg-[#0B1E48] text-white border-[#0B1E48] shadow-sm'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Building className="w-4 h-4 text-rose-400" />
+                <div className="text-left">
+                  <span className="block font-bold">1. Main Home Page</span>
+                  <span className="text-[10px] opacity-75 font-normal">Óghowa Mother Accelerator</span>
+                </div>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'home' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                {ventures.length} Ventures
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveSiteSection('summit')}
+              className={`p-3.5 rounded-xl font-bold text-xs transition flex items-center justify-between cursor-pointer border ${
+                activeSiteSection === 'summit'
+                  ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#FEF3C7]" />
+                <div className="text-left">
+                  <span className="block font-bold">2. Business Week Summit</span>
+                  <span className="text-[10px] opacity-75 font-normal">Nov 16-21 • ₦50M Deal Rooms</span>
+                </div>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'summit' ? 'bg-[#FEF3C7] text-[#00231b]' : 'bg-slate-200 text-slate-600'}`}>
+                {businessWeekConfig.tracks.length} Tracks
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveSiteSection('registration')}
+              className={`p-3.5 rounded-xl font-bold text-xs transition flex items-center justify-between cursor-pointer border ${
+                activeSiteSection === 'registration'
+                  ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Ticket className="w-4 h-4 text-[#FEF3C7]" />
+                <div className="text-left">
+                  <span className="block font-bold">3. Business Week Registration</span>
+                  <span className="text-[10px] opacity-75 font-normal">Passes, Gates & Badge Inspector</span>
+                </div>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'registration' ? 'bg-[#FEF3C7] text-[#00231b]' : 'bg-slate-200 text-slate-600'}`}>
+                {businessWeekConfig.delegates.length} Delegates
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* ================= SITE SECTION 1: MAIN HOMEPAGE CONTENT ================= */}
+        {activeSiteSection === 'home' && (
+          <>
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 border-b border-slate-200">
+              <button
+                onClick={() => setActiveTab('ventures')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
+                  activeTab === 'ventures'
+                    ? 'bg-[#0B1E48] text-white shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Featured Ventures ({ventures.length})</span>
+              </button>
 
           <button
             onClick={() => setActiveTab('partners')}
@@ -1121,7 +1205,27 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
             </div>
           </div>
         )}
-      </div>
+      </>
+    )}
+
+    {/* ================= SITE SECTION 2: BUSINESS WEEK SUMMIT ================= */}
+    {activeSiteSection === 'summit' && (
+      <SuperadminSummitManager
+        config={businessWeekConfig}
+        onUpdateConfig={onUpdateBusinessWeekConfig}
+        onPreviewSummit={onNavigateToBusinessWeek}
+      />
+    )}
+
+    {/* ================= SITE SECTION 3: BUSINESS WEEK REGISTRATION ================= */}
+    {activeSiteSection === 'registration' && (
+      <SuperadminRegistrationManager
+        config={businessWeekConfig}
+        onUpdateConfig={onUpdateBusinessWeekConfig}
+        onPreviewRegistration={onNavigateToRegistration}
+      />
+    )}
+  </div>
 
       {/* ================= MODAL: EDIT / ADD VENTURE ================= */}
       {editingVenture && (

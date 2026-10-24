@@ -126,3 +126,79 @@ export interface Booking {
   status: 'Confirmed' | 'Completed' | 'Cancelled';
 }
 
+export interface SummitTrack {
+  id: string;
+  tag: string;
+  title: string;
+  desc: string;
+  isDisplayed: boolean;
+}
+
+export interface SummitSpeaker {
+  id: string;
+  name: string;
+  role: string;
+  topic: string;
+  image: string;
+  isDisplayed: boolean;
+}
+
+export interface SummitScheduleItem {
+  time: string;
+  title: string;
+  speaker: string;
+}
+
+export interface SummitDaySchedule {
+  day: number;
+  title: string;
+  date: string;
+  theme: string;
+  events: SummitScheduleItem[];
+}
+
+export interface RegisteredDelegate {
+  id: string;
+  code: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string;
+  role: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  location: string;
+  persona: string;
+  otherPersona?: string;
+  tracks: string[];
+  interests?: string[];
+  masterclass?: string;
+  attendanceMode: string;
+  exhibitSponsorInterest?: string;
+  discoverySource?: string;
+  otherDiscoverySource?: string;
+  accessibilityRequirements?: string;
+  expectations?: string;
+  declarationConfirmed?: boolean;
+  receiveUpdates?: boolean;
+  registeredAt: string;
+  status: 'Accreditation Issued' | 'Fast-Track VIP' | 'Pending Verification' | 'Declined';
+  dealRoomInterest?: boolean;
+}
+
+export interface BusinessWeekConfig {
+  summitTitle: string;
+  dates: string;
+  venueName: string;
+  venueAddress: string;
+  dealFundAmount: string;
+  expectedDelegates: string;
+  capacityWindowText: string;
+  isRegistrationOpen: boolean;
+  tracks: SummitTrack[];
+  speakers: SummitSpeaker[];
+  schedule: SummitDaySchedule[];
+  delegates: RegisteredDelegate[];
+}
+
