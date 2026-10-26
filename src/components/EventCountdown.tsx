@@ -70,10 +70,12 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
         id: `EML-${Math.floor(1000 + Math.random() * 9000)}`,
         recipient: attendeeEmail || 'innovator@venture.africa',
         recipientName: attendeeName || 'Participant',
+        sender: 'oghowa@metaspaceconsult.com',
+        smtpServer: 'mail.metaspaceconsult.com:465 (SSL/TLS)',
         subject: 'Confirmed: Your Participant Pass to Óghowa Business Week 2026',
         type: 'Event Ticket',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
-        content: `Dear ${attendeeName || 'Innovator'},\n\nYour seat for Óghowa Business Week 2026 is officially confirmed!\n\nTheme: Innovation for Economic Transformation\nDates: November 16 – 21, 2026\nVenue: Victor Uwaifo Creative Hub\nCredential ID: OBW-2026-${Math.floor(100000 + Math.random() * 900000)}\nOrganization: ${attendeeOrg || 'Independent'}\n\nPlease present this email confirmation or your mobile badge at the registration desk for instant accreditation.`
+        content: `Dear ${attendeeName || 'Innovator'},\n\nYour seat for Óghowa Business Week 2026 is officially confirmed!\n\nTheme: Innovation for Economic Transformation\nDates: November 16 – 21, 2026\nVenue: Victor Uwaifo Creative Hub\nCredential ID: OBW-2026-${Math.floor(100000 + Math.random() * 900000)}\nOrganization: ${attendeeOrg || 'Independent'}\n\nPlease present this email confirmation or your mobile badge at the registration desk for instant accreditation.\n\nWarm regards,\nÓghowa Business Week Secretariat\noghowa@metaspaceconsult.com`
       };
 
       if (onTicketReserved) {

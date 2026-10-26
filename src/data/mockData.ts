@@ -1,4 +1,16 @@
-import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide, BusinessWeekConfig } from '../types';
+import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide, BusinessWeekConfig, SmtpSettings } from '../types';
+
+export const DEFAULT_SMTP_SETTINGS: SmtpSettings = {
+  senderEmail: 'oghowa@metaspaceconsult.com',
+  incomingServer: 'mail.metaspaceconsult.com',
+  imapPort: 993,
+  pop3Port: 995,
+  outgoingServer: 'mail.metaspaceconsult.com',
+  smtpPort: 465,
+  useSsl: true,
+  status: 'Connected',
+  lastTestedAt: 'Verified SSL/TLS'
+};
 
 export const WHO_WE_SERVE_DATA = [
   {

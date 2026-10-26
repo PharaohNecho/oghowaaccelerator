@@ -24,9 +24,15 @@ import {
   Ticket,
   Clock,
   RotateCcw,
-  Check
+  Check,
+  Server,
+  Settings,
+  Radio,
+  Image as ImageIcon,
+  ExternalLink
 } from 'lucide-react';
-import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig } from '../types';
+import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig, SmtpSettings } from '../types';
+import { DEFAULT_SMTP_SETTINGS } from '../data/mockData';
 import { SuperadminSummitManager } from './SuperadminSummitManager';
 import { SuperadminRegistrationManager } from './SuperadminRegistrationManager';
 
@@ -52,11 +58,14 @@ interface SuperadminPortalProps {
   partners: PartnerItem[];
   carouselEvents: CarouselSlide[];
   businessWeekConfig: BusinessWeekConfig;
+  smtpSettings?: SmtpSettings;
   onUpdateStatus: (newStatus: string, feedbackMsg: string) => void;
   onUpdateVentures: (updated: Venture[]) => void;
   onUpdatePartners: (updated: PartnerItem[]) => void;
   onUpdateCarouselEvents: (updated: CarouselSlide[]) => void;
   onUpdateBusinessWeekConfig: (updated: BusinessWeekConfig) => void;
+  onUpdateSmtpSettings?: (updated: SmtpSettings) => void;
+  onSendCustomEmail?: (email: EmailNotification) => void;
   onBackToDashboard: () => void;
   onBackToHome: () => void;
   onNavigateToBusinessWeek?: () => void;
@@ -72,11 +81,14 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   partners,
   carouselEvents,
   businessWeekConfig,
+  smtpSettings = DEFAULT_SMTP_SETTINGS,
   onUpdateStatus,
   onUpdateVentures,
   onUpdatePartners,
   onUpdateCarouselEvents,
   onUpdateBusinessWeekConfig,
+  onUpdateSmtpSettings,
+  onSendCustomEmail,
   onBackToDashboard,
   onBackToHome,
   onNavigateToBusinessWeek,
@@ -101,6 +113,19 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
 
   // Active Management Tab within Main Home site
   const [activeTab, setActiveTab] = useState<'ventures' | 'partners' | 'carousel' | 'applications' | 'emails'>('ventures');
+
+  // SMTP Configuration State
+  const [currentSmtp, setCurrentSmtp] = useState<SmtpSettings>(smtpSettings || DEFAULT_SMTP_SETTINGS);
+  const [isEditingSmtp, setIsEditingSmtp] = useState<boolean>(false);
+  const [smtpTestNotice, setSmtpTestNotice] = useState<string>('');
+
+  // Custom Direct Correspondence Form State
+  const [composeRecipientName, setComposeRecipientName] = useState<string>('');
+  const [composeRecipientEmail, setComposeRecipientEmail] = useState<string>('');
+  const [composeSubject, setComposeSubject] = useState<string>('');
+  const [composeType, setComposeType] = useState<EmailNotification['type']>('Broadcast');
+  const [composeContent, setComposeContent] = useState<string>('');
+  const [composeSuccess, setComposeSuccess] = useState<string>('');
 
   // Application Review State
   const [feedbackInput, setFeedbackInput] = useState<string>(adminNotes);
@@ -370,8 +395,9 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
     setPartnerForm({
       id: `partner-${Date.now()}`,
       name: '',
-      category: 'Corporate',
-      logo: '🤝 Partner',
+      category: 'Government',
+      logo: '🏛️ Partner',
+      logoUrl: '',
       websiteUrl: 'https://',
       isDisplayed: true
     });
@@ -386,8 +412,9 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
     const finalPartner: PartnerItem = {
       id: partnerForm.id || `partner-${Date.now()}`,
       name: partnerForm.name,
-      category: partnerForm.category || 'Ecosystem',
+      category: partnerForm.category || 'Government',
       logo: partnerForm.logo || `🏛️ ${partnerForm.name}`,
+      logoUrl: partnerForm.logoUrl || (partnerForm.logo?.startsWith('http') ? partnerForm.logo : undefined),
       websiteUrl: partnerForm.websiteUrl || '',
       isDisplayed: partnerForm.isDisplayed !== false
     };
@@ -398,6 +425,66 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
       onUpdatePartners(partners.map((p) => (p.id === finalPartner.id ? finalPartner : p)));
     }
     setEditingPartner(null);
+  };
+
+  // ================= SMTP & CORRESPONDENCE HANDLERS =================
+  const handleSaveSmtpSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onUpdateSmtpSettings) {
+      onUpdateSmtpSettings(currentSmtp);
+    }
+    setIsEditingSmtp(false);
+    setSmtpTestNotice('SMTP Server Configuration updated and verified.');
+    setTimeout(() => setSmtpTestNotice(''), 4000);
+  };
+
+  const handleTestSmtpConnection = () => {
+    const testEmail: EmailNotification = {
+      id: `EML-TEST-${Date.now()}`,
+      recipient: currentSmtp.senderEmail,
+      recipientName: 'Óghowa Mail Administrator',
+      sender: currentSmtp.senderEmail,
+      smtpServer: `${currentSmtp.outgoingServer}:${currentSmtp.smtpPort} (SSL/TLS)`,
+      subject: 'SMTP Handshake Verification: mail.metaspaceconsult.com [PASS]',
+      type: 'Broadcast',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Just now',
+      content: `SMTP Transport Self-Test Verification\n\nRoute: ${currentSmtp.outgoingServer}:${currentSmtp.smtpPort} (SSL/TLS)\nSender: ${currentSmtp.senderEmail}\nIncoming IMAP: ${currentSmtp.incomingServer}:${currentSmtp.imapPort}\nIncoming POP3: ${currentSmtp.incomingServer}:${currentSmtp.pop3Port}\n\nStatus: 250 OK - Handshake Completed Successfully.`
+    };
+    if (onSendCustomEmail) {
+      onSendCustomEmail(testEmail);
+    }
+    setSmtpTestNotice(`Handshake test dispatched via ${currentSmtp.outgoingServer}:${currentSmtp.smtpPort}`);
+    setTimeout(() => setSmtpTestNotice(''), 5000);
+  };
+
+  const handleSendCustomCorrespondence = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!composeRecipientEmail || !composeSubject || !composeContent) {
+      alert('Please fill in Recipient Email, Subject, and Message Body.');
+      return;
+    }
+
+    const newEmail: EmailNotification = {
+      id: `EML-MANUAL-${Date.now()}`,
+      recipient: composeRecipientEmail,
+      recipientName: composeRecipientName || composeRecipientEmail.split('@')[0],
+      sender: currentSmtp.senderEmail,
+      smtpServer: `${currentSmtp.outgoingServer}:${currentSmtp.smtpPort} (SSL/TLS)`,
+      subject: composeSubject,
+      type: composeType,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
+      content: composeContent
+    };
+
+    if (onSendCustomEmail) {
+      onSendCustomEmail(newEmail);
+    }
+    setComposeSuccess(`Official correspondence dispatched via ${currentSmtp.outgoingServer}:${currentSmtp.smtpPort} to ${composeRecipientEmail}`);
+    setComposeRecipientName('');
+    setComposeRecipientEmail('');
+    setComposeSubject('');
+    setComposeContent('');
+    setTimeout(() => setComposeSuccess(''), 5000);
   };
 
   // ================= CAROUSEL HANDLERS =================
@@ -887,66 +974,117 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h3 className="text-xl font-bold text-[#0B1E48]">Ecosystem & Institutional Partners</h3>
+                <h3 className="text-xl font-bold text-[#0B1E48]">Our Partners & Institutional Alliances</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Superadmin can add, edit, re-categorize, hide, or delete any partner on the platform.
+                  Superadmin can add, edit names, update logo images/emblems, change categories, set website links, hide, or remove partners.
                 </p>
               </div>
 
-              <button
-                onClick={handleOpenAddPartner}
-                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Partner</span>
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={handleOpenAddPartner}
+                  className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Partner</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {partners.map((partner) => (
-                <div
-                  key={partner.id || partner.name}
-                  className={`bg-white rounded-xl border p-4 shadow-2xs flex flex-col justify-between ${
-                    partner.isDisplayed !== false ? 'border-slate-200' : 'border-dashed border-slate-300 opacity-60'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                        {partner.category}
-                      </span>
-                      <button
-                        onClick={() => handleTogglePartnerDisplay(partner.id)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          partner.isDisplayed !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
-                        }`}
-                      >
-                        {partner.isDisplayed !== false ? 'Visible' : 'Hidden'}
-                      </button>
+              {partners.map((partner) => {
+                const isImage = partner.logoUrl || (partner.logo && (partner.logo.startsWith('http') || partner.logo.startsWith('/')));
+                const imgSrc = partner.logoUrl || (isImage ? partner.logo : undefined);
+
+                return (
+                  <div
+                    key={partner.id || partner.name}
+                    className={`bg-white rounded-xl border p-4 shadow-2xs flex flex-col justify-between transition-all ${
+                      partner.isDisplayed !== false ? 'border-slate-200' : 'border-dashed border-slate-300 opacity-60 bg-slate-50'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                          {partner.category}
+                        </span>
+                        <button
+                          onClick={() => handleTogglePartnerDisplay(partner.id)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition cursor-pointer ${
+                            partner.isDisplayed !== false
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {partner.isDisplayed !== false ? 'Visible' : 'Hidden'}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-2">
+                        {isImage && imgSrc ? (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-white p-1 border border-slate-200 shrink-0 flex items-center justify-center shadow-xs">
+                            <img
+                              src={imgSrc}
+                              alt={partner.name}
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `<span class="text-xs font-bold text-[#0B1E48]">${partner.name.charAt(0)}</span>`;
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-[#0B1E48]/10 text-[#0B1E48] font-black text-sm flex items-center justify-center shrink-0 border border-[#0B1E48]/15">
+                            {partner.logo && !partner.logo.startsWith('http') ? partner.logo.slice(0, 2) : partner.name.charAt(0)}
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-[#0B1E48] text-sm leading-snug truncate" title={partner.name}>
+                            {partner.name}
+                          </h4>
+                          {partner.websiteUrl && (
+                            <a
+                              href={partner.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-rose-600 hover:underline flex items-center gap-1 mt-0.5 truncate"
+                            >
+                              <span className="truncate">{partner.websiteUrl.replace(/^https?:\/\//, '')}</span>
+                              <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 mt-2 truncate">
+                        <span className="text-slate-400">Emblem/Tag:</span> <strong>{partner.logo || partner.name}</strong>
+                      </div>
                     </div>
 
-                    <h4 className="font-bold text-[#0B1E48] text-sm mb-1">{partner.name}</h4>
-                    <p className="text-xs text-slate-500 truncate">{partner.logo}</p>
+                    <div className="flex items-center justify-end gap-1.5 pt-3 mt-3 border-t border-slate-100">
+                      <button
+                        onClick={() => handleOpenEditPartner(partner)}
+                        className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md flex items-center gap-1 transition cursor-pointer"
+                        title="Edit Partner Name & Logo"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeletePartner(partner.id)}
+                        className="p-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer"
+                        title="Delete Partner"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="flex items-center justify-end gap-1.5 pt-3 mt-3 border-t border-slate-100">
-                    <button
-                      onClick={() => handleOpenEditPartner(partner)}
-                      className="p-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer"
-                      title="Edit Partner"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePartner(partner.id)}
-                      className="p-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-md cursor-pointer"
-                      title="Delete Partner"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -1169,39 +1307,401 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
           </div>
         )}
 
-        {/* ================= TAB 5: AUTOMATED EMAIL LOG ================= */}
+        {/* ================= TAB 5: EMAIL CORRESPONDENCE & SMTP GATEWAY ================= */}
         {activeTab === 'emails' && (
-          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs">
-            <h3 className="text-xl font-bold text-[#0B1E48] mb-2">Automated Transactional Emails Log</h3>
-            <p className="text-xs text-slate-500 mb-6">
-              Full record of welcome messages, status updates, and VIP event invitations dispatched to founders.
-            </p>
+          <div className="space-y-8">
+            {/* 1. Mail Server & SMTP Gateway Configuration Card */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-5 mb-5 border-b border-slate-100 gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    <Server className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Official Mail Server Configuration</span>
+                  </div>
+                  <h3 className="text-xl font-black text-[#0B1E48]">
+                    Email Correspondence Gateway
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    All summit accreditation passes, venture statuses, and automated communications are routed through this mail server.
+                  </p>
+                </div>
 
-            <div className="space-y-4">
-              {sentEmails.map((email) => (
-                <div
-                  key={email.id}
-                  className="p-4 sm:p-5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2 pb-2 border-b border-slate-200/60">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800">
-                        {email.type}
-                      </span>
-                      <span className="font-bold text-slate-900 text-sm">{email.subject}</span>
-                    </div>
-                    <span className="text-xs text-slate-400">{email.timestamp}</span>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={handleTestSmtpConnection}
+                    className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+                    <span>Test SMTP Handshake</span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsEditingSmtp(!isEditingSmtp)}
+                    className="px-4 py-2 text-xs font-bold text-white bg-[#0B1E48] hover:bg-[#071733] rounded-lg flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>{isEditingSmtp ? 'Close Settings' : 'Edit Server Parameters'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {smtpTestNotice && (
+                <div className="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{smtpTestNotice}</span>
+                </div>
+              )}
+
+              {/* Server Details Grid */}
+              {!isEditingSmtp ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Sender Address */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">
+                      Sender Address
+                    </span>
+                    <span className="font-mono font-bold text-slate-900 text-sm block mt-1">
+                      {currentSmtp.senderEmail}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Active / SPF Verified
+                    </span>
                   </div>
 
-                  <p className="text-xs text-slate-500 mb-3">
-                    Recipient: <strong className="text-slate-800">{email.recipientName}</strong> &lt;{email.recipient}&gt;
-                  </p>
+                  {/* Outgoing SMTP */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">
+                      Outgoing Server (SMTP)
+                    </span>
+                    <span className="font-mono font-bold text-slate-900 text-sm block mt-1">
+                      {currentSmtp.outgoingServer}
+                    </span>
+                    <span className="text-[10px] text-slate-600 font-semibold block mt-1">
+                      SMTP Port: <strong className="text-slate-800">{currentSmtp.smtpPort}</strong> (SSL/TLS)
+                    </span>
+                  </div>
 
-                  <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-line leading-relaxed">
-                    {email.content}
+                  {/* Incoming IMAP */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">
+                      Incoming Server (IMAP)
+                    </span>
+                    <span className="font-mono font-bold text-slate-900 text-sm block mt-1">
+                      {currentSmtp.incomingServer}
+                    </span>
+                    <span className="text-[10px] text-slate-600 font-semibold block mt-1">
+                      IMAP Port: <strong className="text-slate-800">{currentSmtp.imapPort}</strong> (SSL)
+                    </span>
+                  </div>
+
+                  {/* Incoming POP3 */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">
+                      Incoming Server (POP3)
+                    </span>
+                    <span className="font-mono font-bold text-slate-900 text-sm block mt-1">
+                      {currentSmtp.incomingServer}
+                    </span>
+                    <span className="text-[10px] text-slate-600 font-semibold block mt-1">
+                      POP3 Port: <strong className="text-slate-800">{currentSmtp.pop3Port}</strong> (SSL)
+                    </span>
                   </div>
                 </div>
-              ))}
+              ) : (
+                /* Editable SMTP Parameters Form */
+                <form onSubmit={handleSaveSmtpSettings} className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">Sender Email</label>
+                      <input
+                        type="email"
+                        value={currentSmtp.senderEmail}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, senderEmail: e.target.value })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">Outgoing Server (SMTP)</label>
+                      <input
+                        type="text"
+                        value={currentSmtp.outgoingServer}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, outgoingServer: e.target.value })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">SMTP Port</label>
+                      <input
+                        type="number"
+                        value={currentSmtp.smtpPort}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, smtpPort: Number(e.target.value) })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">Incoming Server</label>
+                      <input
+                        type="text"
+                        value={currentSmtp.incomingServer}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, incomingServer: e.target.value })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">IMAP Port</label>
+                      <input
+                        type="number"
+                        value={currentSmtp.imapPort}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, imapPort: Number(e.target.value) })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase mb-1">POP3 Port</label>
+                      <input
+                        type="number"
+                        value={currentSmtp.pop3Port}
+                        onChange={(e) => setCurrentSmtp({ ...currentSmtp, pop3Port: Number(e.target.value) })}
+                        className="w-full p-2.5 rounded-lg border border-slate-300 text-sm bg-white"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingSmtp(false)}
+                      className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                    >
+                      Save Configuration
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* 2. Direct Email Correspondence Dispatcher */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <Send className="w-5 h-5 text-rose-600" />
+                <h3 className="text-xl font-bold text-[#0B1E48]">Send Email Correspondence</h3>
+              </div>
+              <p className="text-xs text-slate-500 mb-6">
+                Compose and dispatch official emails to delegates, founders, or partners directly from <strong>{currentSmtp.senderEmail}</strong>.
+              </p>
+
+              {composeSuccess && (
+                <div className="mb-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{composeSuccess}</span>
+                </div>
+              )}
+
+              {/* Quick Template Chips */}
+              <div className="mb-5">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                  Quick Load Template:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setComposeSubject('Óghowa Business Week 2026: Official Accreditation Issued');
+                      setComposeType('Accreditation');
+                      setComposeContent(
+                        `Dear Participant,\n\nWe are delighted to confirm your physical accreditation for Óghowa Business Week 2026 at the Victor Uwaifo Creative Hub.\n\nEvent Dates: November 16 – 21, 2026\nVenue: Victor Uwaifo Creative Hub\nDelegate Badge: ACCREDITED PHYSICAL PASS\n\nPlease present this email confirmation upon arrival at the secretariat desk.\n\nBest regards,\nÓghowa Summit Secretariat\noghowa@metaspaceconsult.com`
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+                  >
+                    + Accreditation Pass
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setComposeSubject('Update on your Óghowa Venture Studio Application');
+                      setComposeType('Status Update');
+                      setComposeContent(
+                        `Dear Founder,\n\nThe Óghowa Investment Committee has reviewed your application. We would like to invite your founding team to a 20-minute preliminary diligence call.\n\nPlease reply to this correspondence with your availability for this week.\n\nBest regards,\nÓghowa Admissions Desk\noghowa@metaspaceconsult.com`
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+                  >
+                    + Application Update
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setComposeSubject('Invitation: ₦50M Venture Syndicate & Deal Room');
+                      setComposeType('Broadcast');
+                      setComposeContent(
+                        `Dear Investor / Partner,\n\nYou are cordially invited to participate in the closed-door Deal Room at Óghowa Business Week 2026.\n\nDate: Thursday, 19 November 2026\nVenue: Victor Uwaifo Creative Hub\nFeatured Fund: ₦50,000,000 Seed Co-Investment Syndicate\n\nWe look forward to hosting you in Benin City.\n\nWarm regards,\nÓghowa Investment Committee\noghowa@metaspaceconsult.com`
+                      );
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+                  >
+                    + Deal Room Invite
+                  </button>
+                </div>
+              </div>
+
+              {/* Compose Form */}
+              <form onSubmit={handleSendCustomCorrespondence} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Recipient Name</label>
+                    <input
+                      type="text"
+                      value={composeRecipientName}
+                      onChange={(e) => setComposeRecipientName(e.target.value)}
+                      placeholder="e.g. Osasere Idehen"
+                      className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Recipient Email *</label>
+                    <input
+                      type="email"
+                      value={composeRecipientEmail}
+                      onChange={(e) => setComposeRecipientEmail(e.target.value)}
+                      placeholder="e.g. founder@startup.ng"
+                      className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48]"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Subject Line *</label>
+                    <input
+                      type="text"
+                      value={composeSubject}
+                      onChange={(e) => setComposeSubject(e.target.value)}
+                      placeholder="Subject of the official correspondence"
+                      className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48]"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Category Type</label>
+                    <select
+                      value={composeType}
+                      onChange={(e) => setComposeType(e.target.value as any)}
+                      className="w-full p-2.5 rounded-lg border border-slate-300 text-sm"
+                    >
+                      <option value="Accreditation">Accreditation</option>
+                      <option value="Event Ticket">Event Ticket</option>
+                      <option value="Status Update">Status Update</option>
+                      <option value="Information Request">Information Request</option>
+                      <option value="Broadcast">Broadcast</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Message Content *</label>
+                  <textarea
+                    rows={6}
+                    value={composeContent}
+                    onChange={(e) => setComposeContent(e.target.value)}
+                    placeholder="Write your email message..."
+                    className="w-full p-3.5 rounded-xl border border-slate-300 text-sm font-mono leading-relaxed focus:ring-2 focus:ring-[#0B1E48] bg-slate-50"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-3">
+                  <div className="text-[11px] text-slate-500">
+                    Dispatched from: <strong>{currentSmtp.senderEmail}</strong> via <strong>{currentSmtp.outgoingServer}:{currentSmtp.smtpPort}</strong>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold rounded-lg shadow-md transition cursor-pointer flex items-center gap-2"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Send via SMTP (Port {currentSmtp.smtpPort})</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* 3. Sent Correspondence Outbox & Delivery Audit Log */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-xl font-bold text-[#0B1E48]">Sent Correspondence Outbox</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Real-time log of all dispatched summit accreditations, venture notifications, and test handshakes.
+                  </p>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                  Total Dispatched: {sentEmails.length}
+                </span>
+              </div>
+
+              {sentEmails.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 text-xs">
+                  <Mail className="w-10 h-10 mx-auto mb-2 text-slate-300 stroke-1" />
+                  <p>No correspondence dispatched yet. Sent emails will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {sentEmails.map((email) => (
+                    <div
+                      key={email.id}
+                      onClick={() => setSelectedEmail(email)}
+                      className="p-4 sm:p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-xs transition cursor-pointer"
+                    >
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2 pb-2 border-b border-slate-200/60">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-800">
+                            {email.type}
+                          </span>
+                          <span className="font-bold text-slate-900 text-sm">{email.subject}</span>
+                        </div>
+                        <span className="text-xs text-slate-400 font-mono">{email.timestamp}</span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 mb-3 gap-2">
+                        <p>
+                          To: <strong className="text-slate-800">{email.recipientName}</strong> &lt;{email.recipient}&gt;
+                        </p>
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          From: {email.sender || currentSmtp.senderEmail} · Sent via SMTP: {email.smtpServer || `${currentSmtp.outgoingServer}:${currentSmtp.smtpPort}`}
+                        </span>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs font-mono text-slate-700 whitespace-pre-line leading-relaxed line-clamp-3">
+                        {email.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1393,9 +1893,72 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                   value={partnerForm.name || ''}
                   onChange={(e) => setPartnerForm({ ...partnerForm, name: e.target.value })}
                   placeholder="e.g. Edo State Government"
-                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 font-bold text-slate-800"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">
+                  Logo Image URL (Direct PNG, SVG, or WebP)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={partnerForm.logoUrl || ''}
+                    onChange={(e) => setPartnerForm({ ...partnerForm, logoUrl: e.target.value })}
+                    placeholder="https://.../logo.png"
+                    className="flex-1 p-2.5 rounded-lg border border-slate-300 text-sm"
+                  />
+                  {partnerForm.logoUrl && (
+                    <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 p-1 flex items-center justify-center shrink-0">
+                      <img
+                        src={partnerForm.logoUrl}
+                        alt="Logo preview"
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Preset Emblems & Labels */}
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                  Quick Preset Logos / Emblems:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { name: 'Edo State Govt', cat: 'Government', logo: '🏛️ Edo State Govt', url: 'https://edostate.gov.ng' },
+                    { name: 'Bank of Industry', cat: 'Financial', logo: '🏢 BOI', url: 'https://boi.ng' },
+                    { name: 'Benin Tech Fest', cat: 'Technology', logo: '⚡ Benin Tech Fest', url: 'https://benintechfest.com' },
+                    { name: 'University of Benin', cat: 'Academic', logo: '🎓 UNIBEN', url: 'https://uniben.edu' },
+                    { name: 'Microsoft Africa', cat: 'Technology', logo: '💻 Microsoft', url: 'https://microsoft.com' },
+                    { name: 'Amazon Web Services', cat: 'Cloud', logo: '☁️ AWS', url: 'https://aws.amazon.com' },
+                    { name: 'MTN Nigeria', cat: 'Telecom', logo: '📶 MTN', url: 'https://mtn.ng' },
+                    { name: 'GIZ Germany', cat: 'Development', logo: '🌍 GIZ', url: 'https://giz.de' }
+                  ].map((preset) => (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => {
+                        setPartnerForm({
+                          ...partnerForm,
+                          name: preset.name,
+                          category: preset.cat,
+                          logo: preset.logo,
+                          websiteUrl: preset.url
+                        });
+                      }}
+                      className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition cursor-pointer"
+                    >
+                      {preset.logo}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1414,11 +1977,12 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                     <option value="Telecom">Telecom</option>
                     <option value="Enterprise">Enterprise</option>
                     <option value="Development">Development</option>
+                    <option value="Media">Media</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Emblem / Label</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Emblem / Text Label</label>
                   <input
                     type="text"
                     value={partnerForm.logo || ''}

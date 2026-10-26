@@ -13,8 +13,8 @@ import { FeaturedVentures } from './components/FeaturedVentures';
 import { PartnersMarquee } from './components/PartnersMarquee';
 import { Footer } from './components/Footer';
 import { AuthModal } from './components/AuthModal';
-import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig, RegisteredDelegate } from './types';
-import { FEATURED_VENTURES, PARTNERS_LIST, DEFAULT_CAROUSEL_EVENTS, DEFAULT_BUSINESS_WEEK_CONFIG } from './data/mockData';
+import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig, RegisteredDelegate, SmtpSettings } from './types';
+import { FEATURED_VENTURES, PARTNERS_LIST, DEFAULT_CAROUSEL_EVENTS, DEFAULT_BUSINESS_WEEK_CONFIG, DEFAULT_SMTP_SETTINGS } from './data/mockData';
 
 // Code-split heavy views for high-performance loading
 const ApplicationPortal = lazy(() =>
@@ -68,6 +68,9 @@ export default function App() {
 
   // Dynamic Business Week Summit & Registration Configuration controlled by Superadmin
   const [businessWeekConfig, setBusinessWeekConfig] = useState<BusinessWeekConfig>(DEFAULT_BUSINESS_WEEK_CONFIG);
+
+  // Mail Server & SMTP Configuration controlled by Superadmin (mail.metaspaceconsult.com:465)
+  const [smtpSettings, setSmtpSettings] = useState<SmtpSettings>(DEFAULT_SMTP_SETTINGS);
 
   // Current User (Defaults to guest/visitor until real sign-in)
   const [currentUser, setCurrentUser] = useState<{
@@ -204,6 +207,21 @@ export default function App() {
     }
   };
 
+  // Update SMTP Settings with Firestore sync
+  const handleUpdateSmtpSettings = async (updated: SmtpSettings) => {
+    setSmtpSettings(updated);
+    try {
+      await setDoc(doc(db, 'settings', 'smtp'), updated, { merge: true });
+    } catch {
+      console.warn('Persisting SMTP settings to Firestore: local state updated');
+    }
+  };
+
+  // Direct Custom Email Dispatcher
+  const handleSendCustomEmail = (newEmail: EmailNotification) => {
+    setSentEmails((prev) => [newEmail, ...prev]);
+  };
+
   // Automated Status Change Email Dispatcher
   const handleStatusUpdate = (newStatus: string, feedbackMsg = '') => {
     setAppStatus(newStatus);
@@ -213,12 +231,14 @@ export default function App() {
       id: `EML-00${sentEmails.length + 1}`,
       recipient: appData.founderEmail,
       recipientName: appData.founderName,
+      sender: smtpSettings.senderEmail,
+      smtpServer: `${smtpSettings.outgoingServer}:${smtpSettings.smtpPort} (SSL/TLS)`,
       subject: `Update on your Óghowa Venture Application: ${newStatus.toUpperCase()}`,
       type: newStatus === 'Information Required' ? 'Information Request' : 'Status Update',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
       content: `Dear ${appData.founderName},\n\nThe Óghowa Investment Committee has updated the review status for your venture "${appData.startupName}" to: "${newStatus.toUpperCase()}".\n\nReviewer Feedback Notes:\n"${
         feedbackMsg || 'No additional remarks provided.'
-      }"\n\nPlease log in to your Applicant Dashboard to review timeline deliverables or schedule your diligence session.\n\nBest regards,\nÓghowa Investment Committee`
+      }"\n\nPlease log in to your Applicant Dashboard to review timeline deliverables or schedule your diligence session.\n\nBest regards,\nÓghowa Investment Committee\n${smtpSettings.senderEmail}`
     };
 
     setSentEmails([newEmail, ...sentEmails]);
@@ -233,10 +253,12 @@ export default function App() {
       id: `EML-00${sentEmails.length + 1}`,
       recipient: submissionData.founderEmail,
       recipientName: submissionData.founderName,
+      sender: smtpSettings.senderEmail,
+      smtpServer: `${smtpSettings.outgoingServer}:${smtpSettings.smtpPort} (SSL/TLS)`,
       subject: `Application Confirmed: ${submissionData.startupName} is Under Review`,
       type: 'Registration',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
-      content: `Dear ${submissionData.founderName},\n\nWe have received your complete application for ${submissionData.startupName} (Sector: ${submissionData.sector}).\n\nYour documents (${submissionData.deckFileName} & ${submissionData.cacFileName}) have been uploaded to the diligence vault and allocated to our sector screening leads.\n\nYou can track the progress of your application directly on your founder dashboard.\n\nBest regards,\nÓghowa Admissions Desk`
+      content: `Dear ${submissionData.founderName},\n\nWe have received your complete application for ${submissionData.startupName} (Sector: ${submissionData.sector}).\n\nYour documents (${submissionData.deckFileName} & ${submissionData.cacFileName}) have been uploaded to the diligence vault and allocated to our sector screening leads.\n\nYou can track the progress of your application directly on your founder dashboard.\n\nBest regards,\nÓghowa Admissions Desk\n${smtpSettings.senderEmail}`
     };
 
     setSentEmails([confirmationEmail, ...sentEmails]);
@@ -246,7 +268,12 @@ export default function App() {
 
   // Ticket Reservation Handler
   const handleTicketReserved = (ticketEmail: EmailNotification) => {
-    setSentEmails([ticketEmail, ...sentEmails]);
+    const enrichedEmail: EmailNotification = {
+      ...ticketEmail,
+      sender: ticketEmail.sender || smtpSettings.senderEmail,
+      smtpServer: ticketEmail.smtpServer || `${smtpSettings.outgoingServer}:${smtpSettings.smtpPort} (SSL/TLS)`
+    };
+    setSentEmails([enrichedEmail, ...sentEmails]);
   };
 
   const handleStartJourney = () => {
@@ -441,11 +468,14 @@ export default function App() {
               partners={partners}
               carouselEvents={carouselEvents}
               businessWeekConfig={businessWeekConfig}
+              smtpSettings={smtpSettings}
               onUpdateStatus={handleStatusUpdate}
               onUpdateVentures={handleUpdateVentures}
               onUpdatePartners={handleUpdatePartners}
               onUpdateCarouselEvents={handleUpdateCarouselEvents}
               onUpdateBusinessWeekConfig={setBusinessWeekConfig}
+              onUpdateSmtpSettings={handleUpdateSmtpSettings}
+              onSendCustomEmail={handleSendCustomEmail}
               onBackToDashboard={() => {
                 setCurrentView('dashboard');
                 window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -61,8 +61,21 @@ export interface PartnerItem {
   name: string;
   category: string;
   logo: string;
+  logoUrl?: string;
   websiteUrl?: string;
   isDisplayed?: boolean;
+}
+
+export interface SmtpSettings {
+  senderEmail: string;
+  incomingServer: string;
+  imapPort: number;
+  pop3Port: number;
+  outgoingServer: string;
+  smtpPort: number;
+  useSsl: boolean;
+  status: 'Connected' | 'Ready';
+  lastTestedAt?: string;
 }
 
 export interface CarouselSlide {
@@ -103,8 +116,10 @@ export interface EmailNotification {
   id: string;
   recipient: string;
   recipientName: string;
+  sender?: string;
+  smtpServer?: string;
   subject: string;
-  type: 'Registration' | 'Status Update' | 'Event Ticket' | 'Information Request';
+  type: 'Registration' | 'Status Update' | 'Event Ticket' | 'Information Request' | 'Broadcast' | 'Accreditation';
   timestamp: string;
   content: string;
   statusBadge?: string;

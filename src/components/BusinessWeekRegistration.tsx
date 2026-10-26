@@ -363,10 +363,12 @@ END:VCALENDAR`;
         id: `EML-OBW-${Date.now()}`,
         recipient: newDelegate.email,
         recipientName: newDelegate.name,
+        sender: 'oghowa@metaspaceconsult.com',
+        smtpServer: 'mail.metaspaceconsult.com:465 (SSL/TLS)',
         subject: `Accreditation Confirmed: Óghowa Business Week 2026 (${newDelegate.code})`,
         type: 'Event Ticket',
         timestamp: 'Just now',
-        content: `Dear ${newDelegate.name},\n\nYour participant registration for Óghowa Business Week (Nov 16 – 21, 2026) in collaboration with Benin Tech Fest is successfully confirmed!\n\nReference Code: ${newDelegate.code}\nAttendance Mode: ${newDelegate.attendanceMode}\nPersona: ${newDelegate.persona}\nOrganisation: ${newDelegate.organization} (${newDelegate.role})\nLocation: ${newDelegate.location}\nVenue: Victor Uwaifo Creative Hub\n\nPlease present this accreditation code upon arrival at the registration desk.\n\nWarm regards,\nÓghowa Business Week Secretariat`
+        content: `Dear ${newDelegate.name},\n\nYour participant registration for Óghowa Business Week (Nov 16 – 21, 2026) in collaboration with Benin Tech Fest is successfully confirmed!\n\nReference Code: ${newDelegate.code}\nAttendance Mode: ${newDelegate.attendanceMode}\nPersona: ${newDelegate.persona}\nOrganisation: ${newDelegate.organization} (${newDelegate.role})\nLocation: ${newDelegate.location}\nVenue: Victor Uwaifo Creative Hub\n\nPlease present this accreditation code upon arrival at the registration desk.\n\nWarm regards,\nÓghowa Business Week Secretariat\noghowa@metaspaceconsult.com`
       };
       onTicketReserved(ticketEmail);
     }

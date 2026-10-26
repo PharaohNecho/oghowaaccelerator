@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   Calendar,
-  MapPin,
   ChevronLeft,
   ChevronRight,
   Ticket,
   Sparkles,
+  MapPin,
   Clock,
-  ShieldCheck,
+  Layers,
+  Award,
   TrendingUp,
-  Building,
-  Rocket,
-  Users
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
 import { CarouselSlide, BusinessWeekConfig } from '../types';
 import { DEFAULT_CAROUSEL_EVENTS } from '../data/mockData';
@@ -31,6 +31,7 @@ interface HeroProps {
 // Target Date: November 16, 2026 at 09:00:00 WAT (UTC+1)
 const SUMMIT_START_TIME = new Date('2026-11-16T09:00:00+01:00').getTime();
 const TOTAL_PHYSICAL_SEATS = 500;
+const SLIDE_DURATION_MS = 6000;
 
 export const Hero: React.FC<HeroProps> = ({
   onStartJourney,
@@ -41,13 +42,16 @@ export const Hero: React.FC<HeroProps> = ({
   onRegisterForBusinessWeek,
   config
 }) => {
-  // Only display slides marked as isDisplayed
-  const activeSlides = carouselEvents.filter((slide) => slide.isDisplayed !== false);
+  // Only display slides marked as isDisplayed !== false
+  const activeSlides = (carouselEvents && carouselEvents.length > 0)
+    ? carouselEvents.filter((slide) => slide.isDisplayed !== false)
+    : DEFAULT_CAROUSEL_EVENTS;
   const slides = activeSlides.length > 0 ? activeSlides : DEFAULT_CAROUSEL_EVENTS;
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [slideAnimKey, setSlideAnimKey] = useState<number>(0);
+  const [slideProgress, setSlideProgress] = useState<number>(0);
 
   // Accurate real-time countdown to Nov 16, 2026 09:00:00 WAT
   const [timeLeft, setTimeLeft] = useState({
@@ -79,97 +83,115 @@ export const Hero: React.FC<HeroProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Live vacant seats calculation (No fake demo offset)
+  // Live vacant seats calculation (Strictly without demo/mock offsets)
   const totalRegistered = config?.delegates?.length || 0;
   const vacantSeats = Math.max(0, TOTAL_PHYSICAL_SEATS - totalRegistered);
 
-  // Auto-advance carousel every 6 seconds
+  // Smooth slide timer & progress bar
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentSlideIndex((prev) => {
-        const next = (prev + 1) % slides.length;
-        setSlideAnimKey((k) => k + 1);
-        return next;
+
+    const intervalTime = 50; // update progress every 50ms
+    const step = (intervalTime / SLIDE_DURATION_MS) * 100;
+
+    const progressTimer = setInterval(() => {
+      setSlideProgress((prev) => {
+        if (prev >= 100) {
+          setCurrentSlideIndex((oldIdx) => (oldIdx + 1) % slides.length);
+          setSlideAnimKey((k) => k + 1);
+          return 0;
+        }
+        return prev + step;
       });
-    }, 6000);
-    return () => clearInterval(interval);
+    }, intervalTime);
+
+    return () => clearInterval(progressTimer);
   }, [isPaused, slides.length]);
 
   const goToSlide = (idx: number) => {
     setCurrentSlideIndex(idx);
     setSlideAnimKey((k) => k + 1);
+    setSlideProgress(0);
   };
 
   const handlePrev = () => {
-    setCurrentSlideIndex((prev) => {
-      const next = (prev - 1 + slides.length) % slides.length;
-      setSlideAnimKey((k) => k + 1);
-      return next;
-    });
+    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    setSlideAnimKey((k) => k + 1);
+    setSlideProgress(0);
   };
 
   const handleNext = () => {
-    setCurrentSlideIndex((prev) => {
-      const next = (prev + 1) % slides.length;
-      setSlideAnimKey((k) => k + 1);
-      return next;
-    });
+    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    setSlideAnimKey((k) => k + 1);
+    setSlideProgress(0);
   };
 
   const currentSlide = slides[currentSlideIndex] || slides[0];
   const isBusinessWeekSlide =
     currentSlide?.id === 'event-startup-week' ||
-    currentSlide?.title?.toLowerCase().includes('business week');
+    currentSlide?.title?.toLowerCase().includes('business week') ||
+    currentSlide?.title?.toLowerCase().includes('summit');
 
   return (
     <section
-      className="relative overflow-hidden bg-[#061226] text-white"
+      className="relative overflow-hidden bg-[#061224] text-white"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* FULL-WIDTH HERO SLIDER (matching oghowa.metaspaceconsult.com) */}
-      <div className="relative min-h-[580px] sm:min-h-[640px] lg:min-h-[700px] flex items-center overflow-hidden">
-        {/* Animated Background Image with Cinematic Gradient Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img
-            key={currentSlide.imageUrl}
-            src={currentSlide.imageUrl}
-            alt={currentSlide.title}
-            className="w-full h-full object-cover object-center transform scale-105 transition-all duration-1000 ease-out brightness-75"
-          />
-          {/* Deep atmospheric gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#061224] via-[#061224]/85 to-[#061224]/60 sm:from-[#061224]/95 sm:via-[#061224]/80 sm:to-[#061224]/40" />
-          <div className="absolute inset-0 bg-radial-at-c from-transparent via-[#061224]/30 to-[#061224]/80" />
-        </div>
+      {/* FULL-WIDTH DYNAMIC HERO SLIDER */}
+      <div className="relative min-h-[620px] sm:min-h-[680px] lg:min-h-[740px] flex items-center overflow-hidden">
+        {/* Animated Background Visuals Layer (Cross-fading with Ken-Burns motion) */}
+        {slides.map((slide, idx) => {
+          const isActive = idx === currentSlideIndex;
+          return (
+            <div
+              key={slide.id || idx}
+              className={`absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out ${
+                isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+            >
+              <img
+                src={slide.imageUrl}
+                alt={slide.title}
+                className={`w-full h-full object-cover object-center transform transition-transform duration-[8000ms] ease-out brightness-[0.72] contrast-105 ${
+                  isActive ? 'scale-105 sm:scale-110' : 'scale-100'
+                }`}
+              />
+              {/* Deep atmospheric overlay matching oghowa.metaspaceconsult.com */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#061224] via-[#061224]/85 to-[#061224]/50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#061224] via-transparent to-[#061224]/70" />
+              <div className="absolute inset-0 bg-radial-at-c from-transparent via-[#061224]/20 to-[#061224]/75" />
+            </div>
+          );
+        })}
 
-        {/* Slide Content Container */}
+        {/* Dynamic Slide Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
           <div
             key={slideAnimKey}
             className="max-w-3xl space-y-6 text-left animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both"
           >
             {/* Slide Badge Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-950/70 border border-rose-500/40 text-rose-200 text-xs sm:text-sm font-semibold tracking-wide uppercase backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-950/70 border border-rose-500/40 text-rose-200 text-xs sm:text-sm font-semibold tracking-wide uppercase backdrop-blur-md shadow-lg">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               <span>{currentSlide.badge || 'Venture Ecosystem'}</span>
               <span className="text-slate-400">•</span>
               <span className="text-slate-200">Victor Uwaifo Creative Hub</span>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Animated Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
               {currentSlide.title}
             </h1>
 
-            {/* Subtitle / Narrative */}
+            {/* Subtitle / Dynamic Narrative */}
             <p className="text-base sm:text-lg lg:text-xl text-slate-200 font-normal leading-relaxed max-w-2xl">
               {currentSlide.subtitle || currentSlide.description}
             </p>
 
-            {/* Real-time Business Week Event Bar if it is the Business Week Slide */}
+            {/* Business Week Event Bar with accurate live participant counter & timer */}
             {isBusinessWeekSlide && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#0B1E48]/85 border border-blue-400/30 backdrop-blur-md max-w-2xl space-y-3 shadow-xl">
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#0B1E48]/85 border border-blue-400/30 backdrop-blur-md max-w-2xl space-y-3 shadow-2xl">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-2 text-slate-200 font-semibold">
                     <Calendar className="w-4 h-4 text-rose-400" />
@@ -260,7 +282,7 @@ export const Hero: React.FC<HeroProps> = ({
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center border border-white/20 backdrop-blur-xs transition cursor-pointer"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center border border-white/20 backdrop-blur-md transition cursor-pointer shadow-lg hover:scale-105 active:scale-95"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -268,7 +290,7 @@ export const Hero: React.FC<HeroProps> = ({
 
             <button
               onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center border border-white/20 backdrop-blur-xs transition cursor-pointer"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center border border-white/20 backdrop-blur-md transition cursor-pointer shadow-lg hover:scale-105 active:scale-95"
               aria-label="Next slide"
             >
               <ChevronRight className="w-6 h-6" />
@@ -276,21 +298,33 @@ export const Hero: React.FC<HeroProps> = ({
           </>
         )}
 
-        {/* Slide Indicators / Dots */}
+        {/* Slide Counter & Indicators Container with Live Progress Bar */}
         {slides.length > 1 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goToSlide(idx)}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  currentSlideIndex === idx
-                    ? 'w-8 h-2.5 bg-rose-500 shadow-md shadow-rose-500/50'
-                    : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-md">
+              <span className="text-[11px] font-mono font-bold text-slate-300">
+                0{currentSlideIndex + 1} / 0{slides.length}
+              </span>
+              <div className="flex items-center gap-2">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => goToSlide(idx)}
+                    className={`relative h-2 rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
+                      currentSlideIndex === idx ? 'w-10 bg-white/30' : 'w-2.5 bg-white/30 hover:bg-white/60'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  >
+                    {currentSlideIndex === idx && (
+                      <div
+                        className="h-full bg-rose-500 rounded-full transition-all duration-75"
+                        style={{ width: `${slideProgress}%` }}
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
