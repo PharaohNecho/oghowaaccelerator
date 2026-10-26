@@ -69,48 +69,35 @@ export default function App() {
   // Dynamic Business Week Summit & Registration Configuration controlled by Superadmin
   const [businessWeekConfig, setBusinessWeekConfig] = useState<BusinessWeekConfig>(DEFAULT_BUSINESS_WEEK_CONFIG);
 
-  // Current Logged-in User
-  const [currentUser, setCurrentUser] = useState({
-    name: 'Victory Usiobaifo',
-    email: 'usiobaifovictory245@gmail.com',
-    role: 'founder'
-  });
+  // Current User (Defaults to guest/visitor until real sign-in)
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    email: string;
+    role: string;
+  } | null>(null);
 
-  // Startup Application State
+  // Startup Application State (Defaults completely blank)
   const [appData, setAppData] = useState({
-    founderName: 'Victory Usiobaifo',
-    founderEmail: 'usiobaifovictory245@gmail.com',
-    founderPhone: '+234 803 123 4567',
-    startupName: 'Ugbekun SMP',
-    sector: 'Education Technology',
-    stage: 'Scaling',
-    description: 'Comprehensive school management platform simplifying school administration, tuition reconciliation, attendance, and student academic performance across K-12 institutions.',
-    targetMarket: 'K-12 schools, state education ministries, and low-cost private educators.',
-    tractionMRR: '₦4,800,000',
-    activeUsers: '52,000',
-    deckFileName: 'UgbekunSMP_PitchDeck.pdf',
-    cacFileName: 'CAC_Registration_RC198273.pdf'
+    founderName: '',
+    founderEmail: '',
+    founderPhone: '',
+    startupName: '',
+    sector: '',
+    stage: '',
+    description: '',
+    targetMarket: '',
+    tractionMRR: '',
+    activeUsers: '',
+    deckFileName: '',
+    cacFileName: ''
   });
 
   // Application Evaluation Status
-  const [appStatus, setAppStatus] = useState<string>('Screening');
-  const [adminNotes, setAdminNotes] = useState<string>(
-    'Strong initial traction in Edo and Lagos states. Please confirm financial model projections for Q1 2027.'
-  );
+  const [appStatus, setAppStatus] = useState<string>('');
+  const [adminNotes, setAdminNotes] = useState<string>('');
 
-  // Simulated Automated Email Outbox
-  const [sentEmails, setSentEmails] = useState<EmailNotification[]>([
-    {
-      id: 'EML-001',
-      recipient: 'usiobaifovictory245@gmail.com',
-      recipientName: 'Victory Usiobaifo',
-      subject: 'Welcome to Óghowa Venture Ecosystem - Application Initiated',
-      type: 'Registration',
-      timestamp: 'Today, 09:14 AM',
-      content:
-        'Dear Victory,\n\nWelcome to Óghowa Venture Ecosystem!\n\nYour founder account is active and your startup application for "Ugbekun SMP" has been registered in our Cohort 2026 selection database.\n\nPlease monitor your Applicant Dashboard for live milestone progression and investment committee updates.\n\nWarm regards,\nÓghowa Admissions Team'
-    }
-  ]);
+  // Automated Email Outbox (Starts empty)
+  const [sentEmails, setSentEmails] = useState<EmailNotification[]>([]);
 
   // ================= FIRESTORE REAL-TIME SYNCHRONIZATION =================
   useEffect(() => {
@@ -516,9 +503,13 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        currentUserRole={currentUser.role}
+        currentUserRole={currentUser?.role || 'visitor'}
         onSelectRole={(r) => {
-          setCurrentUser((prev) => ({ ...prev, role: r.toLowerCase() }));
+          setCurrentUser((prev) => ({
+            name: prev?.name || 'Venture Member',
+            email: prev?.email || 'member@oghowa.africa',
+            role: r.toLowerCase()
+          }));
           if (r.toLowerCase() === 'founder') {
             setCurrentView('dashboard');
           } else if (r.toLowerCase() === 'investor' || r.toLowerCase() === 'mentor') {

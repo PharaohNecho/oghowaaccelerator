@@ -44,28 +44,8 @@ export const ApplicationPortal: React.FC<ApplicationPortalProps> = ({
 }) => {
   const [appStep, setAppStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [deckUploaded, setDeckUploaded] = useState<boolean>(true);
-  const [cacUploaded, setCacUploaded] = useState<boolean>(true);
-
-  // 1-Click Auto-Fill for instant demonstration
-  const handleAutoFill = () => {
-    setAppData({
-      founderName: 'Osahon Ehigiator',
-      founderEmail: 'osahon@edutechpulse.ng',
-      founderPhone: '+234 803 123 4567',
-      startupName: 'Edutech Pulse',
-      sector: 'Education Technology',
-      stage: 'Seed Stage',
-      description: 'An AI-powered foundational literacy engine and smart tuition reconciliation platform for primary schools across Sub-Saharan Africa.',
-      targetMarket: 'K-12 schools, state education ministries, and low-cost private educators.',
-      tractionMRR: '₦3,800,000',
-      activeUsers: '14,200',
-      deckFileName: 'EdutechPulse_PitchDeck_Q4.pdf',
-      cacFileName: 'CAC_Registration_RC198273.pdf'
-    });
-    setDeckUploaded(true);
-    setCacUploaded(true);
-  };
+  const [deckUploaded, setDeckUploaded] = useState<boolean>(Boolean(appData.deckFileName));
+  const [cacUploaded, setCacUploaded] = useState<boolean>(Boolean(appData.cacFileName));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,8 +55,8 @@ export const ApplicationPortal: React.FC<ApplicationPortalProps> = ({
       setIsSubmitting(false);
       onSubmitApplication({
         ...appData,
-        deckFileName: appData.deckFileName || 'EdutechPulse_PitchDeck_Q4.pdf',
-        cacFileName: appData.cacFileName || 'CAC_Registration_RC198273.pdf'
+        deckFileName: appData.deckFileName || '',
+        cacFileName: appData.cacFileName || ''
       });
     }, 700);
   };
@@ -89,7 +69,7 @@ export const ApplicationPortal: React.FC<ApplicationPortalProps> = ({
           <div>
             <button
               onClick={onBackToHome}
-              className="text-xs text-slate-500 hover:text-slate-800 mb-2 flex items-center gap-1 font-semibold"
+              className="text-xs text-slate-500 hover:text-slate-800 mb-2 flex items-center gap-1 font-semibold cursor-pointer"
             >
               ← Back to Home
             </button>
@@ -102,15 +82,6 @@ export const ApplicationPortal: React.FC<ApplicationPortalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleAutoFill}
-              className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Auto-Fill Sample</span>
-            </button>
-
             <span className="text-xs font-bold px-3 py-1 bg-rose-100 text-rose-700 rounded-full">
               Step {appStep} of 5
             </span>

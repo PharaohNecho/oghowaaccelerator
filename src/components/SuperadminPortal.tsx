@@ -680,18 +680,18 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
               onClick={() => setActiveSiteSection('summit')}
               className={`p-3.5 rounded-xl font-bold text-xs transition flex items-center justify-between cursor-pointer border ${
                 activeSiteSection === 'summit'
-                  ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
+                  ? 'bg-[#0B1E48] text-white border-[#0B1E48] shadow-sm'
                   : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#FEF3C7]" />
+                <Sparkles className="w-4 h-4 text-[#FEE2E2]" />
                 <div className="text-left">
                   <span className="block font-bold">2. Business Week Summit</span>
                   <span className="text-[10px] opacity-75 font-normal">Nov 16-21 • ₦50M Deal Rooms</span>
                 </div>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'summit' ? 'bg-[#FEF3C7] text-[#00231b]' : 'bg-slate-200 text-slate-600'}`}>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'summit' ? 'bg-[#FEE2E2] text-[#0B1E48]' : 'bg-slate-200 text-slate-600'}`}>
                 {businessWeekConfig.tracks.length} Tracks
               </span>
             </button>
@@ -700,19 +700,19 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
               onClick={() => setActiveSiteSection('registration')}
               className={`p-3.5 rounded-xl font-bold text-xs transition flex items-center justify-between cursor-pointer border ${
                 activeSiteSection === 'registration'
-                  ? 'bg-[#00231b] text-white border-[#00231b] shadow-sm'
+                  ? 'bg-[#0B1E48] text-white border-[#0B1E48] shadow-sm'
                   : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Ticket className="w-4 h-4 text-[#FEF3C7]" />
+                <Ticket className="w-4 h-4 text-[#FEE2E2]" />
                 <div className="text-left">
                   <span className="block font-bold">3. Business Week Registration</span>
                   <span className="text-[10px] opacity-75 font-normal">Passes, Gates & Badge Inspector</span>
                 </div>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'registration' ? 'bg-[#FEF3C7] text-[#00231b]' : 'bg-slate-200 text-slate-600'}`}>
-                {businessWeekConfig.delegates.length} Delegates
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeSiteSection === 'registration' ? 'bg-[#FEE2E2] text-[#0B1E48]' : 'bg-slate-200 text-slate-600'}`}>
+                {businessWeekConfig.delegates.length} Participants
               </span>
             </button>
           </div>

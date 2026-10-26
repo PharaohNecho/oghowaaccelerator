@@ -459,9 +459,9 @@ export const NEWS_ARTICLES: NewsArticle[] = [
     },
     summary: 'The three-day gathering will feature masterclasses, the Great Venture Pitch Showcase, policy roundtables, and high-impact investor matchmaking.',
     content: [
-      'Preparations are officially underway for the 2026 edition of Óghowa Business Week, scheduled to take place at the Victor Uwaifo Creative Hub and Edo Innovates Campus.',
+      'Preparations are officially underway for the 2026 edition of Óghowa Business Week, scheduled to take place at the Victor Uwaifo Creative Hub.',
       'The theme for this year’s symposium is "Decentralized Growth: Building Pan-African Value from the Grassroots." Key speakers will include tech founders, venture capitalists from London, Lagos, and Nairobi, and policymakers driving the National Digital Economy policy.',
-      'Registration opens next week for both in-person delegates and virtual livestream attendees across the globe.'
+      'Registration opens next week for both in-person participants and virtual livestream attendees across the globe.'
     ],
     coverImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=70',
     tags: ['Business Week', 'Conference', 'Ecosystem', 'Networking']
@@ -571,7 +571,7 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
     subtitle: 'Innovation for Economic Transformation ...Our own',
     description: 'Join founders, investors, business leaders and innovators in collaboration with Benin Tech Fest for keynotes, masterclasses, startup pitches and networking in Edo State.',
     eventDate: 'Nov 16 - 21, 2026',
-    location: 'Victor Uwaifo Creative Hub & Edo Innovates Campus, Benin City',
+    location: 'Victor Uwaifo Creative Hub',
     badge: 'Flagship Summit',
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=75',
     registerLink: '#register-event',
@@ -585,7 +585,7 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
     subtitle: '48-Hour Rapid Prototyping, Venture Ideation & Co-founder Matchmaking',
     description: 'Pitch ideas, form multi-disciplinary squads, build functional MVPs, and compete for ₦5,000,000 in equity-free grant financing and direct admission into Incubation.',
     eventDate: 'Dec 05 - 07, 2026',
-    location: 'Óghowa Venture Studio & Innovation Lab, Benin City',
+    location: 'Victor Uwaifo Creative Hub',
     badge: 'Hackathon Sprint',
     imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=75',
     registerLink: '#register-hackathon',
@@ -599,7 +599,7 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
     subtitle: '₦50M Pre-Seed & Seed Investment Showcase',
     description: 'Top cohort finalists present vetted metrics to Pan-African VC partners, angel syndicates, and institutional family offices in closed-door deal sessions.',
     eventDate: 'Jan 16, 2027',
-    location: 'Main Auditorium & Global Livestream, Hybrid',
+    location: 'Victor Uwaifo Creative Hub',
     badge: 'Investor Deal Room',
     imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=75',
     registerLink: '#register-dealroom',
@@ -612,11 +612,11 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
 export const DEFAULT_BUSINESS_WEEK_CONFIG: BusinessWeekConfig = {
   summitTitle: 'Óghowa Business Week 2026',
   dates: 'November 16 – 21, 2026',
-  venueName: 'Victor Uwaifo Creative Hub & Edo Innovates Campus',
-  venueAddress: 'Airport Road, GRA, Benin City, Edo State, Nigeria',
+  venueName: 'Victor Uwaifo Creative Hub',
+  venueAddress: 'Victor Uwaifo Creative Hub',
   dealFundAmount: '₦50,000,000',
   expectedDelegates: '2,500+',
-  capacityWindowText: 'Limited Delegates — Registrations are reviewed systematically by the summit committee.',
+  capacityWindowText: 'Limited Participants — Registrations are reviewed systematically by the secretariat.',
   isRegistrationOpen: true,
   tracks: [
     {
@@ -739,58 +739,6 @@ export const DEFAULT_BUSINESS_WEEK_CONFIG: BusinessWeekConfig = {
       ]
     }
   ],
-  delegates: [
-    {
-      id: 'del-1',
-      code: 'OBW-2026-DELEGATE-8492',
-      name: 'Osagie Egharevba',
-      email: 'osagie.e@innovateafrica.com',
-      phone: '+234 801 234 5678',
-      organization: 'Benin Hub Ventures',
-      role: 'Founder & Managing Partner',
-      location: 'Benin City, Edo State, Nigeria',
-      persona: 'founder',
-      tracks: ['digital_economy', 'investment_pitches'],
-      masterclass: 'early_stage_fundraising',
-      attendanceMode: 'in_person',
-      registeredAt: '2026-10-20 14:15',
-      status: 'Accreditation Issued',
-      dealRoomInterest: true
-    },
-    {
-      id: 'del-2',
-      code: 'OBW-2026-DELEGATE-1029',
-      name: 'Dr. Aisosa Edebiri',
-      email: 'aisosa@edutech.ng',
-      phone: '+234 803 987 6543',
-      organization: 'Sahara Frontier Capital',
-      role: 'Managing Partner',
-      location: 'Lagos & Benin City, Nigeria',
-      persona: 'investor',
-      tracks: ['investment_pitches', 'digital_economy'],
-      masterclass: 'early_stage_fundraising',
-      attendanceMode: 'in_person',
-      registeredAt: '2026-10-21 09:30',
-      status: 'Fast-Track VIP',
-      dealRoomInterest: true
-    },
-    {
-      id: 'del-3',
-      code: 'OBW-2026-DELEGATE-4719',
-      name: 'Victory Usiobaifo',
-      email: 'usiobaifovictory245@gmail.com',
-      phone: '+234 803 123 4567',
-      organization: 'Ugbekun SMP',
-      role: 'CEO & Founder',
-      location: 'Benin City, Edo State',
-      persona: 'founder',
-      tracks: ['digital_economy', 'agritech'],
-      masterclass: 'ai_sme_adoption',
-      attendanceMode: 'in_person',
-      registeredAt: '2026-10-22 11:20',
-      status: 'Accreditation Issued',
-      dealRoomInterest: true
-    }
-  ]
+  delegates: []
 };
 

@@ -79,9 +79,9 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
     onUpdateConfig({ ...config, delegates: updatedDelegates });
   };
 
-  // Delete Delegate
+  // Delete Participant
   const handleDeleteDelegate = (delegateId: string) => {
-    if (window.confirm('Are you sure you want to revoke and delete this delegate accreditation?')) {
+    if (window.confirm('Are you sure you want to revoke and delete this participant accreditation?')) {
       const updatedDelegates = config.delegates.filter((d) => d.id !== delegateId);
       onUpdateConfig({ ...config, delegates: updatedDelegates });
     }
@@ -222,8 +222,8 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] font-bold text-[#00231b] uppercase tracking-wider block">In-Person Delegates</span>
-          <p className="text-2xl font-black text-[#00231b] mt-1">{inPersonCount}</p>
+          <span className="text-[10px] font-bold text-[#0B1E48] uppercase tracking-wider block">In-Person Participants</span>
+          <p className="text-2xl font-black text-[#0B1E48] mt-1">{inPersonCount}</p>
           <span className="text-[11px] text-slate-500">Victor Uwaifo Hub</span>
         </div>
 
@@ -240,11 +240,11 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
         </div>
       </div>
 
-      {/* 3. DELEGATES ROSTER CONTROLS & TABLE */}
+      {/* 3. PARTICIPANTS ROSTER CONTROLS & TABLE */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-bold text-[#0B1E48]">Live Registered Delegates Roster</h3>
+            <h3 className="text-xl font-bold text-[#0B1E48]">Live Registered Participants Roster</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Review credentialed participants, inspect verified digital badge passes, and update security status.
             </p>
@@ -316,7 +316,7 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
               {filteredDelegates.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-slate-400">
-                    No delegates found matching your search and filter criteria.
+                    No participants found matching your search and filter criteria.
                   </td>
                 </tr>
               ) : (

@@ -39,8 +39,8 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
   const [settingsForm, setSettingsForm] = useState({
     summitTitle: config.summitTitle || 'Óghowa Business Week 2026',
     dates: config.dates || 'October 24 – 28, 2026',
-    venueName: config.venueName || 'Victor Uwaifo Creative Hub & Edo Innovates Campus',
-    venueAddress: config.venueAddress || 'Airport Road, GRA, Benin City, Edo State, Nigeria',
+    venueName: config.venueName || 'Victor Uwaifo Creative Hub',
+    venueAddress: config.venueAddress || 'Victor Uwaifo Creative Hub',
     dealFundAmount: config.dealFundAmount || '₦50,000,000',
     expectedDelegates: config.expectedDelegates || '2,500+'
   });
@@ -250,9 +250,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
   return (
     <div className="space-y-6">
       {/* Top Banner with Quick Summit Summary */}
-      <div className="bg-[#00231b] text-white p-6 rounded-2xl shadow-md border border-[#316858]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-[#0B1E48] text-white p-6 rounded-2xl shadow-md border border-[#0B1E48]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] uppercase tracking-widest text-[#FEF3C7] font-bold block mb-1">
+          <span className="text-[11px] uppercase tracking-widest text-[#FEE2E2] font-bold block mb-1">
             Óghowa Business Week — Dedicated Summit Control
           </span>
           <h2 className="text-xl sm:text-2xl font-black">{config.summitTitle}</h2>
@@ -264,7 +264,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
         {onPreviewSummit && (
           <button
             onClick={onPreviewSummit}
-            className="px-4 py-2 bg-[#FEF3C7] hover:bg-white text-[#00231b] font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+            className="px-4 py-2 bg-[#FEE2E2] hover:bg-white text-[#0B1E48] font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
           >
             <span>Live Summit Page Preview</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -278,7 +278,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
           onClick={() => setSubTab('settings')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
             subTab === 'settings'
-              ? 'bg-[#00231b] text-white shadow-xs'
+              ? 'bg-[#0B1E48] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
           }`}
         >
@@ -290,7 +290,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
           onClick={() => setSubTab('tracks')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
             subTab === 'tracks'
-              ? 'bg-[#00231b] text-white shadow-xs'
+              ? 'bg-[#0B1E48] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
           }`}
         >
@@ -302,7 +302,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
           onClick={() => setSubTab('speakers')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
             subTab === 'speakers'
-              ? 'bg-[#00231b] text-white shadow-xs'
+              ? 'bg-[#0B1E48] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
           }`}
         >
@@ -314,7 +314,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
           onClick={() => setSubTab('schedule')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-2 ${
             subTab === 'schedule'
-              ? 'bg-[#00231b] text-white shadow-xs'
+              ? 'bg-[#0B1E48] text-white shadow-xs'
               : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
           }`}
         >
@@ -352,7 +352,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   value={settingsForm.summitTitle}
                   onChange={(e) => setSettingsForm({ ...settingsForm, summitTitle: e.target.value })}
                   placeholder="Óghowa Business Week 2026"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -366,7 +366,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   value={settingsForm.dates}
                   onChange={(e) => setSettingsForm({ ...settingsForm, dates: e.target.value })}
                   placeholder="October 24 – 28, 2026"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -382,7 +382,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   value={settingsForm.dealFundAmount}
                   onChange={(e) => setSettingsForm({ ...settingsForm, dealFundAmount: e.target.value })}
                   placeholder="₦50,000,000"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-amber-700 focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-amber-700 focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -396,7 +396,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   value={settingsForm.expectedDelegates}
                   onChange={(e) => setSettingsForm({ ...settingsForm, expectedDelegates: e.target.value })}
                   placeholder="2,500+"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -411,8 +411,8 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   type="text"
                   value={settingsForm.venueName}
                   onChange={(e) => setSettingsForm({ ...settingsForm, venueName: e.target.value })}
-                  placeholder="Victor Uwaifo Creative Hub & Edo Innovates Campus"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  placeholder="Victor Uwaifo Creative Hub"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -425,8 +425,8 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   type="text"
                   value={settingsForm.venueAddress}
                   onChange={(e) => setSettingsForm({ ...settingsForm, venueAddress: e.target.value })}
-                  placeholder="Airport Road, GRA, Benin City, Edo State, Nigeria"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#00231b] focus:outline-hidden"
+                  placeholder="Victor Uwaifo Creative Hub"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#0B1E48] focus:outline-hidden"
                   required
                 />
               </div>
@@ -435,9 +435,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
             <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-[#0B1E48] hover:bg-[#061224] text-white font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
               >
-                <Save className="w-4 h-4 text-[#FEF3C7]" />
+                <Save className="w-4 h-4 text-[#FEE2E2]" />
                 <span>Save Summit Settings</span>
               </button>
             </div>
@@ -458,9 +458,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
 
             <button
               onClick={handleOpenAddTrack}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#00231b] hover:bg-[#0e3a2f] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#0B1E48] hover:bg-[#061224] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#FEF3C7]" />
+              <Plus className="w-4 h-4 text-[#FEE2E2]" />
               <span>Add New Track</span>
             </button>
           </div>
@@ -477,7 +477,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-bold text-[#B45309] bg-[#FEF3C7] px-2.5 py-0.5 rounded-full">
+                    <span className="text-[11px] font-bold text-[#B45309] bg-[#FEE2E2] px-2.5 py-0.5 rounded-full">
                       {track.tag}
                     </span>
                     <span
@@ -491,7 +491,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                     </span>
                   </div>
 
-                  <h4 className="font-bold text-[#00231b] text-base mb-1.5">{track.title}</h4>
+                  <h4 className="font-bold text-[#0B1E48] text-base mb-1.5">{track.title}</h4>
                   <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{track.desc}</p>
                 </div>
 
@@ -517,7 +517,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEditTrack(track)}
-                      className="p-1.5 text-slate-500 hover:text-[#00231b] hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-[#0B1E48] hover:bg-slate-100 rounded-lg transition cursor-pointer"
                       title="Edit Track"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -550,9 +550,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
 
             <button
               onClick={handleOpenAddSpeaker}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#00231b] hover:bg-[#0e3a2f] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#0B1E48] hover:bg-[#061224] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#FEF3C7]" />
+              <Plus className="w-4 h-4 text-[#FEE2E2]" />
               <span>Add Speaker</span>
             </button>
           </div>
@@ -588,7 +588,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   </div>
 
                   <div className="p-4 space-y-1.5">
-                    <h4 className="font-bold text-[#00231b] text-base">{speaker.name}</h4>
+                    <h4 className="font-bold text-[#0B1E48] text-base">{speaker.name}</h4>
                     <p className="text-[11px] font-semibold text-[#B45309] leading-tight">{speaker.role}</p>
                     <p className="text-xs text-slate-600 italic line-clamp-2 mt-2">"{speaker.topic}"</p>
                   </div>
@@ -615,7 +615,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEditSpeaker(speaker)}
-                      className="p-1.5 text-slate-500 hover:text-[#00231b] hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-[#0B1E48] hover:bg-slate-100 rounded-lg transition cursor-pointer"
                       title="Edit Speaker"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -648,9 +648,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
 
             <button
               onClick={() => handleOpenAddEvent(activeDay)}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#00231b] hover:bg-[#0e3a2f] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#0B1E48] hover:bg-[#061224] rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#FEF3C7]" />
+              <Plus className="w-4 h-4 text-[#FEE2E2]" />
               <span>Add Session to Day {activeDay}</span>
             </button>
           </div>
@@ -663,7 +663,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                 onClick={() => setActiveDay(dayItem.day)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                   activeDay === dayItem.day
-                    ? 'bg-[#00231b] text-white shadow-xs'
+                    ? 'bg-[#0B1E48] text-white shadow-xs'
                     : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                 }`}
               >
@@ -682,9 +682,9 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                 <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider">
                   {currentDaySchedule.date}
                 </span>
-                <h4 className="text-lg font-bold text-[#00231b]">{currentDaySchedule.title}</h4>
+                <h4 className="text-lg font-bold text-[#0B1E48]">{currentDaySchedule.title}</h4>
               </div>
-              <span className="px-3 py-1 bg-[#FEF3C7] text-[#B45309] text-xs font-bold rounded-full self-start sm:self-center">
+              <span className="px-3 py-1 bg-[#FEE2E2] text-[#B45309] text-xs font-bold rounded-full self-start sm:self-center">
                 {currentDaySchedule.theme}
               </span>
             </div>
@@ -693,7 +693,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
               {currentDaySchedule.events.map((evt, idx) => (
                 <div key={idx} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="sm:w-32 shrink-0">
-                    <span className="font-mono text-xs font-bold text-[#00231b] bg-slate-100 px-2 py-1 rounded">
+                    <span className="font-mono text-xs font-bold text-[#0B1E48] bg-slate-100 px-2 py-1 rounded">
                       {evt.time}
                     </span>
                   </div>
@@ -706,7 +706,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
                     <button
                       onClick={() => handleOpenEditEvent(activeDay, idx, evt)}
-                      className="p-1.5 text-slate-500 hover:text-[#00231b] hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-[#0B1E48] hover:bg-slate-100 rounded-lg transition cursor-pointer"
                       title="Edit Session"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
@@ -778,7 +778,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   id="trackDisplayCheck"
                   checked={trackForm.isDisplayed !== false}
                   onChange={(e) => setTrackForm({ ...trackForm, isDisplayed: e.target.checked })}
-                  className="w-4 h-4 text-[#00231b] rounded"
+                  className="w-4 h-4 text-[#0B1E48] rounded"
                 />
                 <label htmlFor="trackDisplayCheck" className="text-slate-800 font-bold">
                   Make visible on Óghowa Business Week landing page
@@ -795,7 +795,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold shadow-xs cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-[#0B1E48] hover:bg-[#061224] text-white font-bold shadow-xs cursor-pointer"
                 >
                   Save Track
                 </button>
@@ -867,7 +867,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                   id="speakerDisplayCheck"
                   checked={speakerForm.isDisplayed !== false}
                   onChange={(e) => setSpeakerForm({ ...speakerForm, isDisplayed: e.target.checked })}
-                  className="w-4 h-4 text-[#00231b] rounded"
+                  className="w-4 h-4 text-[#0B1E48] rounded"
                 />
                 <label htmlFor="speakerDisplayCheck" className="text-slate-800 font-bold">
                   Display in Faculty & Speakers lineup
@@ -884,7 +884,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold shadow-xs cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-[#0B1E48] hover:bg-[#061224] text-white font-bold shadow-xs cursor-pointer"
                 >
                   Save Speaker
                 </button>
@@ -948,7 +948,7 @@ export const SuperadminSummitManager: React.FC<SuperadminSummitManagerProps> = (
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold shadow-xs cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-[#0B1E48] hover:bg-[#061224] text-white font-bold shadow-xs cursor-pointer"
                 >
                   Save Session
                 </button>

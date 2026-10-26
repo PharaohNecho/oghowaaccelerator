@@ -183,8 +183,8 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
     return () => clearInterval(interval);
   }, []);
 
-  // Live Vacant Seats Calculation
-  const registeredCount = (config?.delegates?.length || 0) + 342;
+  // Live Vacant Seats Calculation (Accurate, strictly real count without demo offset)
+  const registeredCount = config?.delegates?.length || 0;
   const vacantSeats = Math.max(0, TOTAL_PHYSICAL_SEATS - registeredCount);
 
   // Active / Confirmed Delegate Profile for the Success Page
@@ -227,8 +227,8 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 SUMMARY:Óghowa Business Week 2026 (Accreditation: ${confirmedDelegate.code})
-DESCRIPTION:Official delegate accreditation for Óghowa Business Week 2026 · Innovation for Economic Transformation (...Our own), in institutional partnership with Benin Tech Fest. Delegate: ${confirmedDelegate.name} (${confirmedDelegate.role}).
-LOCATION:Victor Uwaifo Creative Hub & Edo Innovates Campus, Airport Road, GRA, Benin City, Edo State, Nigeria
+DESCRIPTION:Official participant accreditation for Óghowa Business Week 2026 · Innovation for Economic Transformation (...Our own), in institutional partnership with Benin Tech Fest. Participant: ${confirmedDelegate.name} (${confirmedDelegate.role}).
+LOCATION:Victor Uwaifo Creative Hub
 DTSTART:20261116T080000Z
 DTEND:20261121T180000Z
 STATUS:CONFIRMED
@@ -321,7 +321,7 @@ END:VCALENDAR`;
     const effectiveCity = (city === 'Other' || customCity) ? customCity : city;
     const resolvedLocation = `${effectiveCity || 'Benin City'}, ${effectiveState || 'Edo State'}, ${effectiveCountry || 'Nigeria'}`;
 
-    const generatedRef = `OBW-2026-DELEGATE-${Math.floor(1000 + Math.random() * 9000)}`;
+    const generatedRef = `OBW-2026-PARTICIPANT-${Math.floor(1000 + Math.random() * 9000)}`;
     const newDelegate: RegisteredDelegate = {
       id: `del-${Date.now()}`,
       code: generatedRef,
@@ -366,7 +366,7 @@ END:VCALENDAR`;
         subject: `Accreditation Confirmed: Óghowa Business Week 2026 (${newDelegate.code})`,
         type: 'Event Ticket',
         timestamp: 'Just now',
-        content: `Dear ${newDelegate.name},\n\nYour participant registration for Óghowa Business Week (Nov 16 – 21, 2026) in collaboration with Benin Tech Fest is successfully confirmed!\n\nReference Code: ${newDelegate.code}\nAttendance Mode: ${newDelegate.attendanceMode}\nPersona: ${newDelegate.persona}\nOrganisation: ${newDelegate.organization} (${newDelegate.role})\nLocation: ${newDelegate.location}\nVenue: Victor Uwaifo Creative Hub & Edo Innovates Campus, Airport Road, GRA, Benin City, Edo State.\n\nPlease present this accreditation code upon arrival at the VIP registration pavilion.\n\nWarm regards,\nÓghowa Business Week Secretariat`
+        content: `Dear ${newDelegate.name},\n\nYour participant registration for Óghowa Business Week (Nov 16 – 21, 2026) in collaboration with Benin Tech Fest is successfully confirmed!\n\nReference Code: ${newDelegate.code}\nAttendance Mode: ${newDelegate.attendanceMode}\nPersona: ${newDelegate.persona}\nOrganisation: ${newDelegate.organization} (${newDelegate.role})\nLocation: ${newDelegate.location}\nVenue: Victor Uwaifo Creative Hub\n\nPlease present this accreditation code upon arrival at the registration desk.\n\nWarm regards,\nÓghowa Business Week Secretariat`
       };
       onTicketReserved(ticketEmail);
     }
@@ -400,9 +400,9 @@ END:VCALENDAR`;
   const availableCities = STATE_CITIES[state] || ['Capital City', 'Metropolitan', 'Other'];
 
   return (
-    <div className="bg-[#FBF9F5] text-[#181d1b] min-h-screen flex flex-col font-sans selection:bg-[#00231b] selection:text-white">
+    <div className="bg-[#F8FAFC] text-[#0F172A] min-h-screen flex flex-col font-sans selection:bg-[#0B1E48] selection:text-white">
       {/* 1. HEADER - CLEAN BRANDED NAVIGATION */}
-      <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#E5DFD5]">
+      <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#E2E8F0]">
         <div className="h-20 max-w-[1120px] mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -413,10 +413,10 @@ END:VCALENDAR`;
               <BusinessWeekLogo size="sm" />
             </button>
             <div className="flex flex-col">
-              <span className="text-base text-[#00231b] font-bold tracking-tight leading-tight">
+              <span className="text-base text-[#0B1E48] font-bold tracking-tight leading-tight">
                 Óghowa Business Week
               </span>
-              <span className="text-xs text-[#52605B]">Participant Registration</span>
+              <span className="text-xs text-[#64748B]">Participant Registration</span>
             </div>
           </div>
 
@@ -429,8 +429,8 @@ END:VCALENDAR`;
                 }}
                 className={`text-xs sm:text-sm font-semibold px-3 py-1.5 transition-colors rounded-lg cursor-pointer ${
                   activeTab === 'registration'
-                    ? 'bg-[#00231b] text-white shadow-xs'
-                    : 'text-[#414845] hover:text-[#181d1b]'
+                    ? 'bg-[#0B1E48] text-white shadow-xs'
+                    : 'text-[#475569] hover:text-[#0F172A]'
                 }`}
               >
                 Register
@@ -442,8 +442,8 @@ END:VCALENDAR`;
                 }}
                 className={`text-xs sm:text-sm font-semibold px-3 py-1.5 transition-colors rounded-lg cursor-pointer ${
                   activeTab === 'schedule-tracks'
-                    ? 'bg-[#00231b] text-white shadow-xs'
-                    : 'text-[#414845] hover:text-[#181d1b]'
+                    ? 'bg-[#0B1E48] text-white shadow-xs'
+                    : 'text-[#475569] hover:text-[#0F172A]'
                 }`}
               >
                 Pillars
@@ -455,8 +455,8 @@ END:VCALENDAR`;
                 }}
                 className={`text-xs sm:text-sm font-semibold px-3 py-1.5 transition-colors rounded-lg cursor-pointer ${
                   activeTab === 'status-lookup'
-                    ? 'bg-[#00231b] text-white shadow-xs'
-                    : 'text-[#414845] hover:text-[#181d1b]'
+                    ? 'bg-[#0B1E48] text-white shadow-xs'
+                    : 'text-[#475569] hover:text-[#0F172A]'
                 }`}
               >
                 Verify Status
@@ -473,7 +473,7 @@ END:VCALENDAR`;
 
             <button
               onClick={onBackToAccelerator}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#52605B] hover:text-[#00231b] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64748B] hover:text-[#0B1E48] transition-colors cursor-pointer"
               title="Return to Óghowa Accelerator Homepage"
             >
               <span>Oghowa Homepage</span>
@@ -484,83 +484,83 @@ END:VCALENDAR`;
 
       {/* Toast Notification Alert */}
       {shareSuccessToast && (
-        <div className="fixed top-24 right-6 z-50 bg-[#00231b] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+        <div className="fixed top-24 right-6 z-50 bg-[#0B1E48] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{shareSuccessToast}</span>
         </div>
       )}
 
       {/* 2. MAIN BODY */}
-      <main className="w-full pt-20 flex-1 bg-[#FBF9F5]">
+      <main className="w-full pt-20 flex-1 bg-[#F8FAFC]">
         {/* ============================================================== */}
         {/* VIEW 1: ACCREDITATION SUCCESS PAGE                             */}
         {/* ============================================================== */}
         {activeTab === 'success' && confirmedDelegate && (
           <div className="w-full max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10 animate-in fade-in duration-300">
             {/* Top Stage Pill / Flow Tracker */}
-            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#E5DFD5]">
-              <div className="flex items-center gap-2 text-xs text-[#52605B]">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-[#E2E8F0]">
+              <div className="flex items-center gap-2 text-xs text-[#64748B]">
                 <button
                   onClick={() => setActiveTab('registration')}
-                  className="font-semibold text-[#52605B] hover:text-[#00231b] transition-colors flex items-center gap-1 cursor-pointer"
+                  className="font-semibold text-[#64748B] hover:text-[#0B1E48] transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Registration Form</span>
                 </button>
                 <span>•</span>
-                <span className="font-semibold text-[#316858]">Accreditation Confirmation</span>
+                <span className="font-semibold text-[#0B1E48]">Accreditation Confirmation</span>
               </div>
-              <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-xs border border-[#E5DFD5]">
+              <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-xs border border-[#E2E8F0]">
                 <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#52605B]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
                   Live Accreditation System
                 </span>
               </div>
             </div>
 
             {/* Executive Success Notification Banner */}
-            <section className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs mb-8 relative overflow-hidden border border-[#E5DFD5]">
-              <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-[#b5efda]/30 blur-3xl pointer-events-none" />
+            <section className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs mb-8 relative overflow-hidden border border-[#E2E8F0]">
+              <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-[#E2E8F0]/30 blur-3xl pointer-events-none" />
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
                 <div className="flex items-start gap-4 max-w-2xl">
-                  <div className="w-12 h-12 rounded-full bg-[#0e3a2f] text-[#b5efda] flex items-center justify-center shrink-0 shadow-md">
-                    <ShieldCheck className="w-6 h-6 text-[#b5efda]" />
+                  <div className="w-12 h-12 rounded-full bg-[#061224] text-[#E2E8F0] flex items-center justify-center shrink-0 shadow-md">
+                    <ShieldCheck className="w-6 h-6 text-[#E2E8F0]" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] text-[11px] font-bold uppercase tracking-wider mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#B45309]" />
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FEE2E2] text-[#DC2626] text-[11px] font-bold uppercase tracking-wider mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626]" />
                       Accreditation Issued
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B1E48] tracking-tight">
                       Registration Confirmed — Welcome to Óghowa Business Week 2026
                     </h1>
-                    <p className="text-xs sm:text-sm text-[#52605B] mt-2 leading-relaxed">
-                      Your participant registration has been recorded into the national innovation register for November 16 – 21, 2026. A cryptographic delegate pass and calendar sync have been dispatched to{' '}
-                      <span className="font-bold text-[#181d1b]">{confirmedDelegate.email}</span>.
+                    <p className="text-xs sm:text-sm text-[#64748B] mt-2 leading-relaxed">
+                      Your participant registration has been recorded into the national innovation register for November 16 – 21, 2026. A cryptographic participant pass and calendar sync have been dispatched to{' '}
+                      <span className="font-bold text-[#0F172A]">{confirmedDelegate.email}</span>.
                     </p>
                   </div>
                 </div>
 
                 {/* ID Card Box with Copy feedback */}
-                <div className="bg-[#F4EFE6] p-4 rounded-xl flex flex-col gap-2 shrink-0 min-w-[280px] border border-[#E5DFD5]">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#52605B]">
+                <div className="bg-[#F1F5F9] p-4 rounded-xl flex flex-col gap-2 shrink-0 min-w-[280px] border border-[#E2E8F0]">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#64748B]">
                     Reference / Accreditation ID
                   </span>
-                  <div className="flex items-center justify-between bg-white px-3.5 py-2 rounded-lg border border-[#E5DFD5]">
-                    <span className="text-sm sm:text-base text-[#00231b] tracking-wider font-mono font-bold">
+                  <div className="flex items-center justify-between bg-white px-3.5 py-2 rounded-lg border border-[#E2E8F0]">
+                    <span className="text-sm sm:text-base text-[#0B1E48] tracking-wider font-mono font-bold">
                       {confirmedDelegate.code}
                     </span>
                     <button
                       onClick={handleCopyCode}
-                      className="text-[#316858] hover:text-[#00231b] transition-colors p-1 cursor-pointer"
+                      className="text-[#0B1E48] hover:text-[#0B1E48] transition-colors p-1 cursor-pointer"
                       title="Copy Reference ID"
                     >
                       <Copy className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#52605B]">
+                  <div className="flex items-center justify-between text-xs text-[#64748B]">
                     <span className="flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#316858]" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#0B1E48]" />
                       <span>Verified Protocol</span>
                     </span>
                     {copiedToast && (
@@ -577,7 +577,7 @@ END:VCALENDAR`;
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left Column: The Digital Accreditation Badge Pass */}
               <section className="lg:col-span-7 flex flex-col items-center">
-                <div className="w-full max-w-[500px] bg-gradient-to-b from-[#00231b] via-[#0e3a2f] to-[#001712] rounded-2xl text-white shadow-2xl relative overflow-hidden transition-all duration-300 border border-[#316858]/30">
+                <div className="w-full max-w-[500px] bg-gradient-to-b from-[#0B1E48] via-[#061224] to-[#061224] rounded-2xl text-white shadow-2xl relative overflow-hidden transition-all duration-300 border border-[#0B1E48]/30">
                   <div className="absolute inset-0 opacity-[0.07] pointer-events-none mix-blend-overlay">
                     <svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
                       <defs>
@@ -592,7 +592,7 @@ END:VCALENDAR`;
 
                   {/* Clip Hole Visual */}
                   <div className="w-full flex justify-center pt-3 pb-1 relative z-10">
-                    <div className="w-16 h-3 rounded-full bg-[#001712] shadow-inner flex items-center justify-center border border-white/10">
+                    <div className="w-16 h-3 rounded-full bg-[#061224] shadow-inner flex items-center justify-center border border-white/10">
                       <div className="w-10 h-1.5 rounded-full bg-white/20" />
                     </div>
                   </div>
@@ -600,20 +600,20 @@ END:VCALENDAR`;
                   {/* Top Brand Header */}
                   <div className="p-6 pb-4 border-b border-white/10 relative z-10 flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-[#b5efda] border border-white/10">
-                        <Building className="w-5 h-5 text-[#b5efda]" />
+                      <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-[#E2E8F0] border border-white/10">
+                        <Building className="w-5 h-5 text-[#E2E8F0]" />
                       </div>
                       <div>
                         <span className="text-base font-bold tracking-tight text-white block">
                           Óghowa Business Week
                         </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">
                           November 16 – 21, 2026 • Benin City
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="inline-block px-2.5 py-0.5 rounded bg-[#B45309] text-white text-[10px] font-bold tracking-widest uppercase shadow-xs">
+                      <span className="inline-block px-2.5 py-0.5 rounded bg-[#DC2626] text-white text-[10px] font-bold tracking-widest uppercase shadow-xs">
                         Official Pass
                       </span>
                     </div>
@@ -622,7 +622,7 @@ END:VCALENDAR`;
                   {/* Pass Middle Body */}
                   <div className="p-6 relative z-10 space-y-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-[#b5efda] text-[#002018] text-xs font-bold shadow-xs">
+                      <span className="px-3 py-1 rounded-full bg-[#E2E8F0] text-[#061224] text-xs font-bold shadow-xs">
                         {confirmedDelegate.persona}
                       </span>
                       <span className="px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-bold tracking-wider uppercase border border-white/10">
@@ -631,8 +631,8 @@ END:VCALENDAR`;
                     </div>
 
                     <div className="pt-2">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#99d2be]">
-                        Accredited Delegate
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">
+                        Accredited Participant
                       </span>
                       <h2 className="text-2xl font-black text-white tracking-tight mt-0.5">
                         {confirmedDelegate.name}
@@ -640,29 +640,29 @@ END:VCALENDAR`;
                       <p className="text-xs sm:text-sm text-slate-200 mt-0.5">
                         {confirmedDelegate.role}, {confirmedDelegate.organization}
                       </p>
-                      <p className="text-[11px] text-[#99d2be] mt-0.5 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-[#FEF3C7]" />
+                      <p className="text-[11px] text-[#94A3B8] mt-0.5 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#FEE2E2]" />
                         <span>{confirmedDelegate.location}</span>
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-white/10 text-xs">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be] block mb-1">
-                          Summit Venue
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block mb-1">
+                          Venue
                         </span>
                         <p className="text-white font-bold leading-snug">Victor Uwaifo Creative Hub</p>
-                        <p className="text-slate-300 text-[11px]">Airport Road, GRA, Benin City</p>
+                        <p className="text-slate-300 text-[11px]">Victor Uwaifo Creative Hub</p>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#99d2be] block mb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block mb-1">
                           Selected Focus
                         </span>
                         <div className="flex flex-col gap-1">
                           {(confirmedDelegate.interests || []).slice(0, 2).map((t, idx) => (
                             <span key={idx} className="text-white text-[11px] font-medium flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#B45309]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626]" />
                               <span>{t}</span>
                             </span>
                           ))}
@@ -671,24 +671,24 @@ END:VCALENDAR`;
                     </div>
 
                     {/* QR Code Verification Block */}
-                    <div className="bg-white text-[#181d1b] rounded-xl p-4 shadow-lg flex items-center justify-between gap-4 mt-4">
+                    <div className="bg-white text-[#0F172A] rounded-xl p-4 shadow-lg flex items-center justify-between gap-4 mt-4">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#52605B]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
                           On-Site Rapid Accreditation
                         </span>
-                        <span className="text-base font-extrabold text-[#00231b] tracking-tight">
+                        <span className="text-base font-extrabold text-[#0B1E48] tracking-tight">
                           VIP Fast-Track
                         </span>
-                        <span className="text-xs text-[#52605B] mt-0.5">
+                        <span className="text-xs text-[#64748B] mt-0.5">
                           Present at Entrance or Registration Pavilion
                         </span>
-                        <span className="font-mono text-[9px] text-[#52605B] tracking-widest mt-1">
+                        <span className="font-mono text-[9px] text-[#64748B] tracking-widest mt-1">
                           HASH: 9a7b-04f8-e1c2-obw26
                         </span>
                       </div>
 
-                      <div className="w-20 h-20 bg-[#F4EFE6] p-1.5 rounded-lg border border-[#E5DFD5] shrink-0 flex items-center justify-center">
-                        <svg className="w-full h-full text-[#00231b]" fill="currentColor" viewBox="0 0 100 100">
+                      <div className="w-20 h-20 bg-[#F1F5F9] p-1.5 rounded-lg border border-[#E2E8F0] shrink-0 flex items-center justify-center">
+                        <svg className="w-full h-full text-[#0B1E48]" fill="currentColor" viewBox="0 0 100 100">
                           <path d="M10 10 h24 v24 h-24 Z M14 14 v16 h16 v-16 Z M18 18 h8 v8 h-8 Z" />
                           <path d="M66 10 h24 v24 h-24 Z M70 14 v16 h16 v-16 Z M74 18 h8 v8 h-8 Z" />
                           <path d="M10 66 h24 v24 h-24 Z M14 70 v16 h16 v-16 Z M18 74 h8 v8 h-8 Z" />
@@ -715,9 +715,9 @@ END:VCALENDAR`;
                   </div>
 
                   {/* Bottom Security Barcode */}
-                  <div className="px-6 py-3 bg-[#001712] border-t border-white/10 flex items-center justify-between">
+                  <div className="px-6 py-3 bg-[#061224] border-t border-white/10 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#B45309]" />
+                      <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
                         In Collaboration with Benin Tech Fest
                       </span>
@@ -741,44 +741,44 @@ END:VCALENDAR`;
                 <div className="w-full max-w-[500px] mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     onClick={handlePrintBadge}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#00231b] text-white font-bold text-xs hover:bg-[#0e3a2f] transition-all shadow-sm cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#0B1E48] text-white font-bold text-xs hover:bg-[#061224] transition-all shadow-sm cursor-pointer"
                   >
-                    <Download className="w-4 h-4 text-[#FEF3C7]" />
+                    <Download className="w-4 h-4 text-[#FEE2E2]" />
                     <span>Save PDF Pass</span>
                   </button>
 
                   <button
                     onClick={handleDownloadCalendar}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#00231b] border border-[#C8BFB0] font-bold text-xs hover:bg-[#F4EFE6] transition-colors shadow-xs cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#0B1E48] border border-[#CBD5E1] font-bold text-xs hover:bg-[#F1F5F9] transition-colors shadow-xs cursor-pointer"
                   >
-                    <CalendarPlus className="w-4 h-4 text-[#B45309]" />
+                    <CalendarPlus className="w-4 h-4 text-[#DC2626]" />
                     <span>Add to Calendar</span>
                   </button>
 
                   <button
                     onClick={handleShareBadge}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#00231b] border border-[#C8BFB0] font-bold text-xs hover:bg-[#F4EFE6] transition-colors shadow-xs cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white text-[#0B1E48] border border-[#CBD5E1] font-bold text-xs hover:bg-[#F1F5F9] transition-colors shadow-xs cursor-pointer"
                   >
-                    <Share className="w-4 h-4 text-[#316858]" />
+                    <Share className="w-4 h-4 text-[#0B1E48]" />
                     <span>Share Badge</span>
                   </button>
                 </div>
 
-                <p className="text-[11px] text-[#52605B] mt-2.5 text-center">
+                <p className="text-[11px] text-[#64748B] mt-2.5 text-center">
                   Dates: November 16 – 21, 2026. Compatible with Apple Wallet, Google Wallet & offline PDF storage.
                 </p>
 
                 {/* Social Share Prompt */}
-                <div className="w-full max-w-[500px] mt-4 bg-[#b5efda]/30 rounded-xl p-3.5 flex items-center justify-between border border-[#316858]/20">
+                <div className="w-full max-w-[500px] mt-4 bg-[#E2E8F0]/30 rounded-xl p-3.5 flex items-center justify-between border border-[#0B1E48]/20">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#316858]" />
-                    <span className="text-xs font-semibold text-[#00231b]">
+                    <Sparkles className="w-4 h-4 text-[#0B1E48]" />
+                    <span className="text-xs font-semibold text-[#0B1E48]">
                       Announce attendance on LinkedIn or X
                     </span>
                   </div>
                   <button
                     onClick={handleShareBadge}
-                    className="text-xs font-bold text-[#316858] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-[#0B1E48] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>Post #OBW2026</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -788,59 +788,59 @@ END:VCALENDAR`;
 
               {/* Right Column: Logistics & Actions */}
               <section className="lg:col-span-5 flex flex-col gap-6">
-                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5]">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B45309]">
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E2E8F0]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#DC2626]">
                       On-Site Logistics
                     </span>
-                    <span className="text-xs text-[#52605B] font-semibold">November 16 – 21, 2026</span>
+                    <span className="text-xs text-[#64748B] font-semibold">November 16 – 21, 2026</span>
                   </div>
 
                   <div className="mt-4 space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#F4EFE6] text-[#00231b] flex items-center justify-center shrink-0">
-                        <Calendar className="w-4 h-4 text-[#00231b]" />
+                      <div className="w-8 h-8 rounded-full bg-[#F1F5F9] text-[#0B1E48] flex items-center justify-center shrink-0">
+                        <Calendar className="w-4 h-4 text-[#0B1E48]" />
                       </div>
                       <div>
-                        <span className="text-sm font-bold text-[#00231b] block">
+                        <span className="text-sm font-bold text-[#0B1E48] block">
                           November 16 – 21, 2026
                         </span>
-                        <span className="text-xs text-[#52605B]">
+                        <span className="text-xs text-[#64748B]">
                           Accreditation opens 08:30 AM • Keynote Plenary at 10:15 AM
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#F4EFE6] text-[#00231b] flex items-center justify-center shrink-0">
-                        <Pin className="w-4 h-4 text-[#B45309]" />
+                      <div className="w-8 h-8 rounded-full bg-[#F1F5F9] text-[#0B1E48] flex items-center justify-center shrink-0">
+                        <Pin className="w-4 h-4 text-[#DC2626]" />
                       </div>
                       <div>
-                        <span className="text-sm font-bold text-[#181d1b] block">
-                          Victor Uwaifo Creative Hub & Edo Innovates Campus
+                        <span className="text-sm font-bold text-[#0F172A] block">
+                          Victor Uwaifo Creative Hub
                         </span>
-                        <p className="text-xs text-[#52605B]">
-                          Airport Road, GRA, Benin City, Edo State, Nigeria
+                        <p className="text-xs text-[#64748B]">
+                          Victor Uwaifo Creative Hub
                         </p>
                       </div>
                     </div>
 
-                    <div className="bg-[#F4EFE6] rounded-xl p-3 flex items-start gap-2 border border-[#E5DFD5]">
-                      <Info className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
-                      <p className="text-xs text-[#52605B] leading-tight">
+                    <div className="bg-[#F1F5F9] rounded-xl p-3 flex items-start gap-2 border border-[#E2E8F0]">
+                      <Info className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+                      <p className="text-xs text-[#64748B] leading-tight">
                         Physical lanyard and RFID token collection begins <strong>Monday, November 16, 8:30 AM</strong> at the accreditation pavilions.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Delegate Checklist Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5]">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#316858]">
-                      Delegate Checklist
+                {/* Participant Checklist Card */}
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E2E8F0]">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B1E48]">
+                      Participant Checklist
                     </span>
-                    <span className="text-[10px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-[#DC2626] bg-[#FEE2E2] px-2 py-0.5 rounded-full">
                       Action Items
                     </span>
                   </div>
@@ -851,15 +851,15 @@ END:VCALENDAR`;
                         <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div>
-                        <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                        <span className="text-xs sm:text-sm font-bold text-[#0F172A] block">
                           ₦50M Deal Room & Pitch Showcase
                         </span>
-                        <p className="text-xs text-[#52605B]">
+                        <p className="text-xs text-[#64748B]">
                           As an accredited participant, submit or view investor materials.
                         </p>
                         <button
                           onClick={() => setIsDealRoomModalOpen(true)}
-                          className="text-xs font-bold text-[#316858] hover:underline inline-flex items-center gap-1 mt-1 cursor-pointer"
+                          className="text-xs font-bold text-[#0B1E48] hover:underline inline-flex items-center gap-1 mt-1 cursor-pointer"
                         >
                           <span>Access Deal Room Portal</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -873,30 +873,30 @@ END:VCALENDAR`;
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                          <span className="text-xs sm:text-sm font-bold text-[#0F172A] block">
                             Networking Directory
                           </span>
                           <button
                             onClick={() => setNetworkingEnabled(!networkingEnabled)}
                             className={`text-[10px] px-2 py-0.5 rounded font-bold transition cursor-pointer ${
                               networkingEnabled
-                                ? 'bg-[#b5efda] text-[#002018]'
+                                ? 'bg-[#E2E8F0] text-[#061224]'
                                 : 'bg-slate-200 text-slate-600'
                             }`}
                           >
                             {networkingEnabled ? 'Enabled' : 'Disabled'}
                           </button>
                         </div>
-                        <p className="text-xs text-[#52605B] mt-0.5">
+                        <p className="text-xs text-[#64748B] mt-0.5">
                           Profile is discoverable by verified founders, investors & corporate partners.
                         </p>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-[#E5DFD5] flex items-center justify-between">
+                    <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-[#316858]" />
-                        <span className="text-xs font-semibold text-[#181d1b]">
+                        <Users className="w-4 h-4 text-[#0B1E48]" />
+                        <span className="text-xs font-semibold text-[#0F172A]">
                           Participant Concierge Group
                         </span>
                       </div>
@@ -904,7 +904,7 @@ END:VCALENDAR`;
                         href="https://whatsapp.com"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs font-bold text-[#00231b] hover:text-[#316858] transition-colors"
+                        className="text-xs font-bold text-[#0B1E48] hover:text-[#0B1E48] transition-colors"
                       >
                         Join WhatsApp Group →
                       </a>
@@ -913,23 +913,23 @@ END:VCALENDAR`;
                 </div>
 
                 {/* Support Liaison Card */}
-                <div className="bg-[#F4EFE6] rounded-2xl p-4.5 flex items-center justify-between gap-4 border border-[#E5DFD5]">
+                <div className="bg-[#F1F5F9] rounded-2xl p-4.5 flex items-center justify-between gap-4 border border-[#E2E8F0]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#00231b] shadow-xs shrink-0">
-                      <HelpCircle className="w-5 h-5 text-[#00231b]" />
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0B1E48] shadow-xs shrink-0">
+                      <HelpCircle className="w-5 h-5 text-[#0B1E48]" />
                     </div>
                     <div>
-                      <span className="text-xs sm:text-sm font-bold text-[#00231b] block">
+                      <span className="text-xs sm:text-sm font-bold text-[#0B1E48] block">
                         Need assistance or hotel protocol?
                       </span>
-                      <span className="text-xs text-[#52605B]">
+                      <span className="text-xs text-[#64748B]">
                         Contact protocol desk for airport transfers, partner hotels & queries.
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => setSupportLiaisonModalOpen(true)}
-                    className="shrink-0 px-3 py-2 bg-white text-[#00231b] font-bold text-xs rounded-xl border border-[#C8BFB0] hover:bg-[#FBF9F5] transition-colors cursor-pointer"
+                    className="shrink-0 px-3 py-2 bg-white text-[#0B1E48] font-bold text-xs rounded-xl border border-[#CBD5E1] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                   >
                     Contact Secretariat
                   </button>
@@ -938,7 +938,7 @@ END:VCALENDAR`;
                 <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
                   <button
                     onClick={onBackToBusinessWeek}
-                    className="w-full py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-xs sm:text-sm transition cursor-pointer text-center"
+                    className="w-full py-3 rounded-xl bg-[#0B1E48] hover:bg-[#061224] text-white font-bold text-xs sm:text-sm transition cursor-pointer text-center"
                   >
                     Return to Business Week Summit
                   </button>
@@ -949,7 +949,7 @@ END:VCALENDAR`;
                       setActiveTab('registration');
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="w-full py-3 rounded-xl bg-white hover:bg-[#F4EFE6] text-[#00231b] border border-[#C8BFB0] font-bold text-xs sm:text-sm transition cursor-pointer text-center"
+                    className="w-full py-3 rounded-xl bg-white hover:bg-[#F1F5F9] text-[#0B1E48] border border-[#CBD5E1] font-bold text-xs sm:text-sm transition cursor-pointer text-center"
                   >
                     Register Another Participant
                   </button>
@@ -966,12 +966,12 @@ END:VCALENDAR`;
           <div className="max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10">
             <div className="max-w-[760px] mx-auto">
               {/* Header Box */}
-              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_16px_rgba(0,35,27,0.06)] border border-[#E5DFD5] mb-6 relative overflow-hidden">
-                <div className="h-2.5 w-full bg-[#00231b] absolute top-0 left-0" />
+              <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-[0_2px_16px_rgba(0,35,27,0.06)] border border-[#E2E8F0] mb-6 relative overflow-hidden">
+                <div className="h-2.5 w-full bg-[#0B1E48] absolute top-0 left-0" />
 
                 <div className="pt-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#B45309]">
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#DC2626]">
                       ...Our own
                     </span>
                     <div className="flex items-center gap-3 text-xs">
@@ -980,54 +980,54 @@ END:VCALENDAR`;
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                         <span>{vacantSeats} vacant physical seats remaining</span>
                       </span>
-                      <span className="text-[#52605B] flex items-center gap-1 text-[11px]">
+                      <span className="text-[#64748B] flex items-center gap-1 text-[11px]">
                         <Clock className="w-3.5 h-3.5" />
                         <span>~3 mins</span>
                       </span>
                     </div>
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B1E48] tracking-tight">
                     Óghowa Business Week — Participant Registration
                   </h1>
-                  <p className="text-sm sm:text-base font-semibold text-[#316858] mt-1">
+                  <p className="text-sm sm:text-base font-semibold text-[#0B1E48] mt-1">
                     Óghowa Business Week · Innovation for Economic Transformation
                   </p>
 
-                  <p className="text-xs sm:text-sm text-[#52605B] mt-3 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#64748B] mt-3 leading-relaxed">
                     Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.
                   </p>
 
                   {/* Real-time countdown strip */}
-                  <div className="mt-4 pt-3 border-t border-[#E5DFD5] flex flex-wrap items-center justify-between gap-3 bg-[#FBF9F5] p-3 rounded-xl border">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#00231b]">
-                      <Calendar className="w-4 h-4 text-[#B45309]" />
+                  <div className="mt-4 pt-3 border-t border-[#E2E8F0] flex flex-wrap items-center justify-between gap-3 bg-[#F8FAFC] p-3 rounded-xl border">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#0B1E48]">
+                      <Calendar className="w-4 h-4 text-[#DC2626]" />
                       <span>November 16 – 21, 2026 • Live Countdown:</span>
                     </div>
-                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#00231b]">
-                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#0B1E48]">
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E2E8F0]">
                         {timeLeft.days}d
                       </span>
                       <span>:</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E2E8F0]">
                         {String(timeLeft.hours).padStart(2, '0')}h
                       </span>
                       <span>:</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5]">
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E2E8F0]">
                         {String(timeLeft.minutes).padStart(2, '0')}m
                       </span>
                       <span>:</span>
-                      <span className="bg-white px-2 py-0.5 rounded border border-[#E5DFD5] text-[#B45309]">
+                      <span className="bg-white px-2 py-0.5 rounded border border-[#E2E8F0] text-[#DC2626]">
                         {String(timeLeft.seconds).padStart(2, '0')}s
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-[#E5DFD5] space-y-1">
-                    <p className="text-xs text-[#52605B] font-medium">
+                  <div className="mt-4 pt-3 border-t border-[#E2E8F0] space-y-1">
+                    <p className="text-xs text-[#64748B] font-medium">
                       Please complete all required questions (*). It takes about 3 minutes.
                     </p>
-                    <p className="text-[11px] text-[#B45309] font-bold">
+                    <p className="text-[11px] text-[#DC2626] font-bold">
                       * Indicates required question
                     </p>
                   </div>
@@ -1044,12 +1044,12 @@ END:VCALENDAR`;
                 )}
 
                 {/* Primary Email Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E5DFD5] space-y-2">
-                  <label className="text-sm font-bold text-[#181d1b] block">
-                    Email <span className="text-[#B45309] font-bold">*</span>
+                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E2E8F0] space-y-2">
+                  <label className="text-sm font-bold text-[#0F172A] block">
+                    Email <span className="text-[#DC2626] font-bold">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                     <input
                       type="email"
                       required
@@ -1059,117 +1059,117 @@ END:VCALENDAR`;
                         if (!contactEmail) setContactEmail(e.target.value);
                       }}
                       placeholder="Your email address"
-                      className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                     />
                   </div>
                 </div>
 
                 {/* SECTION 1: ABOUT YOU */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-6">
-                  <div className="pb-3 border-b border-[#E5DFD5]">
-                    <h2 className="text-xl font-bold text-[#00231b]">About you</h2>
-                    <p className="text-xs text-[#52605B] mt-0.5">Please provide your verified personal identification.</p>
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
+                  <div className="pb-3 border-b border-[#E2E8F0]">
+                    <h2 className="text-xl font-bold text-[#0B1E48]">About you</h2>
+                    <p className="text-xs text-[#64748B] mt-0.5">Please provide your verified personal identification.</p>
                   </div>
 
                   {/* Full Name */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Full name <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Full name <span className="text-[#DC2626] font-bold">*</span>
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="text"
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Your full name"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
 
                   {/* Email Address */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Email address <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Email address <span className="text-[#DC2626] font-bold">*</span>
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="email"
                         required
                         value={contactEmail}
                         onChange={(e) => setContactEmail(e.target.value)}
                         placeholder="Your contact email"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
 
                   {/* Phone / WhatsApp number */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Phone / WhatsApp number <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Phone / WhatsApp number <span className="text-[#DC2626] font-bold">*</span>
                     </label>
-                    <p className="text-xs text-[#52605B]">Include your country code, e.g. +234…</p>
+                    <p className="text-xs text-[#64748B]">Include your country code, e.g. +234…</p>
                     <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="tel"
                         required
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="+234 800 000 0000"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
 
                   {/* Organisation / business / school */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Organisation / business / school <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Organisation / business / school <span className="text-[#DC2626] font-bold">*</span>
                     </label>
-                    <p className="text-xs text-[#52605B]">Write "Independent" if you are not attached to an organisation.</p>
+                    <p className="text-xs text-[#64748B]">Write "Independent" if you are not attached to an organisation.</p>
                     <div className="relative">
-                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="text"
                         required
                         value={organisation}
                         onChange={(e) => setOrganisation(e.target.value)}
                         placeholder='Your organisation or "Independent"'
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
 
                   {/* Job title / role */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Job title / role <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Job title / role <span className="text-[#DC2626] font-bold">*</span>
                     </label>
                     <div className="relative">
-                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52605B] w-4 h-4" />
+                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="text"
                         required
                         value={jobRole}
                         onChange={(e) => setJobRole(e.target.value)}
                         placeholder="e.g. Founder, CEO, Student, Tech Lead"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
 
                   {/* City, state and country split */}
-                  <div className="space-y-3 pt-2 border-t border-[#E5DFD5]">
+                  <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
                     <div>
-                      <label className="text-sm font-bold text-[#181d1b] block">
-                        City, state and country <span className="text-[#B45309] font-bold">*</span>
+                      <label className="text-sm font-bold text-[#0F172A] block">
+                        City, state and country <span className="text-[#DC2626] font-bold">*</span>
                       </label>
-                      <p className="text-xs text-[#52605B]">
+                      <p className="text-xs text-[#64748B]">
                         Split each: each country listed and all Nigeria states listed with cities too (e.g. Benin City, Edo State, Nigeria)
                       </p>
                     </div>
@@ -1177,7 +1177,7 @@ END:VCALENDAR`;
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {/* Country */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#52605B]">Country *</label>
+                        <label className="text-xs font-bold text-[#64748B]">Country *</label>
                         <select
                           value={country}
                           onChange={(e) => {
@@ -1185,7 +1185,7 @@ END:VCALENDAR`;
                             setState('');
                             setCity('');
                           }}
-                          className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                          className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
                         >
                           {COUNTRIES.map((c) => (
                             <option key={c} value={c}>
@@ -1200,14 +1200,14 @@ END:VCALENDAR`;
                             value={otherCountry}
                             onChange={(e) => setOtherCountry(e.target.value)}
                             placeholder="Type country name"
-                            className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                            className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                           />
                         )}
                       </div>
 
                       {/* State */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#52605B]">State / Province *</label>
+                        <label className="text-xs font-bold text-[#64748B]">State / Province *</label>
                         {country === 'Nigeria' ? (
                           <select
                             value={state}
@@ -1215,7 +1215,7 @@ END:VCALENDAR`;
                               setState(e.target.value);
                               setCity('');
                             }}
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
                             required
                           >
                             <option value="">Select State</option>
@@ -1232,20 +1232,20 @@ END:VCALENDAR`;
                             value={otherState}
                             onChange={(e) => setOtherState(e.target.value)}
                             placeholder="State or Region"
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b]"
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
                           />
                         )}
                       </div>
 
                       {/* City */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#52605B]">City *</label>
+                        <label className="text-xs font-bold text-[#64748B]">City *</label>
                         {country === 'Nigeria' ? (
                           <>
                             <select
                               value={city}
                               onChange={(e) => setCity(e.target.value)}
-                              className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                              className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
                               required
                             >
                               <option value="">Select City</option>
@@ -1262,7 +1262,7 @@ END:VCALENDAR`;
                                 value={customCity}
                                 onChange={(e) => setCustomCity(e.target.value)}
                                 placeholder="Type city name"
-                                className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                                className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                               />
                             )}
                           </>
@@ -1273,7 +1273,7 @@ END:VCALENDAR`;
                             value={customCity}
                             onChange={(e) => setCustomCity(e.target.value)}
                             placeholder="Enter city"
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b]"
+                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
                           />
                         )}
                       </div>
@@ -1282,16 +1282,16 @@ END:VCALENDAR`;
                 </div>
 
                 {/* SECTION 2: YOUR PARTICIPATION */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-6">
-                  <div className="pb-3 border-b border-[#E5DFD5]">
-                    <h2 className="text-xl font-bold text-[#00231b]">Your participation</h2>
-                    <p className="text-xs text-[#52605B] mt-0.5">Tell us about how you wish to engage with the summit.</p>
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
+                  <div className="pb-3 border-b border-[#E2E8F0]">
+                    <h2 className="text-xl font-bold text-[#0B1E48]">Your participation</h2>
+                    <p className="text-xs text-[#64748B] mt-0.5">Tell us about how you wish to engage with the summit.</p>
                   </div>
 
                   {/* Question: Which best describes you? */}
                   <div className="space-y-3">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Which best describes you? <span className="text-[#B45309] font-bold">*</span>
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Which best describes you? <span className="text-[#DC2626] font-bold">*</span>
                     </label>
 
                     <div className="space-y-2">
@@ -1310,8 +1310,8 @@ END:VCALENDAR`;
                           key={opt}
                           className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                             persona === opt
-                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
-                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
                           }`}
                         >
                           <input
@@ -1319,7 +1319,7 @@ END:VCALENDAR`;
                             name="persona"
                             checked={persona === opt}
                             onChange={() => setPersona(opt)}
-                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
                           />
                           <span className="text-xs sm:text-sm">{opt}</span>
                         </label>
@@ -1332,19 +1332,19 @@ END:VCALENDAR`;
                           value={otherPersona}
                           onChange={(e) => setOtherPersona(e.target.value)}
                           placeholder="Please specify your role"
-                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                         />
                       )}
                     </div>
                   </div>
 
                   {/* Question: What are you most interested in? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
+                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
                     <div>
-                      <label className="text-sm font-bold text-[#181d1b] block">
-                        What are you most interested in? <span className="text-[#B45309] font-bold">*</span>
+                      <label className="text-sm font-bold text-[#0F172A] block">
+                        What are you most interested in? <span className="text-[#DC2626] font-bold">*</span>
                       </label>
-                      <p className="text-xs text-[#52605B]">Select all that apply.</p>
+                      <p className="text-xs text-[#64748B]">Select all that apply.</p>
                     </div>
 
                     <div className="space-y-2">
@@ -1362,15 +1362,15 @@ END:VCALENDAR`;
                             key={item}
                             className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                               isChecked
-                                ? 'bg-[#b5efda]/20 border-[#316858] font-bold text-[#00231b]'
-                                : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                                ? 'bg-[#E2E8F0]/20 border-[#0B1E48] font-bold text-[#0B1E48]'
+                                : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleInterest(item)}
-                              className="w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                              className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
                             />
                             <span className="text-xs sm:text-sm">{item}</span>
                           </label>
@@ -1380,9 +1380,9 @@ END:VCALENDAR`;
                   </div>
 
                   {/* Question: Will you attend in person? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Will you attend in person? <span className="text-[#B45309] font-bold">*</span>
+                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Will you attend in person? <span className="text-[#DC2626] font-bold">*</span>
                     </label>
 
                     <div className="space-y-2">
@@ -1395,8 +1395,8 @@ END:VCALENDAR`;
                           key={opt}
                           className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                             attendanceMode === opt
-                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
-                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
                           }`}
                         >
                           <input
@@ -1404,7 +1404,7 @@ END:VCALENDAR`;
                             name="attendanceMode"
                             checked={attendanceMode === opt}
                             onChange={() => setAttendanceMode(opt)}
-                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
                           />
                           <span className="text-xs sm:text-sm">{opt}</span>
                         </label>
@@ -1413,9 +1413,9 @@ END:VCALENDAR`;
                   </div>
 
                   {/* Question: Are you interested in exhibiting or sponsoring? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      Are you interested in exhibiting or sponsoring? <span className="text-[#B45309] font-bold">*</span>
+                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      Are you interested in exhibiting or sponsoring? <span className="text-[#DC2626] font-bold">*</span>
                     </label>
 
                     <div className="space-y-2">
@@ -1429,8 +1429,8 @@ END:VCALENDAR`;
                           key={opt}
                           className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                             exhibitSponsorInterest === opt
-                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
-                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
                           }`}
                         >
                           <input
@@ -1438,7 +1438,7 @@ END:VCALENDAR`;
                             name="exhibitSponsorInterest"
                             checked={exhibitSponsorInterest === opt}
                             onChange={() => setExhibitSponsorInterest(opt)}
-                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
                           />
                           <span className="text-xs sm:text-sm">{opt}</span>
                         </label>
@@ -1447,9 +1447,9 @@ END:VCALENDAR`;
                   </div>
 
                   {/* Question: How did you hear about Óghowa Business Week? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E5DFD5]">
-                    <label className="text-sm font-bold text-[#181d1b] block">
-                      How did you hear about Óghowa Business Week? <span className="text-[#B45309] font-bold">*</span>
+                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                    <label className="text-sm font-bold text-[#0F172A] block">
+                      How did you hear about Óghowa Business Week? <span className="text-[#DC2626] font-bold">*</span>
                     </label>
 
                     <div className="space-y-2">
@@ -1466,8 +1466,8 @@ END:VCALENDAR`;
                           key={opt}
                           className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
                             discoverySource === opt
-                              ? 'bg-[#FEF3C7]/40 border-[#B45309] font-bold text-[#00231b]'
-                              : 'bg-white hover:bg-[#FBF9F5] border-[#E5DFD5] text-[#181d1b]'
+                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
                           }`}
                         >
                           <input
@@ -1475,7 +1475,7 @@ END:VCALENDAR`;
                             name="discoverySource"
                             checked={discoverySource === opt}
                             onChange={() => setDiscoverySource(opt)}
-                            className="w-4 h-4 text-[#00231b] accent-[#00231b]"
+                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
                           />
                           <span className="text-xs sm:text-sm">{opt}</span>
                         </label>
@@ -1488,30 +1488,30 @@ END:VCALENDAR`;
                           value={otherDiscoverySource}
                           onChange={(e) => setOtherDiscoverySource(e.target.value)}
                           placeholder="How did you hear about us?"
-                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-xs text-[#181d1b]"
+                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                         />
                       )}
                     </div>
                   </div>
 
                   {/* Accessibility or dietary requirements (optional) */}
-                  <div className="space-y-1 pt-3 border-t border-[#E5DFD5]">
-                    <label className="text-sm font-bold text-[#181d1b] block">
+                  <div className="space-y-1 pt-3 border-t border-[#E2E8F0]">
+                    <label className="text-sm font-bold text-[#0F172A] block">
                       Accessibility or dietary requirements (optional)
                     </label>
-                    <p className="text-xs text-[#52605B]">Let us know anything we should prepare for.</p>
+                    <p className="text-xs text-[#64748B]">Let us know anything we should prepare for.</p>
                     <input
                       type="text"
                       value={accessibility}
                       onChange={(e) => setAccessibility(e.target.value)}
                       placeholder="e.g. Wheelchair access, dietary requirements, sign language translation"
-                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                     />
                   </div>
 
                   {/* What do you hope to get from the week? (optional) */}
                   <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#181d1b] block">
+                    <label className="text-sm font-bold text-[#0F172A] block">
                       What do you hope to get from the week? (optional)
                     </label>
                     <textarea
@@ -1519,50 +1519,50 @@ END:VCALENDAR`;
                       value={expectations}
                       onChange={(e) => setExpectations(e.target.value)}
                       placeholder="e.g. Meet investors for my venture, network with industry partners, gain actionable policy insights"
-                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:outline-hidden focus:ring-2 focus:ring-[#00231b]"
+                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                     />
                   </div>
                 </div>
 
                 {/* SECTION 3: CONSENT */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E5DFD5] space-y-5">
-                  <div className="pb-3 border-b border-[#E5DFD5]">
-                    <h2 className="text-xl font-bold text-[#00231b]">Consent</h2>
-                    <p className="text-xs text-[#52605B] mt-0.5">Please review the summit terms and communication preferences.</p>
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-5">
+                  <div className="pb-3 border-b border-[#E2E8F0]">
+                    <h2 className="text-xl font-bold text-[#0B1E48]">Consent</h2>
+                    <p className="text-xs text-[#64748B] mt-0.5">Please review the summit terms and communication preferences.</p>
                   </div>
 
                   {/* Participant declaration */}
-                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] cursor-pointer">
+                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer">
                     <input
                       type="checkbox"
                       required
                       checked={declarationConfirmed}
                       onChange={(e) => setDeclarationConfirmed(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                      className="mt-1 w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
                     />
                     <div>
-                      <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
-                        Participant declaration <span className="text-[#B45309] font-bold">*</span>
+                      <span className="text-xs sm:text-sm font-bold text-[#0F172A] block">
+                        Participant declaration <span className="text-[#DC2626] font-bold">*</span>
                       </span>
-                      <span className="text-xs text-[#52605B] mt-0.5 block leading-relaxed">
+                      <span className="text-xs text-[#64748B] mt-0.5 block leading-relaxed">
                         I confirm that the information provided is accurate and consent to its use for registration and for communicating with me about Óghowa Business Week.
                       </span>
                     </div>
                   </label>
 
                   {/* Updates (optional) */}
-                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#FBF9F5] border border-[#E5DFD5] cursor-pointer">
+                  <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={receiveUpdates}
                       onChange={(e) => setReceiveUpdates(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-[#00231b] accent-[#00231b] rounded"
+                      className="mt-1 w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
                     />
                     <div>
-                      <span className="text-xs sm:text-sm font-bold text-[#181d1b] block">
+                      <span className="text-xs sm:text-sm font-bold text-[#0F172A] block">
                         Updates (optional)
                       </span>
-                      <span className="text-xs text-[#52605B] mt-0.5 block leading-relaxed">
+                      <span className="text-xs text-[#64748B] mt-0.5 block leading-relaxed">
                         Keep me updated about future Óghowa Business Week and Benin Tech Fest events.
                       </span>
                     </div>
@@ -1573,13 +1573,13 @@ END:VCALENDAR`;
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0B1E48] hover:bg-[#061224] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Submit Registration</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
 
-                  <div className="flex items-center gap-2 text-xs text-[#52605B]">
+                  <div className="flex items-center gap-2 text-xs text-[#64748B]">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span>Instant accreditation pass & calendar sync</span>
                   </div>
@@ -1595,14 +1595,14 @@ END:VCALENDAR`;
         {activeTab === 'schedule-tracks' && (
           <div className="max-w-[1120px] mx-auto px-4 md:px-6 py-8 sm:py-10">
             <div className="text-center max-w-2xl mx-auto mb-10">
-              <span className="text-xs font-bold text-[#B45309] uppercase tracking-wider bg-[#FEF3C7] px-3 py-1 rounded-full">
+              <span className="text-xs font-bold text-[#DC2626] uppercase tracking-wider bg-[#FEE2E2] px-3 py-1 rounded-full">
                 4-Day Summit Program
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00231b] mt-3">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B1E48] mt-3">
                 Óghowa Business Week Program Architecture
               </h2>
-              <p className="text-xs sm:text-sm text-[#52605B] mt-2">
-                November 16 – 21, 2026 at Victor Uwaifo Creative Hub & Edo Innovates Campus.
+              <p className="text-xs sm:text-sm text-[#64748B] mt-2">
+                November 16 – 21, 2026 at Victor Uwaifo Creative Hub.
               </p>
             </div>
 
@@ -1653,29 +1653,29 @@ END:VCALENDAR`;
                   ]
                 }
               ].map((p, idx) => (
-                <div key={idx} className="bg-white rounded-2xl p-6 border border-[#E5DFD5] shadow-xs flex flex-col justify-between">
+                <div key={idx} className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-xs flex flex-col justify-between">
                   <div>
-                    <span className="text-xs font-bold text-[#B45309]">{p.day}</span>
-                    <h3 className="text-lg font-bold text-[#00231b] mt-1">{p.title}</h3>
-                    <span className="inline-block mt-1 text-[11px] font-semibold text-[#316858] bg-[#b5efda]/30 px-2 py-0.5 rounded">
+                    <span className="text-xs font-bold text-[#DC2626]">{p.day}</span>
+                    <h3 className="text-lg font-bold text-[#0B1E48] mt-1">{p.title}</h3>
+                    <span className="inline-block mt-1 text-[11px] font-semibold text-[#0B1E48] bg-[#E2E8F0]/30 px-2 py-0.5 rounded">
                       {p.theme}
                     </span>
-                    <ul className="mt-4 space-y-2 text-xs text-[#52605B]">
+                    <ul className="mt-4 space-y-2 text-xs text-[#64748B]">
                       {p.highlights.map((h, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#00231b] mt-1.5 shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#0B1E48] mt-1.5 shrink-0" />
                           <span>{h}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="pt-4 mt-4 border-t border-[#E5DFD5]">
+                  <div className="pt-4 mt-4 border-t border-[#E2E8F0]">
                     <button
                       onClick={() => {
                         setActiveTab('registration');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="text-xs font-bold text-[#00231b] hover:text-[#B45309] flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-bold text-[#0B1E48] hover:text-[#DC2626] flex items-center gap-1 cursor-pointer"
                     >
                       <span>Register for this day</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1692,10 +1692,10 @@ END:VCALENDAR`;
         {/* ============================================================== */}
         {activeTab === 'status-lookup' && (
           <div className="max-w-[760px] mx-auto px-4 md:px-6 py-8 sm:py-10">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E5DFD5] shadow-xs">
-              <h2 className="text-xl font-bold text-[#00231b]">Verify Participant Accreditation</h2>
-              <p className="text-xs text-[#52605B] mt-1">
-                Enter your reference code (e.g. OBW-2026-DELEGATE-8492) or registration email:
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#E2E8F0] shadow-xs">
+              <h2 className="text-xl font-bold text-[#0B1E48]">Verify Participant Accreditation</h2>
+              <p className="text-xs text-[#64748B] mt-1">
+                Enter your reference code (e.g. OBW-2026-PARTICIPANT-8492) or registration email:
               </p>
 
               <form onSubmit={handleStatusSearch} className="mt-4 flex gap-2">
@@ -1704,37 +1704,37 @@ END:VCALENDAR`;
                   required
                   value={lookupQuery}
                   onChange={(e) => setLookupQuery(e.target.value)}
-                  placeholder="OBW-2026-DELEGATE-XXXX or email"
-                  className="flex-1 bg-white px-3.5 py-2.5 rounded-lg border border-[#C8BFB0] text-sm text-[#181d1b] focus:ring-2 focus:ring-[#00231b]"
+                  placeholder="OBW-2026-PARTICIPANT-XXXX or email"
+                  className="flex-1 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
                 />
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#00231b] text-white font-bold text-xs rounded-lg hover:bg-[#0e3a2f] cursor-pointer"
+                  className="px-5 py-2.5 bg-[#0B1E48] text-white font-bold text-xs rounded-lg hover:bg-[#061224] cursor-pointer"
                 >
                   Verify
                 </button>
               </form>
 
               {lookupSearched && (
-                <div className="mt-6 pt-6 border-t border-[#E5DFD5]">
+                <div className="mt-6 pt-6 border-t border-[#E2E8F0]">
                   {lookupResult ? (
-                    <div className="bg-[#b5efda]/20 border border-[#316858]/30 rounded-xl p-4 space-y-2">
+                    <div className="bg-[#E2E8F0]/20 border border-[#0B1E48]/30 rounded-xl p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#00231b]">{lookupResult.code}</span>
+                        <span className="text-xs font-bold text-[#0B1E48]">{lookupResult.code}</span>
                         <span className="text-[10px] font-bold uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
                           {lookupResult.status}
                         </span>
                       </div>
-                      <p className="text-sm font-bold text-[#181d1b]">{lookupResult.name}</p>
-                      <p className="text-xs text-[#52605B]">{lookupResult.role} · {lookupResult.organization}</p>
-                      <p className="text-xs text-[#52605B]">Location: {lookupResult.location}</p>
-                      <p className="text-xs text-[#52605B]">Mode: {lookupResult.attendanceMode}</p>
+                      <p className="text-sm font-bold text-[#0F172A]">{lookupResult.name}</p>
+                      <p className="text-xs text-[#64748B]">{lookupResult.role} · {lookupResult.organization}</p>
+                      <p className="text-xs text-[#64748B]">Location: {lookupResult.location}</p>
+                      <p className="text-xs text-[#64748B]">Mode: {lookupResult.attendanceMode}</p>
                       <button
                         onClick={() => {
                           setConfirmedDelegate(lookupResult);
                           setActiveTab('success');
                         }}
-                        className="mt-2 text-xs font-bold text-[#00231b] underline cursor-pointer"
+                        className="mt-2 text-xs font-bold text-[#0B1E48] underline cursor-pointer"
                       >
                         Open Digital Accreditation Badge Pass →
                       </button>
@@ -1754,19 +1754,19 @@ END:VCALENDAR`;
       {/* DEAL ROOM MODAL */}
       {isDealRoomModalOpen && confirmedDelegate && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E5DFD5]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
-              <h3 className="font-bold text-base text-[#00231b]">₦50M Deal Room & Pitch Submission</h3>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E2E8F0]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+              <h3 className="font-bold text-base text-[#0B1E48]">₦50M Deal Room & Pitch Submission</h3>
               <button onClick={() => setIsDealRoomModalOpen(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="mt-4 space-y-3 text-xs text-[#52605B]">
+            <div className="mt-4 space-y-3 text-xs text-[#64748B]">
               <p>
-                Your accreditation ID <strong className="text-[#00231b] font-mono">{confirmedDelegate.code}</strong> qualifies you for fast-track deal review.
+                Your accreditation ID <strong className="text-[#0B1E48] font-mono">{confirmedDelegate.code}</strong> qualifies you for fast-track deal review.
               </p>
-              <div className="p-3 bg-[#FBF9F5] rounded-xl border border-[#E5DFD5]">
-                <p className="font-bold text-[#00231b]">Deal Room Day: Thursday, 19 November 2026</p>
+              <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                <p className="font-bold text-[#0B1E48]">Deal Room Day: Thursday, 19 November 2026</p>
                 <p className="mt-1">Pitch decks and term sheet submissions close on November 10, 2026.</p>
               </div>
               <p>Upload your one-pager or deck to the closed deal portal or email investment@oghowa.africa with your code in the subject.</p>
@@ -1777,7 +1777,7 @@ END:VCALENDAR`;
                     setShareSuccessToast('Deal Room request acknowledged by Secretariat.');
                     setTimeout(() => setShareSuccessToast(''), 3000);
                   }}
-                  className="px-4 py-2 bg-[#00231b] text-white font-bold rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#0B1E48] text-white font-bold rounded-lg text-xs"
                 >
                   Done
                 </button>
@@ -1790,25 +1790,25 @@ END:VCALENDAR`;
       {/* SUPPORT LIAISON MODAL */}
       {supportLiaisonModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E5DFD5]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E5DFD5]">
-              <h3 className="font-bold text-base text-[#00231b]">Secretariat Protocol Liaison</h3>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E2E8F0]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+              <h3 className="font-bold text-base text-[#0B1E48]">Secretariat Protocol Liaison</h3>
               <button onClick={() => setSupportLiaisonModalOpen(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="mt-4 space-y-3 text-xs text-[#52605B]">
+            <div className="mt-4 space-y-3 text-xs text-[#64748B]">
               <p>For official delegations, flight arrivals at Benin Airport, and hotel bookings at our partner hotels in GRA:</p>
-              <div className="space-y-1 bg-[#FBF9F5] p-3 rounded-xl border border-[#E5DFD5]">
+              <div className="space-y-1 bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
                 <p><strong>Desk:</strong> Óghowa Business Week Secretariat</p>
                 <p><strong>Email:</strong> secretariat@oghowa.africa</p>
                 <p><strong>Hotline:</strong> +234 803 123 4567</p>
-                <p><strong>Venue:</strong> Victor Uwaifo Creative Hub, Airport Road, GRA, Benin City</p>
+                <p><strong>Venue:</strong> Victor Uwaifo Creative Hub</p>
               </div>
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setSupportLiaisonModalOpen(false)}
-                  className="px-4 py-2 bg-[#00231b] text-white font-bold rounded-lg text-xs"
+                  className="px-4 py-2 bg-[#0B1E48] text-white font-bold rounded-lg text-xs"
                 >
                   Close
                 </button>
@@ -1819,7 +1819,7 @@ END:VCALENDAR`;
       )}
 
       {/* 3. FOOTER */}
-      <footer className="w-full bg-[#00231b] text-white py-8 border-t border-[#316858]/30">
+      <footer className="w-full bg-[#0B1E48] text-white py-8 border-t border-[#0B1E48]/30">
         <div className="max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-300">
           <div className="flex items-center gap-2">
             <span className="font-bold text-white">Óghowa Business Week</span>

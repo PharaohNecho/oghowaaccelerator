@@ -72,7 +72,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
             <div className="pt-2 text-xs text-slate-400 space-y-1.5">
               <p className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                <span>Benin City, Edo State, Nigeria</span>
+                <span>Victor Uwaifo Creative Hub</span>
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-blue-400" />
@@ -189,7 +189,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
 
         {/* Bottom copyright */}
         <div className="pt-10 mt-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© 2026 Óghowa Accelerator. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <p>© 2026 Óghowa Accelerator. All rights reserved.</p>
+            <span className="text-slate-700">•</span>
+            <button
+              onClick={() => onNavigate('admin' as any)}
+              className="text-slate-600 hover:text-slate-400 text-[11px] transition cursor-pointer"
+            >
+              Secretariat
+            </button>
+          </div>
           <p>Building Africa's Innovation Economy from Edo State to the World.</p>
         </div>
       </div>

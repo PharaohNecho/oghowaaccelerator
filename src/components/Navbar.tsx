@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ShieldAlert,
   Compass,
   Sparkles,
   Rocket,
-  Clock,
-  User,
   ChevronDown,
-  ChevronRight,
   Menu,
   X,
   Layers,
@@ -19,8 +15,6 @@ import {
   Calendar,
   FileText,
   Users,
-  Briefcase,
-  BookOpen,
   ArrowRight
 } from 'lucide-react';
 import { OghowaLogo } from './OghowaLogo';
@@ -30,12 +24,12 @@ interface NavbarProps {
   setActiveView: (view: 'home' | 'apply' | 'dashboard' | 'admin' | 'mentors' | 'news' | 'business-week' | 'business-week-register') => void;
   onOpenApply: () => void;
   onOpenAuth: () => void;
-  currentUser: {
+  currentUser?: {
     name: string;
     email: string;
     role: string;
-  };
-  appStatus: string;
+  } | null;
+  appStatus?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -80,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      {/* 1. TOP ANNOUNCEMENT & UTILITY BAR (matching oghowa.metaspaceconsult.com) */}
+      {/* 1. TOP ANNOUNCEMENT & UTILITY BAR (Clean, no superadmin login shown to visitors) */}
       <div className="bg-[#061224] text-xs text-slate-300 py-2 px-4 border-b border-slate-800 relative z-50">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-2">
@@ -91,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => {
                 setActiveView('business-week');
@@ -101,19 +95,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
               <span>Óghowa Business Week 2026</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveView('admin');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`hover:text-rose-400 transition-colors flex items-center gap-1.5 cursor-pointer ${
-                activeView === 'admin' ? 'text-rose-400 font-bold' : 'text-slate-400'
-              }`}
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-              <span>Superadmin Portal</span>
             </button>
           </div>
         </div>
@@ -407,14 +388,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                       <div>
                         <p className="text-xs font-bold text-slate-900 group-hover:text-rose-600 transition">Corporate Governance & Legal Clinics</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Investor readiness, cap-table diligence and tax clinics</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Investor readiness, cap-table diligence and compliance</p>
                       </div>
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* About / Resources Dropdown */}
+              {/* About Dropdown (Clean, no superadmin link) */}
               <div
                 className="relative"
                 onMouseEnter={() => setActiveDropdown('about')}
@@ -461,39 +442,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="text-[11px] text-slate-500 mt-0.5">Latest announcements, cohort milestones and ecosystem updates</p>
                       </div>
                     </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveView('admin');
-                        setActiveDropdown(null);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="w-full text-left p-3 rounded-xl hover:bg-slate-50 transition flex items-start gap-3 group cursor-pointer"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition">
-                        <ShieldAlert className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-900 group-hover:text-rose-600 transition">Superadmin & Management</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Secretariat controls, registrations and live event manager</p>
-                      </div>
-                    </button>
                   </div>
                 )}
               </div>
             </nav>
 
-            {/* Action CTAs: Join Óghowa (Red) & Founder Portal */}
+            {/* Action CTAs: Óghowa Business Week & Join Cohort 2026 (No demo user profile shown) */}
             <div className="hidden sm:flex items-center space-x-3">
               <button
                 onClick={() => {
                   setActiveView('business-week');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-3 py-2 rounded-xl text-xs font-bold bg-[#00231b] hover:bg-[#0e3a2f] text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-[#0B1E48] hover:bg-[#061224] text-white border border-blue-400/30 shadow-xs transition flex items-center gap-1.5 cursor-pointer"
               >
-                <Calendar className="w-3.5 h-3.5 text-[#FEF3C7]" />
-                <span>Business Week</span>
+                <Calendar className="w-3.5 h-3.5 text-amber-300" />
+                <span>Óghowa Business Week</span>
               </button>
 
               <button
@@ -506,14 +470,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>Join Cohort 2026</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
-
-              <button
-                onClick={onOpenAuth}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center space-x-1.5 cursor-pointer"
-              >
-                <User className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden md:inline">{currentUser?.name ? currentUser.name.split(' ')[0] : 'Sign In'}</span>
-              </button>
             </div>
 
             {/* Mobile Menu Hamburger Button */}
@@ -523,7 +479,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setActiveView('business-week');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#00231b] text-white flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#0B1E48] text-white flex items-center gap-1"
               >
                 <span>Business Week</span>
               </button>
@@ -539,7 +495,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* 3. MOBILE MENU DRAWER (Accordion Dropdowns as requested) */}
+        {/* 3. MOBILE MENU DRAWER (Accordion Dropdowns, completely removed from visitors' eyes) */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-slate-200 shadow-2xl animate-in slide-in-from-top-4 duration-200 max-h-[85vh] overflow-y-auto">
             <div className="px-4 pt-3 pb-6 space-y-2">
@@ -648,7 +604,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setMobileMenuOpen(false);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="block w-full text-left py-1.5 font-bold text-[#00231b] hover:text-[#B45309]"
+                      className="block w-full text-left py-1.5 font-bold text-[#0B1E48] hover:text-rose-600"
                     >
                       ★ Óghowa Business Week 2026 (Nov 16–21)
                     </button>
@@ -686,16 +642,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                     >
                       • News & Press Releases
                     </button>
-                    <button
-                      onClick={() => {
-                        setActiveView('admin');
-                        setMobileMenuOpen(false);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="block w-full text-left py-1.5 font-medium hover:text-rose-600"
-                    >
-                      • Superadmin Portal
-                    </button>
                   </div>
                 )}
               </div>
@@ -708,9 +654,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setMobileMenuOpen(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-3 rounded-xl bg-[#00231b] hover:bg-[#0e3a2f] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-[#0B1E48] hover:bg-[#061224] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4 text-[#FEF3C7]" />
+                  <Calendar className="w-4 h-4 text-amber-300" />
                   <span>Óghowa Business Week 2026 Portal</span>
                 </button>
 
@@ -724,17 +670,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <span>Apply for Cohort 2026</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuth();
-                  }}
-                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <User className="w-4 h-4 text-slate-500" />
-                  <span>{currentUser?.name ? `Signed in as ${currentUser.name}` : 'Sign In / Dashboard'}</span>
                 </button>
               </div>
             </div>

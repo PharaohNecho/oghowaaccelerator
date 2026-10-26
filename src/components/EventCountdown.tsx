@@ -26,8 +26,8 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
   const [attendeeOrg, setAttendeeOrg] = useState<string>('');
   const [additionalReservedCount, setAdditionalReservedCount] = useState<number>(0);
 
-  // Live Vacant Seats calculation
-  const totalRegistered = 342 + (config?.delegates?.length || 0) + additionalReservedCount;
+  // Live Vacant Seats calculation (No demo 342 offset)
+  const totalRegistered = (config?.delegates?.length || 0) + additionalReservedCount;
   const vacantSeats = Math.max(0, TOTAL_PHYSICAL_SEATS - totalRegistered);
 
   // Accurate Real-Time Countdown Timer Engine
@@ -69,11 +69,11 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
       const ticketEmail: EmailNotification = {
         id: `EML-${Math.floor(1000 + Math.random() * 9000)}`,
         recipient: attendeeEmail || 'innovator@venture.africa',
-        recipientName: attendeeName || 'Founder / Attendee',
+        recipientName: attendeeName || 'Participant',
         subject: 'Confirmed: Your Participant Pass to Óghowa Business Week 2026',
         type: 'Event Ticket',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
-        content: `Dear ${attendeeName || 'Innovator'},\n\nYour seat for Óghowa Business Week 2026 is officially confirmed!\n\nTheme: Innovation for Economic Transformation\nDates: November 16 – 21, 2026\nVenue: Victor Uwaifo Creative Hub & Edo Innovates Campus, Benin City\nCredential ID: OBW-2026-${Math.floor(100000 + Math.random() * 900000)}\nOrganization: ${attendeeOrg || 'Independent'}\n\nPlease present this email confirmation or your mobile badge at the registration desk for instant accreditation.`
+        content: `Dear ${attendeeName || 'Innovator'},\n\nYour seat for Óghowa Business Week 2026 is officially confirmed!\n\nTheme: Innovation for Economic Transformation\nDates: November 16 – 21, 2026\nVenue: Victor Uwaifo Creative Hub\nCredential ID: OBW-2026-${Math.floor(100000 + Math.random() * 900000)}\nOrganization: ${attendeeOrg || 'Independent'}\n\nPlease present this email confirmation or your mobile badge at the registration desk for instant accreditation.`
       };
 
       if (onTicketReserved) {
@@ -94,7 +94,7 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
           <div className="max-w-xl text-center lg:text-left">
             <div className="inline-flex items-center gap-2 text-rose-400 font-semibold text-xs tracking-wider uppercase mb-2">
               <Calendar className="w-4 h-4 text-rose-500" />
-              <span>Óghowa Business Week 2026</span>
+              <span>Upcoming Flagship Event</span>
             </div>
 
             <h3
@@ -103,22 +103,22 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
                 onOpenBusinessWeek ? 'cursor-pointer hover:text-blue-200 transition-colors' : ''
               }`}
             >
-              Óghowa Business Week
+              Óghowa Business Week 2026
             </h3>
 
             <p className="text-slate-300 text-sm leading-relaxed mb-5">
-              Under the theme <strong className="text-white">"Innovation for Economic Transformation"</strong>, in collaboration with Benin Tech Fest. Join founders, investors, business leaders, and innovators for keynotes, masterclasses, startup pitches, and high-impact networking in Edo State.
+              Under the theme <strong className="text-white">"Innovation for Economic Transformation"</strong>, in collaboration with Benin Tech Fest. Join founders, investors, business leaders, and innovators for keynotes, masterclasses, startup pitches, and high-impact networking.
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-xs font-semibold">
               <span className="bg-blue-900/70 px-3 py-1.5 rounded-md border border-blue-400/25 flex items-center gap-1.5 text-slate-200">
                 <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                <span>Benin City, Edo State</span>
+                <span>Victor Uwaifo Creative Hub</span>
               </span>
 
               <span className="bg-rose-950/70 text-rose-300 px-3 py-1.5 rounded-md border border-rose-500/30 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
-                <span>Only <strong className="text-white font-extrabold">{vacantSeats}</strong> vacant physical seats remaining (out of {TOTAL_PHYSICAL_SEATS} capacity)!</span>
+                <span>Capacity: 500 Participants • <strong className="text-white font-extrabold">{vacantSeats}</strong> Seats Vacant</span>
               </span>
             </div>
           </div>
@@ -161,7 +161,7 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
                   onClick={onOpenBusinessWeek}
                   className="w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-xs bg-white text-[#0B1E48] hover:bg-slate-100 active:scale-98 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Explore Summit Page</span>
+                  <span>Explore 4-Day Program</span>
                   <ArrowRight className="w-4 h-4 text-blue-600" />
                 </button>
               )}
@@ -202,7 +202,7 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
                   <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-2 ring-4 ring-rose-50">
                     <Ticket className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-bold text-rose-600 uppercase tracking-widest">Live Participant Registration</span>
+                  <span className="text-xs font-bold text-rose-600 uppercase tracking-widest">Participant Registration</span>
                   <h3 className="text-xl font-black text-[#0B1E48] mt-1">
                     Reserve Your Business Week Pass
                   </h3>
@@ -263,7 +263,7 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-500">
-                  Includes full access to the 4-day program: Policy Forum, The Founder's Blueprint, VC Day, and Grand Finale Demo Day.
+                  Venue: <strong className="text-slate-800">Victor Uwaifo Creative Hub</strong>. Access to all 4 days of keynotes, masterclasses, and networking.
                 </div>
 
                 <button
@@ -280,15 +280,10 @@ export const EventCountdown: React.FC<EventCountdownProps> = ({
                 </div>
                 <h4 className="text-xl font-black text-[#0B1E48]">Pass Confirmed & Dispatched!</h4>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                  Your event credential has been dispatched to{' '}
+                  Your participant credential has been dispatched to{' '}
                   <strong className="text-slate-900">{attendeeEmail || 'your email'}</strong>. Live vacant physical seats remaining:{' '}
                   <strong className="text-rose-600">{vacantSeats}</strong>.
                 </p>
-
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-left text-xs text-blue-900 space-y-1">
-                  <p className="font-bold">Next Steps:</p>
-                  <p>Check the automated email dispatched to your inbox with your credential ID and accreditation barcode.</p>
-                </div>
 
                 <button
                   onClick={() => {
