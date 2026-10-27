@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { PARTNERS_LIST } from '../data/mockData';
 import { PartnerItem } from '../types';
 import { ExternalLink, Handshake } from 'lucide-react';
@@ -21,9 +22,15 @@ export const PartnersMarquee: React.FC<PartnersMarqueeProps> = ({
   };
 
   return (
-    <section id="partners" className="py-16 sm:py-20 bg-white border-b border-slate-100">
+    <section id="partners" className="py-16 sm:py-20 bg-white border-b border-slate-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="text-center mb-10"
+        >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/60 text-rose-700 text-xs font-bold uppercase tracking-wider mb-2">
             <Handshake className="w-3.5 h-3.5" />
             <span>Institutional Backing</span>
@@ -34,11 +41,11 @@ export const PartnersMarquee: React.FC<PartnersMarqueeProps> = ({
           <p className="mt-2 text-sm text-slate-500 font-normal max-w-2xl mx-auto">
             Backed by visionary governments, global technology leaders, and premier financial institutions advancing economic transformation.
           </p>
-        </div>
+        </motion.div>
 
         {/* Partners Badges & Logos Row */}
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8">
-          {activePartners.map((partner) => {
+          {activePartners.map((partner, idx) => {
             const hasImage = isImageUrl(partner.logoUrl) || isImageUrl(partner.logo);
             const imageSrc = partner.logoUrl || (isImageUrl(partner.logo) ? partner.logo : undefined);
 
@@ -82,30 +89,42 @@ export const PartnersMarquee: React.FC<PartnersMarqueeProps> = ({
               </div>
             );
 
-            return partner.websiteUrl ? (
-              <a
+            return (
+              <motion.div
                 key={partner.id || partner.name}
-                href={partner.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`Visit ${partner.name}`}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.4, delay: idx * 0.04, ease: 'easeOut' }}
               >
-                {CardContent}
-              </a>
-            ) : (
-              <div key={partner.id || partner.name}>
-                {CardContent}
-              </div>
+                {partner.websiteUrl ? (
+                  <a
+                    href={partner.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Visit ${partner.name}`}
+                  >
+                    {CardContent}
+                  </a>
+                ) : (
+                  CardContent
+                )}
+              </motion.div>
             );
           })}
         </div>
 
         {/* Co-Investment & Support Note */}
-        <div className="mt-12 text-center text-xs text-slate-400">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-12 text-center text-xs text-slate-400"
+        >
           <span>Official ecosystem innovation partners supporting technical credits, venture grants, and state pilot programs.</span>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 };
-

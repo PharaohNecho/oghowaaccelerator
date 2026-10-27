@@ -67,7 +67,33 @@ export default function App() {
   const [carouselEvents, setCarouselEvents] = useState<CarouselSlide[]>(DEFAULT_CAROUSEL_EVENTS);
 
   // Dynamic Business Week Summit & Registration Configuration controlled by Superadmin
-  const [businessWeekConfig, setBusinessWeekConfig] = useState<BusinessWeekConfig>(DEFAULT_BUSINESS_WEEK_CONFIG);
+  const [businessWeekConfig, setBusinessWeekConfig] = useState<BusinessWeekConfig>(() => {
+    try {
+      const saved = localStorage.getItem('oghowa_business_week_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.formFields || parsed.formFields.length === 0) {
+          parsed.formFields = DEFAULT_BUSINESS_WEEK_CONFIG.formFields;
+        }
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse oghowa_business_week_config', e);
+    }
+    return DEFAULT_BUSINESS_WEEK_CONFIG;
+  });
+
+  const handleUpdateBusinessWeekConfig = (updated: BusinessWeekConfig | ((prev: BusinessWeekConfig) => BusinessWeekConfig)) => {
+    setBusinessWeekConfig((prev) => {
+      const next = typeof updated === 'function' ? updated(prev) : updated;
+      try {
+        localStorage.setItem('oghowa_business_week_config', JSON.stringify(next));
+      } catch (err) {
+        console.warn('Failed to save oghowa_business_week_config', err);
+      }
+      return next;
+    });
+  };
 
   // Mail Server & SMTP Configuration controlled by Superadmin (mail.metaspaceconsult.com:465)
   const [smtpSettings, setSmtpSettings] = useState<SmtpSettings>(DEFAULT_SMTP_SETTINGS);
@@ -329,7 +355,7 @@ export default function App() {
           }}
           onTicketReserved={handleTicketReserved}
           onRegisterDelegate={(newDelegate: RegisteredDelegate) => {
-            setBusinessWeekConfig((prev) => ({
+            handleUpdateBusinessWeekConfig((prev) => ({
               ...prev,
               delegates: [newDelegate, ...prev.delegates]
             }));
@@ -473,7 +499,7 @@ export default function App() {
               onUpdateVentures={handleUpdateVentures}
               onUpdatePartners={handleUpdatePartners}
               onUpdateCarouselEvents={handleUpdateCarouselEvents}
-              onUpdateBusinessWeekConfig={setBusinessWeekConfig}
+              onUpdateBusinessWeekConfig={handleUpdateBusinessWeekConfig}
               onUpdateSmtpSettings={handleUpdateSmtpSettings}
               onSendCustomEmail={handleSendCustomEmail}
               onBackToDashboard={() => {

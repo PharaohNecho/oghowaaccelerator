@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Compass, Wrench, BarChart2, Coins, Globe2, Award, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { JOURNEY_STEPS } from '../data/mockData';
 
@@ -7,7 +8,7 @@ interface JourneyProps {
 }
 
 export const Journey: React.FC<JourneyProps> = ({ onStartApplication }) => {
-  const [activeStage, setActiveStage] = useState<number>(3); // Default to 'Fund' (step 4, index 3) matching red highlight!
+  const [activeStage, setActiveStage] = useState<number>(3); // Default to 'Fund' (step 4, index 3)
 
   const getStepIcon = (iconName: string, isHighlighted: boolean, isSelected: boolean) => {
     const iconClass = isHighlighted ? 'text-white' : isSelected ? 'text-white' : 'text-slate-700';
@@ -32,19 +33,25 @@ export const Journey: React.FC<JourneyProps> = ({ onStartApplication }) => {
   const selectedStep = JOURNEY_STEPS[activeStage];
 
   return (
-    <section id="journey" className="py-20 sm:py-24 bg-slate-50/60 border-b border-slate-100">
+    <section id="journey" className="py-20 sm:py-24 bg-slate-50/60 border-b border-slate-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="text-center max-w-3xl mx-auto mb-16"
+        >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B1E48] tracking-tight">
             The Óghowa Journey
           </h2>
           <p className="mt-3 text-base sm:text-lg text-slate-600 font-normal">
             We support entrepreneurs throughout their entire venture lifecycle—from idea to impact.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Step progression line (Horizontal in desktop, scroll/grid in mobile) */}
+        {/* Step progression line */}
         <div className="relative mb-12">
           {/* Connector Line behind circles */}
           <div className="hidden lg:block absolute top-7 left-12 right-12 h-0.5 bg-slate-200 z-0" />
@@ -52,11 +59,15 @@ export const Journey: React.FC<JourneyProps> = ({ onStartApplication }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 relative z-10">
             {JOURNEY_STEPS.map((step, index) => {
               const isSelected = activeStage === index;
-              const isFundStep = step.highlight; // The red highlighted step in the original image
+              const isFundStep = step.highlight;
 
               return (
-                <button
+                <motion.button
                   key={step.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: index * 0.07, ease: 'easeOut' }}
                   onClick={() => setActiveStage(index)}
                   className={`text-center flex flex-col items-center group focus:outline-hidden p-3 rounded-xl transition-all ${
                     isSelected ? 'bg-white shadow-md ring-1 ring-slate-200' : 'hover:bg-white/60'
@@ -93,18 +104,24 @@ export const Journey: React.FC<JourneyProps> = ({ onStartApplication }) => {
                     {step.title}
                   </h3>
 
-                  {/* Short summary matching image */}
+                  {/* Short summary */}
                   <p className="mt-2 text-xs text-slate-500 leading-relaxed text-center line-clamp-3">
                     {step.summary}
                   </p>
-                </button>
+                </motion.button>
               );
             })}
           </div>
         </div>
 
         {/* Selected Stage Detail Box */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 shadow-sm"
+        >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
             <div className="flex items-center gap-4">
               <span className="text-3xl font-black text-rose-600">
@@ -167,7 +184,7 @@ export const Journey: React.FC<JourneyProps> = ({ onStartApplication }) => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

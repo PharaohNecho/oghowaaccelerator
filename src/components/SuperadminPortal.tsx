@@ -29,7 +29,8 @@ import {
   Settings,
   Radio,
   Image as ImageIcon,
-  ExternalLink
+  ExternalLink,
+  Key
 } from 'lucide-react';
 import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekConfig, SmtpSettings } from '../types';
 import { DEFAULT_SMTP_SETTINGS } from '../data/mockData';
@@ -94,14 +95,36 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   onNavigateToBusinessWeek,
   onNavigateToRegistration
 }) => {
+  // Stored Admin Credentials (saved to localStorage so changes persist)
+  const [adminCredentials, setAdminCredentials] = useState<{ username: string; password: string }>(() => {
+    try {
+      const saved = localStorage.getItem('oghowa_admin_credentials');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.username && parsed.password) return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+    return { username: 'Admin01', password: 'OghAdmin@26' };
+  });
+
   // Authentication & Auto-Lock State
-  // Default credentials: Admin01 / OghAdmin@26
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [unlockPasswordInput, setUnlockPasswordInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+
+  // Password / Credentials Change Modal State
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState<boolean>(false);
+  const [currentPassInput, setCurrentPassInput] = useState<string>('');
+  const [newUsernameInput, setNewUsernameInput] = useState<string>('');
+  const [newPasswordInput, setNewPasswordInput] = useState<string>('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState<string>('');
+  const [credUpdateSuccess, setCredUpdateSuccess] = useState<string>('');
+  const [credUpdateError, setCredUpdateError] = useState<string>('');
 
   // 5 Minutes (300 seconds) Inactivity Auto-Lock
   const TIMEOUT_SECONDS = 300;
@@ -196,27 +219,68 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   // Login handler
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (usernameInput === 'Admin01' && passwordInput === 'OghAdmin@26') {
+    if (usernameInput === adminCredentials.username && passwordInput === adminCredentials.password) {
       setIsAuthenticated(true);
       setIsLocked(false);
       setSecondsRemaining(TIMEOUT_SECONDS);
       setAuthError('');
     } else {
-      setAuthError('Invalid credentials. Default username is Admin01 and password is OghAdmin@26');
+      setAuthError('Invalid credentials. Please enter your valid superadmin username and password.');
     }
   };
 
   // Unlock handler
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
-    if (unlockPasswordInput === 'OghAdmin@26') {
+    if (unlockPasswordInput === adminCredentials.password) {
       setIsLocked(false);
       setUnlockPasswordInput('');
       setSecondsRemaining(TIMEOUT_SECONDS);
       setAuthError('');
     } else {
-      setAuthError('Incorrect admin password. Default is OghAdmin@26');
+      setAuthError('Incorrect superadmin password. Please try again.');
     }
+  };
+
+  // Change Credentials & Password handler
+  const handleChangeCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCredUpdateError('');
+    setCredUpdateSuccess('');
+
+    if (currentPassInput !== adminCredentials.password) {
+      setCredUpdateError('Current password does not match.');
+      return;
+    }
+    if (!newPasswordInput || newPasswordInput.length < 6) {
+      setCredUpdateError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPasswordInput !== confirmPasswordInput) {
+      setCredUpdateError('New passwords do not match.');
+      return;
+    }
+
+    const updated = {
+      username: newUsernameInput.trim() || adminCredentials.username,
+      password: newPasswordInput
+    };
+
+    setAdminCredentials(updated);
+    try {
+      localStorage.setItem('oghowa_admin_credentials', JSON.stringify(updated));
+    } catch (err) {
+      console.error('Failed to store credentials', err);
+    }
+
+    setCredUpdateSuccess('Credentials updated successfully. Saved for subsequent logins.');
+    setTimeout(() => {
+      setIsChangePasswordOpen(false);
+      setCurrentPassInput('');
+      setNewPasswordInput('');
+      setConfirmPasswordInput('');
+      setCredUpdateSuccess('');
+    }, 1500);
   };
 
   const handleManualLock = () => {
@@ -263,6 +327,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
       stage: 'Scaling',
       logoText: 'OV',
       badgeColor: 'bg-blue-600',
+      websiteUrl: 'https://',
       isDisplayed: true,
       metrics: [
         { label: 'Traction', value: '10,000+' },
@@ -289,6 +354,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
       stage: (ventureForm.stage as any) || 'Scaling',
       logoText: ventureForm.logoText || (ventureForm.name ? ventureForm.name.substring(0, 2).toUpperCase() : 'OV'),
       badgeColor: ventureForm.badgeColor || 'bg-blue-600',
+      websiteUrl: ventureForm.websiteUrl || '',
       isDisplayed: ventureForm.isDisplayed !== false,
       metrics: ventureForm.metrics || [{ label: 'Scale', value: '1,000+' }],
       highlights: ventureForm.highlights || ['Verified venture']
@@ -587,9 +653,9 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                 type="text"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="Admin01"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
                 required
+                autoComplete="username"
               />
             </div>
 
@@ -601,19 +667,15 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                 type="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="OghAdmin@26"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
                 required
+                autoComplete="current-password"
               />
-            </div>
-
-            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-500">
-              Default Credentials: <strong className="text-slate-800">Admin01</strong> / <strong className="text-slate-800">OghAdmin@26</strong> (Auto-locks after 5 mins).
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold rounded-lg shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold rounded-lg shadow-md transition cursor-pointer flex items-center justify-center gap-2 mt-2"
             >
               <Lock className="w-4 h-4" />
               <span>Authenticate Superadmin</span>
@@ -658,7 +720,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                 type="password"
                 value={unlockPasswordInput}
                 onChange={(e) => setUnlockPasswordInput(e.target.value)}
-                placeholder="Enter password (OghAdmin@26)"
+                placeholder="Enter password"
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 focus:outline-hidden text-center"
                 autoFocus
                 required
@@ -673,7 +735,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
             </form>
 
             <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
-              <span>User: Admin01</span>
+              <span>Superadmin Session</span>
               <button
                 onClick={handleLogout}
                 className="text-rose-600 hover:underline font-semibold"
@@ -719,6 +781,20 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
             >
               <Lock className="w-3.5 h-3.5" />
               <span>Lock (5m)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setIsChangePasswordOpen(true);
+                setNewUsernameInput(adminCredentials.username);
+                setCredUpdateError('');
+                setCredUpdateSuccess('');
+              }}
+              title="Update username & password"
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 transition cursor-pointer border border-amber-500/30"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span>Change Password</span>
             </button>
 
             <button
@@ -1834,6 +1910,22 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
                 </div>
               </div>
 
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Company Website URL</label>
+                <div className="relative">
+                  <input
+                    type="url"
+                    value={ventureForm.websiteUrl || ''}
+                    onChange={(e) => setVentureForm({ ...ventureForm, websiteUrl: e.target.value })}
+                    placeholder="https://company.com"
+                    className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  Link used on homepage portfolio cards and modal for visitors to explore this company.
+                </span>
+              </div>
+
               <div className="pt-2 flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -2201,6 +2293,106 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-800 whitespace-pre-line leading-relaxed font-mono">
               {selectedEmail.content}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password & Admin Credentials Modal */}
+      {isChangePasswordOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+            <button
+              onClick={() => setIsChangePasswordOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2 text-rose-600 font-bold text-xs uppercase mb-1">
+              <Key className="w-4 h-4" />
+              <span>Superadmin Security</span>
+            </div>
+            <h3 className="text-xl font-bold text-[#0B1E48] mb-1">Update Admin Credentials</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Change the Superadmin username and login password. These credentials will be saved and required for subsequent sign-ins.
+            </p>
+
+            {credUpdateError && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{credUpdateError}</span>
+              </div>
+            )}
+
+            {credUpdateSuccess && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 font-medium flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span>{credUpdateSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleChangeCredentials} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Current Password *</label>
+                <input
+                  type="password"
+                  value={currentPassInput}
+                  onChange={(e) => setCurrentPassInput(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Superadmin Username</label>
+                <input
+                  type="text"
+                  value={newUsernameInput}
+                  onChange={(e) => setNewUsernameInput(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 font-medium"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">New Password * (Min 6 chars)</label>
+                <input
+                  type="password"
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Confirm New Password *</label>
+                <input
+                  type="password"
+                  value={confirmPasswordInput}
+                  onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Save Password & Changes</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

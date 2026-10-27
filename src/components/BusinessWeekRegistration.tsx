@@ -33,10 +33,12 @@ import {
   Users,
   ExternalLink,
   HelpCircle,
-  QrCode
+  QrCode,
+  Printer
 } from 'lucide-react';
 import { BusinessWeekLogo } from './BusinessWeekLogo';
-import { EmailNotification, RegisteredDelegate, BusinessWeekConfig } from '../types';
+import { EmailNotification, RegisteredDelegate, BusinessWeekConfig, RegistrationFormField } from '../types';
+import { DEFAULT_REGISTRATION_FIELDS } from '../data/mockData';
 
 interface BusinessWeekRegistrationProps {
   onBackToBusinessWeek: () => void;
@@ -149,6 +151,31 @@ export const BusinessWeekRegistration: React.FC<BusinessWeekRegistrationProps> =
   // Section 3: Consent - BLANK / UNCHECKED
   const [declarationConfirmed, setDeclarationConfirmed] = useState<boolean>(false);
   const [receiveUpdates, setReceiveUpdates] = useState<boolean>(false);
+
+  // Dynamic Form Custom Field Responses (Superadmin-added fields)
+  const [customResponses, setCustomResponses] = useState<Record<string, any>>({});
+
+  // Dynamic Fields Resolution from Superadmin Config
+  const formFields: RegistrationFormField[] = (config?.formFields && config.formFields.length > 0)
+    ? config.formFields
+    : DEFAULT_REGISTRATION_FIELDS;
+
+  const getField = (id: string) => formFields.find((f) => f.id === id);
+  const isVisible = (id: string) => {
+    const f = getField(id);
+    return f ? f.isVisible !== false : true;
+  };
+  const isRequired = (id: string) => {
+    const f = getField(id);
+    return f ? !!f.required : false;
+  };
+  const getFieldLabel = (id: string, fallback: string) => getField(id)?.label || fallback;
+  const getFieldPlaceholder = (id: string, fallback: string) => getField(id)?.placeholder || fallback;
+  const getFieldHelper = (id: string, fallback?: string) => getField(id)?.helperText || fallback || '';
+  const getFieldOptions = (id: string, fallback: string[]) => {
+    const f = getField(id);
+    return f && f.options && f.options.length > 0 ? f.options : fallback;
+  };
 
   // Form Validation & Errors
   const [formError, setFormError] = useState<string>('');
@@ -267,48 +294,233 @@ END:VCALENDAR`;
     }
   };
 
+  const renderCustomField = (field: RegistrationFormField) => {
+    const val = customResponses[field.id];
+    return (
+      <div key={field.id} className="space-y-1.5">
+        <label className="text-sm font-bold text-[#0F172A] block">
+          {field.label} {field.required && <span className="text-[#DC2626] font-bold">*</span>}
+        </label>
+        {field.helperText && <p className="text-xs text-[#64748B]">{field.helperText}</p>}
+
+        {field.type === 'text' && (
+          <input
+            type="text"
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            placeholder={field.placeholder || ''}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+          />
+        )}
+        {field.type === 'email' && (
+          <input
+            type="email"
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            placeholder={field.placeholder || 'email@example.com'}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+          />
+        )}
+        {field.type === 'tel' && (
+          <input
+            type="tel"
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            placeholder={field.placeholder || '+234...'}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+          />
+        )}
+        {field.type === 'number' && (
+          <input
+            type="number"
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            placeholder={field.placeholder || '0'}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+          />
+        )}
+        {field.type === 'textarea' && (
+          <textarea
+            rows={3}
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            placeholder={field.placeholder || ''}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+          />
+        )}
+        {field.type === 'select' && (
+          <select
+            required={field.required}
+            value={val || ''}
+            onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.value }))}
+            className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
+          >
+            <option value="">{field.placeholder || '-- Please Select --'}</option>
+            {(field.options || []).map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        )}
+        {field.type === 'radio' && (
+          <div className="space-y-2 pt-1">
+            {(field.options || []).map((opt) => (
+              <label
+                key={opt}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                  val === opt
+                    ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                    : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={`custom_${field.id}`}
+                  checked={val === opt}
+                  onChange={() => setCustomResponses((prev) => ({ ...prev, [field.id]: opt }))}
+                  className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
+                />
+                <span className="text-xs sm:text-sm">{opt}</span>
+              </label>
+            ))}
+          </div>
+        )}
+        {field.type === 'checkbox' && (
+          <div className="space-y-2 pt-1">
+            {field.options && field.options.length > 0 ? (
+              field.options.map((opt) => {
+                const currentArr: string[] = Array.isArray(val) ? val : [];
+                const checked = currentArr.includes(opt);
+                return (
+                  <label
+                    key={opt}
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                      checked
+                        ? 'bg-[#E2E8F0]/20 border-[#0B1E48] font-bold text-[#0B1E48]'
+                        : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        const nextArr = checked ? currentArr.filter((x) => x !== opt) : [...currentArr, opt];
+                        setCustomResponses((prev) => ({ ...prev, [field.id]: nextArr }));
+                      }}
+                      className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
+                    />
+                    <span className="text-xs sm:text-sm">{opt}</span>
+                  </label>
+                );
+              })
+            ) : (
+              <label className="flex items-center gap-3 p-3 rounded-xl border bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!val}
+                  onChange={(e) => setCustomResponses((prev) => ({ ...prev, [field.id]: e.target.checked }))}
+                  className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
+                />
+                <span className="text-xs sm:text-sm text-[#0F172A]">{field.placeholder || field.label}</span>
+              </label>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    if (!formEmail.trim()) {
-      setFormError('Please enter your primary email address.');
+    // Dynamic validations respecting Superadmin isVisible and required configuration
+    if (isVisible('primaryEmail') && isRequired('primaryEmail') && !formEmail.trim()) {
+      setFormError(`Please enter your ${getFieldLabel('primaryEmail', 'Email').toLowerCase()}.`);
       return;
     }
 
-    if (!fullName.trim() || !contactEmail.trim() || !phoneNumber.trim() || !organisation.trim() || !jobRole.trim()) {
-      setFormError('Please complete all required fields in the "About you" section.');
+    if (isVisible('fullName') && isRequired('fullName') && !fullName.trim()) {
+      setFormError(`Please provide your ${getFieldLabel('fullName', 'Full name')}.`);
       return;
     }
 
-    if (!country || (country === 'Nigeria' && !state)) {
-      setFormError('Please select your state and city.');
+    if (isVisible('contactEmail') && isRequired('contactEmail') && !contactEmail.trim()) {
+      setFormError(`Please provide your ${getFieldLabel('contactEmail', 'Email address')}.`);
       return;
     }
 
-    if (!persona) {
-      setFormError('Please select which category best describes you.');
+    if (isVisible('phoneNumber') && isRequired('phoneNumber') && !phoneNumber.trim()) {
+      setFormError(`Please provide your ${getFieldLabel('phoneNumber', 'Phone / WhatsApp number')}.`);
       return;
     }
 
-    if (selectedInterests.length === 0) {
-      setFormError('Please select at least one area of interest.');
+    if (isVisible('organization') && isRequired('organization') && !organisation.trim()) {
+      setFormError(`Please specify your ${getFieldLabel('organization', 'Organisation / business / school')}.`);
       return;
     }
 
-    if (!attendanceMode) {
-      setFormError('Please indicate whether you will attend in person.');
+    if (isVisible('jobRole') && isRequired('jobRole') && !jobRole.trim()) {
+      setFormError(`Please specify your ${getFieldLabel('jobRole', 'Job title / role')}.`);
       return;
     }
 
-    if (!exhibitSponsorInterest) {
-      setFormError('Please indicate if you are interested in exhibiting or sponsoring.');
+    if (isVisible('location') && isRequired('location')) {
+      if (!country || (country === 'Nigeria' && !state)) {
+        setFormError('Please select your state and city.');
+        return;
+      }
+    }
+
+    if (isVisible('persona') && isRequired('persona') && !persona) {
+      setFormError(`Please select an option for: ${getFieldLabel('persona', 'Which best describes you?')}`);
       return;
     }
 
-    if (!discoverySource) {
-      setFormError('Please select how you heard about Óghowa Business Week.');
+    if (isVisible('interests') && isRequired('interests') && selectedInterests.length === 0) {
+      setFormError(`Please select at least one area for: ${getFieldLabel('interests', 'What are you most interested in?')}`);
       return;
+    }
+
+    if (isVisible('attendanceMode') && isRequired('attendanceMode') && !attendanceMode) {
+      setFormError(`Please select an option for: ${getFieldLabel('attendanceMode', 'Will you attend in person?')}`);
+      return;
+    }
+
+    if (isVisible('exhibitSponsorInterest') && isRequired('exhibitSponsorInterest') && !exhibitSponsorInterest) {
+      setFormError(`Please answer: ${getFieldLabel('exhibitSponsorInterest', 'Are you interested in exhibiting or sponsoring?')}`);
+      return;
+    }
+
+    if (isVisible('discoverySource') && isRequired('discoverySource') && !discoverySource) {
+      setFormError(`Please answer: ${getFieldLabel('discoverySource', 'How did you hear about Óghowa Business Week?')}`);
+      return;
+    }
+
+    if (isVisible('accessibilityRequirements') && isRequired('accessibilityRequirements') && !accessibility.trim()) {
+      setFormError(`Please answer: ${getFieldLabel('accessibilityRequirements', 'Accessibility requirements')}`);
+      return;
+    }
+
+    if (isVisible('expectations') && isRequired('expectations') && !expectations.trim()) {
+      setFormError(`Please answer: ${getFieldLabel('expectations', 'What do you hope to get from the week?')}`);
+      return;
+    }
+
+    // Dynamic validation for superadmin custom fields
+    const customRequiredFields = formFields.filter((f) => !f.isCore && f.isVisible !== false && f.required);
+    for (const cf of customRequiredFields) {
+      const resp = customResponses[cf.id];
+      if (resp === undefined || resp === null || resp === '' || (Array.isArray(resp) && resp.length === 0)) {
+        setFormError(`Please complete required field: ${cf.label}`);
+        return;
+      }
     }
 
     if (!declarationConfirmed) {
@@ -325,24 +537,25 @@ END:VCALENDAR`;
     const newDelegate: RegisteredDelegate = {
       id: `del-${Date.now()}`,
       code: generatedRef,
-      name: fullName,
+      name: fullName || 'Participant',
       email: formEmail || contactEmail,
       phone: phoneNumber,
-      organization: organisation,
-      role: jobRole,
+      organization: organisation || 'Independent',
+      role: jobRole || 'Participant',
       country: effectiveCountry,
       state: effectiveState,
       city: effectiveCity,
       location: resolvedLocation,
-      persona: persona === 'Other' ? (otherPersona || 'Other') : persona,
+      persona: persona === 'Other' ? (otherPersona || 'Other') : (persona || 'Participant'),
       otherPersona: persona === 'Other' ? otherPersona : undefined,
       tracks: selectedInterests.slice(0, 2),
       interests: selectedInterests,
-      attendanceMode,
-      exhibitSponsorInterest,
-      discoverySource: discoverySource === 'Other' ? (otherDiscoverySource || 'Other') : discoverySource,
+      attendanceMode: attendanceMode || 'Yes, in person',
+      exhibitSponsorInterest: exhibitSponsorInterest || 'No',
+      discoverySource: discoverySource === 'Other' ? (otherDiscoverySource || 'Other') : (discoverySource || 'Online'),
       accessibilityRequirements: accessibility,
       expectations,
+      customAnswers: customResponses,
       declarationConfirmed,
       receiveUpdates,
       registeredAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -744,9 +957,10 @@ END:VCALENDAR`;
                   <button
                     onClick={handlePrintBadge}
                     className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#0B1E48] text-white font-bold text-xs hover:bg-[#061224] transition-all shadow-sm cursor-pointer"
+                    title="Print registration voucher sheet or save as PDF"
                   >
-                    <Download className="w-4 h-4 text-[#FEE2E2]" />
-                    <span>Save PDF Pass</span>
+                    <Printer className="w-4 h-4 text-[#FEE2E2]" />
+                    <span>Print Sheet / PDF</span>
                   </button>
 
                   <button
@@ -990,14 +1204,14 @@ END:VCALENDAR`;
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B1E48] tracking-tight">
-                    Óghowa Business Week — Participant Registration
+                    {config?.registrationTitle || 'Óghowa Business Week — Participant Registration'}
                   </h1>
                   <p className="text-sm sm:text-base font-semibold text-[#0B1E48] mt-1">
-                    Óghowa Business Week · Innovation for Economic Transformation
+                    {config?.registrationSubtitle || 'Óghowa Business Week · Innovation for Economic Transformation'}
                   </p>
 
                   <p className="text-xs sm:text-sm text-[#64748B] mt-3 leading-relaxed">
-                    Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.
+                    {config?.registrationDescription || 'Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State.'}
                   </p>
 
                   {/* Real-time countdown strip */}
@@ -1046,485 +1260,636 @@ END:VCALENDAR`;
                 )}
 
                 {/* Primary Email Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E2E8F0] space-y-2">
-                  <label className="text-sm font-bold text-[#0F172A] block">
-                    Email <span className="text-[#DC2626] font-bold">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
-                    <input
-                      type="email"
-                      required
-                      value={formEmail}
-                      onChange={(e) => {
-                        setFormEmail(e.target.value);
-                        if (!contactEmail) setContactEmail(e.target.value);
-                      }}
-                      placeholder="Your email address"
-                      className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                    />
-                  </div>
-                </div>
-
-                {/* SECTION 1: ABOUT YOU */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
-                  <div className="pb-3 border-b border-[#E2E8F0]">
-                    <h2 className="text-xl font-bold text-[#0B1E48]">About you</h2>
-                    <p className="text-xs text-[#64748B] mt-0.5">Please provide your verified personal identification.</p>
-                  </div>
-
-                  {/* Full Name */}
-                  <div className="space-y-1">
+                {isVisible('primaryEmail') && (
+                  <div className="bg-white rounded-2xl p-6 shadow-xs border border-[#E2E8F0] space-y-2">
                     <label className="text-sm font-bold text-[#0F172A] block">
-                      Full name <span className="text-[#DC2626] font-bold">*</span>
+                      {getFieldLabel('primaryEmail', 'Email')}{' '}
+                      {isRequired('primaryEmail') && <span className="text-[#DC2626] font-bold">*</span>}
                     </label>
-                    <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
-                      <input
-                        type="text"
-                        required
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Your full name"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Email Address */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Email address <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
+                    {getFieldHelper('primaryEmail') && (
+                      <p className="text-xs text-[#64748B]">{getFieldHelper('primaryEmail')}</p>
+                    )}
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                       <input
                         type="email"
-                        required
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                        placeholder="Your contact email"
+                        required={isRequired('primaryEmail')}
+                        value={formEmail}
+                        onChange={(e) => {
+                          setFormEmail(e.target.value);
+                          if (!contactEmail) setContactEmail(e.target.value);
+                        }}
+                        placeholder={getFieldPlaceholder('primaryEmail', 'Your email address')}
                         className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                       />
                     </div>
                   </div>
+                )}
 
-                  {/* Phone / WhatsApp number */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Phone / WhatsApp number <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
-                    <p className="text-xs text-[#64748B]">Include your country code, e.g. +234…</p>
-                    <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
-                      <input
-                        type="tel"
-                        required
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder="+234 800 000 0000"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Organisation / business / school */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Organisation / business / school <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
-                    <p className="text-xs text-[#64748B]">Write "Independent" if you are not attached to an organisation.</p>
-                    <div className="relative">
-                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
-                      <input
-                        type="text"
-                        required
-                        value={organisation}
-                        onChange={(e) => setOrganisation(e.target.value)}
-                        placeholder='Your organisation or "Independent"'
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Job title / role */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Job title / role <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
-                    <div className="relative">
-                      <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
-                      <input
-                        type="text"
-                        required
-                        value={jobRole}
-                        onChange={(e) => setJobRole(e.target.value)}
-                        placeholder="e.g. Founder, CEO, Student, Tech Lead"
-                        className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* City, state and country split */}
-                  <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
-                    <div>
-                      <label className="text-sm font-bold text-[#0F172A] block">
-                        City, state and country <span className="text-[#DC2626] font-bold">*</span>
-                      </label>
-                      <p className="text-xs text-[#64748B]">
-                        Split each: each country listed and all Nigeria states listed with cities too (e.g. Benin City, Edo State, Nigeria)
-                      </p>
+                {/* SECTION 1: ABOUT YOU */}
+                {(isVisible('fullName') ||
+                  isVisible('contactEmail') ||
+                  isVisible('phoneNumber') ||
+                  isVisible('organization') ||
+                  isVisible('jobRole') ||
+                  isVisible('location') ||
+                  formFields.some((f) => !f.isCore && f.isVisible !== false && f.section === 'about')) && (
+                  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
+                    <div className="pb-3 border-b border-[#E2E8F0]">
+                      <h2 className="text-xl font-bold text-[#0B1E48]">About you</h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">Please provide your verified personal identification.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {/* Country */}
+                    {/* Full Name */}
+                    {isVisible('fullName') && (
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#64748B]">Country *</label>
-                        <select
-                          value={country}
-                          onChange={(e) => {
-                            setCountry(e.target.value);
-                            setState('');
-                            setCity('');
-                          }}
-                          className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
-                        >
-                          {COUNTRIES.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                        {country === 'Other' && (
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('fullName', 'Full name')}{' '}
+                          {isRequired('fullName') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        {getFieldHelper('fullName') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('fullName')}</p>
+                        )}
+                        <div className="relative">
+                          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                           <input
                             type="text"
-                            required
-                            value={otherCountry}
-                            onChange={(e) => setOtherCountry(e.target.value)}
-                            placeholder="Type country name"
-                            className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
+                            required={isRequired('fullName')}
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            placeholder={getFieldPlaceholder('fullName', 'Your full name')}
+                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                           />
-                        )}
+                        </div>
                       </div>
+                    )}
 
-                      {/* State */}
+                    {/* Email Address */}
+                    {isVisible('contactEmail') && (
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#64748B]">State / Province *</label>
-                        {country === 'Nigeria' ? (
-                          <select
-                            value={state}
-                            onChange={(e) => {
-                              setState(e.target.value);
-                              setCity('');
-                            }}
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
-                            required
-                          >
-                            <option value="">Select State</option>
-                            {NIGERIAN_STATES.map((s) => (
-                              <option key={s} value={s}>
-                                {s} {s === 'Edo' ? '(Host State)' : ''}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('contactEmail', 'Email address')}{' '}
+                          {isRequired('contactEmail') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        {getFieldHelper('contactEmail') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('contactEmail')}</p>
+                        )}
+                        <div className="relative">
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
+                          <input
+                            type="email"
+                            required={isRequired('contactEmail')}
+                            value={contactEmail}
+                            onChange={(e) => setContactEmail(e.target.value)}
+                            placeholder={getFieldPlaceholder('contactEmail', 'Your contact email')}
+                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Phone / WhatsApp number */}
+                    {isVisible('phoneNumber') && (
+                      <div className="space-y-1">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('phoneNumber', 'Phone / WhatsApp number')}{' '}
+                          {isRequired('phoneNumber') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        <p className="text-xs text-[#64748B]">
+                          {getFieldHelper('phoneNumber', 'Include your country code, e.g. +234…')}
+                        </p>
+                        <div className="relative">
+                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
+                          <input
+                            type="tel"
+                            required={isRequired('phoneNumber')}
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            placeholder={getFieldPlaceholder('phoneNumber', '+234 800 000 0000')}
+                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Organisation / business / school */}
+                    {isVisible('organization') && (
+                      <div className="space-y-1">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('organization', 'Organisation / business / school')}{' '}
+                          {isRequired('organization') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        <p className="text-xs text-[#64748B]">
+                          {getFieldHelper('organization', 'Write "Independent" if you are not attached to an organisation.')}
+                        </p>
+                        <div className="relative">
+                          <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
                           <input
                             type="text"
-                            required
-                            value={otherState}
-                            onChange={(e) => setOtherState(e.target.value)}
-                            placeholder="State or Region"
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
+                            required={isRequired('organization')}
+                            value={organisation}
+                            onChange={(e) => setOrganisation(e.target.value)}
+                            placeholder={getFieldPlaceholder('organization', 'Your organisation or "Independent"')}
+                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                           />
-                        )}
+                        </div>
                       </div>
+                    )}
 
-                      {/* City */}
+                    {/* Job title / role */}
+                    {isVisible('jobRole') && (
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#64748B]">City *</label>
-                        {country === 'Nigeria' ? (
-                          <>
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('jobRole', 'Job title / role')}{' '}
+                          {isRequired('jobRole') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        {getFieldHelper('jobRole') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('jobRole')}</p>
+                        )}
+                        <div className="relative">
+                          <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-4 h-4" />
+                          <input
+                            type="text"
+                            required={isRequired('jobRole')}
+                            value={jobRole}
+                            onChange={(e) => setJobRole(e.target.value)}
+                            placeholder={getFieldPlaceholder('jobRole', 'e.g. Founder, CEO, Student, Tech Lead')}
+                            className="w-full bg-white pl-10 pr-4 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* City, state and country split */}
+                    {isVisible('location') && (
+                      <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
+                        <div>
+                          <label className="text-sm font-bold text-[#0F172A] block">
+                            {getFieldLabel('location', 'City, state and country')}{' '}
+                            {isRequired('location') && <span className="text-[#DC2626] font-bold">*</span>}
+                          </label>
+                          <p className="text-xs text-[#64748B]">
+                            {getFieldHelper(
+                              'location',
+                              'Split each: each country listed and all Nigeria states listed with cities too (e.g. Benin City, Edo State, Nigeria)'
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {/* Country */}
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#64748B]">
+                              Country {isRequired('location') && '*'}
+                            </label>
                             <select
-                              value={city}
-                              onChange={(e) => setCity(e.target.value)}
+                              value={country}
+                              onChange={(e) => {
+                                setCountry(e.target.value);
+                                setState('');
+                                setCity('');
+                              }}
                               className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
-                              required
                             >
-                              <option value="">Select City</option>
-                              {availableCities.map((c) => (
+                              {COUNTRIES.map((c) => (
                                 <option key={c} value={c}>
                                   {c}
                                 </option>
                               ))}
                             </select>
-                            {city === 'Other' && (
+                            {country === 'Other' && (
                               <input
                                 type="text"
-                                required
-                                value={customCity}
-                                onChange={(e) => setCustomCity(e.target.value)}
-                                placeholder="Type city name"
+                                required={isRequired('location')}
+                                value={otherCountry}
+                                onChange={(e) => setOtherCountry(e.target.value)}
+                                placeholder="Type country name"
                                 className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                               />
                             )}
-                          </>
-                        ) : (
-                          <input
-                            type="text"
-                            required
-                            value={customCity}
-                            onChange={(e) => setCustomCity(e.target.value)}
-                            placeholder="Enter city"
-                            className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
-                          />
-                        )}
+                          </div>
+
+                          {/* State */}
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#64748B]">
+                              State / Province {isRequired('location') && '*'}
+                            </label>
+                            {country === 'Nigeria' ? (
+                              <select
+                                value={state}
+                                onChange={(e) => {
+                                  setState(e.target.value);
+                                  setCity('');
+                                }}
+                                className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
+                                required={isRequired('location')}
+                              >
+                                <option value="">Select State</option>
+                                {NIGERIAN_STATES.map((s) => (
+                                  <option key={s} value={s}>
+                                    {s} {s === 'Edo' ? '(Host State)' : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                required={isRequired('location')}
+                                value={otherState}
+                                onChange={(e) => setOtherState(e.target.value)}
+                                placeholder="State or Region"
+                                className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
+                              />
+                            )}
+                          </div>
+
+                          {/* City */}
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#64748B]">
+                              City {isRequired('location') && '*'}
+                            </label>
+                            {country === 'Nigeria' ? (
+                              <>
+                                <select
+                                  value={city}
+                                  onChange={(e) => setCity(e.target.value)}
+                                  className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:ring-2 focus:ring-[#0B1E48]"
+                                  required={isRequired('location')}
+                                >
+                                  <option value="">Select City</option>
+                                  {availableCities.map((c) => (
+                                    <option key={c} value={c}>
+                                      {c}
+                                    </option>
+                                  ))}
+                                </select>
+                                {city === 'Other' && (
+                                  <input
+                                    type="text"
+                                    required={isRequired('location')}
+                                    value={customCity}
+                                    onChange={(e) => setCustomCity(e.target.value)}
+                                    placeholder="Type city name"
+                                    className="w-full mt-2 bg-white px-3 py-2 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
+                                  />
+                                )}
+                              </>
+                            ) : (
+                              <input
+                                type="text"
+                                required={isRequired('location')}
+                                value={customCity}
+                                onChange={(e) => setCustomCity(e.target.value)}
+                                placeholder="Enter city"
+                                className="w-full bg-white px-3 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A]"
+                              />
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Section 1 Custom Fields if any */}
+                    {formFields
+                      .filter((f) => !f.isCore && f.isVisible !== false && f.section === 'about')
+                      .map(renderCustomField)}
                   </div>
-                </div>
+                )}
 
                 {/* SECTION 2: YOUR PARTICIPATION */}
-                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
-                  <div className="pb-3 border-b border-[#E2E8F0]">
-                    <h2 className="text-xl font-bold text-[#0B1E48]">Your participation</h2>
-                    <p className="text-xs text-[#64748B] mt-0.5">Tell us about how you wish to engage with the summit.</p>
-                  </div>
+                {(isVisible('persona') ||
+                  isVisible('interests') ||
+                  isVisible('attendanceMode') ||
+                  isVisible('exhibitSponsorInterest') ||
+                  isVisible('discoverySource') ||
+                  isVisible('accessibilityRequirements') ||
+                  isVisible('expectations') ||
+                  formFields.some((f) => !f.isCore && f.isVisible !== false && f.section === 'participation')) && (
+                  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
+                    <div className="pb-3 border-b border-[#E2E8F0]">
+                      <h2 className="text-xl font-bold text-[#0B1E48]">Your participation</h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">Tell us about how you wish to engage with the summit.</p>
+                    </div>
 
-                  {/* Question: Which best describes you? */}
-                  <div className="space-y-3">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Which best describes you? <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
-
-                    <div className="space-y-2">
-                      {[
-                        'Entrepreneur / business owner',
-                        'Startup founder',
-                        'Tech or digital professional',
-                        'Investor / funder',
-                        'Corporate / business professional',
-                        'Government / public sector',
-                        'Student / young professional',
-                        'Creative / media',
-                        'Other'
-                      ].map((opt) => (
-                        <label
-                          key={opt}
-                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                            persona === opt
-                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
-                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="persona"
-                            checked={persona === opt}
-                            onChange={() => setPersona(opt)}
-                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
-                          />
-                          <span className="text-xs sm:text-sm">{opt}</span>
+                    {/* Question: Which best describes you? */}
+                    {isVisible('persona') && (
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('persona', 'Which best describes you?')}{' '}
+                          {isRequired('persona') && <span className="text-[#DC2626] font-bold">*</span>}
                         </label>
-                      ))}
+                        {getFieldHelper('persona') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('persona')}</p>
+                        )}
 
-                      {persona === 'Other' && (
-                        <input
-                          type="text"
-                          required
-                          value={otherPersona}
-                          onChange={(e) => setOtherPersona(e.target.value)}
-                          placeholder="Please specify your role"
-                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
-                        />
-                      )}
-                    </div>
-                  </div>
+                        <div className="space-y-2">
+                          {getFieldOptions('persona', [
+                            'Entrepreneur / business owner',
+                            'Startup founder',
+                            'Tech or digital professional',
+                            'Investor / funder',
+                            'Corporate / business professional',
+                            'Government / public sector',
+                            'Student / young professional',
+                            'Creative / media',
+                            'Other'
+                          ]).map((opt) => (
+                            <label
+                              key={opt}
+                              className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                persona === opt
+                                  ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                                  : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="persona"
+                                checked={persona === opt}
+                                onChange={() => setPersona(opt)}
+                                className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
+                              />
+                              <span className="text-xs sm:text-sm">{opt}</span>
+                            </label>
+                          ))}
 
-                  {/* Question: What are you most interested in? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
-                    <div>
-                      <label className="text-sm font-bold text-[#0F172A] block">
-                        What are you most interested in? <span className="text-[#DC2626] font-bold">*</span>
-                      </label>
-                      <p className="text-xs text-[#64748B]">Select all that apply.</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      {[
-                        'Keynotes & panel discussions',
-                        'Masterclasses & workshops',
-                        'Startup pitches & showcase',
-                        'Networking & investor meetups',
-                        'Exhibition',
-                        'Mentorship & business support'
-                      ].map((item) => {
-                        const isChecked = selectedInterests.includes(item);
-                        return (
-                          <label
-                            key={item}
-                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                              isChecked
-                                ? 'bg-[#E2E8F0]/20 border-[#0B1E48] font-bold text-[#0B1E48]'
-                                : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
-                            }`}
-                          >
+                          {persona === 'Other' && (
                             <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleInterest(item)}
-                              className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
+                              type="text"
+                              required={isRequired('persona')}
+                              value={otherPersona}
+                              onChange={(e) => setOtherPersona(e.target.value)}
+                              placeholder="Please specify your role"
+                              className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
                             />
-                            <span className="text-xs sm:text-sm">{item}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Question: What are you most interested in? */}
+                    {isVisible('interests') && (
+                      <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                        <div>
+                          <label className="text-sm font-bold text-[#0F172A] block">
+                            {getFieldLabel('interests', 'What are you most interested in?')}{' '}
+                            {isRequired('interests') && <span className="text-[#DC2626] font-bold">*</span>}
                           </label>
-                        );
-                      })}
-                    </div>
-                  </div>
+                          <p className="text-xs text-[#64748B]">
+                            {getFieldHelper('interests', 'Select all that apply.')}
+                          </p>
+                        </div>
 
-                  {/* Question: Will you attend in person? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Will you attend in person? <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
+                        <div className="space-y-2">
+                          {getFieldOptions('interests', [
+                            'Keynotes & panel discussions',
+                            'Masterclasses & workshops',
+                            'Startup pitches & showcase',
+                            'Networking & investor meetups',
+                            'Exhibition',
+                            'Mentorship & business support'
+                          ]).map((item) => {
+                            const isChecked = selectedInterests.includes(item);
+                            return (
+                              <label
+                                key={item}
+                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                  isChecked
+                                    ? 'bg-[#E2E8F0]/20 border-[#0B1E48] font-bold text-[#0B1E48]'
+                                    : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => toggleInterest(item)}
+                                  className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48] rounded"
+                                />
+                                <span className="text-xs sm:text-sm">{item}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="space-y-2">
-                      {[
-                        'Yes, in person',
-                        'Not sure yet',
-                        'No, I would like to follow remotely'
-                      ].map((opt) => (
-                        <label
-                          key={opt}
-                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                            attendanceMode === opt
-                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
-                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="attendanceMode"
-                            checked={attendanceMode === opt}
-                            onChange={() => setAttendanceMode(opt)}
-                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
-                          />
-                          <span className="text-xs sm:text-sm">{opt}</span>
+                    {/* Question: Will you attend in person? */}
+                    {isVisible('attendanceMode') && (
+                      <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('attendanceMode', 'Will you attend in person?')}{' '}
+                          {isRequired('attendanceMode') && <span className="text-[#DC2626] font-bold">*</span>}
                         </label>
-                      ))}
-                    </div>
-                  </div>
+                        {getFieldHelper('attendanceMode') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('attendanceMode')}</p>
+                        )}
 
-                  {/* Question: Are you interested in exhibiting or sponsoring? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Are you interested in exhibiting or sponsoring? <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
+                        <div className="space-y-2">
+                          {getFieldOptions('attendanceMode', [
+                            'Yes, in person',
+                            'Not sure yet',
+                            'No, I would like to follow remotely'
+                          ]).map((opt) => (
+                            <label
+                              key={opt}
+                              className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                attendanceMode === opt
+                                  ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                                  : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="attendanceMode"
+                                checked={attendanceMode === opt}
+                                onChange={() => setAttendanceMode(opt)}
+                                className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
+                              />
+                              <span className="text-xs sm:text-sm">{opt}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="space-y-2">
-                      {[
-                        'No',
-                        'Exhibiting',
-                        'Sponsoring',
-                        'Both'
-                      ].map((opt) => (
-                        <label
-                          key={opt}
-                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                            exhibitSponsorInterest === opt
-                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
-                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="exhibitSponsorInterest"
-                            checked={exhibitSponsorInterest === opt}
-                            onChange={() => setExhibitSponsorInterest(opt)}
-                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
-                          />
-                          <span className="text-xs sm:text-sm">{opt}</span>
+                    {/* Question: Are you interested in exhibiting or sponsoring? */}
+                    {isVisible('exhibitSponsorInterest') && (
+                      <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('exhibitSponsorInterest', 'Are you interested in exhibiting or sponsoring?')}{' '}
+                          {isRequired('exhibitSponsorInterest') && (
+                            <span className="text-[#DC2626] font-bold">*</span>
+                          )}
                         </label>
-                      ))}
-                    </div>
-                  </div>
+                        {getFieldHelper('exhibitSponsorInterest') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('exhibitSponsorInterest')}</p>
+                        )}
 
-                  {/* Question: How did you hear about Óghowa Business Week? */}
-                  <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      How did you hear about Óghowa Business Week? <span className="text-[#DC2626] font-bold">*</span>
-                    </label>
+                        <div className="space-y-2">
+                          {getFieldOptions('exhibitSponsorInterest', ['No', 'Exhibiting', 'Sponsoring', 'Both']).map(
+                            (opt) => (
+                              <label
+                                key={opt}
+                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                  exhibitSponsorInterest === opt
+                                    ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                                    : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="exhibitSponsorInterest"
+                                  checked={exhibitSponsorInterest === opt}
+                                  onChange={() => setExhibitSponsorInterest(opt)}
+                                  className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
+                                />
+                                <span className="text-xs sm:text-sm">{opt}</span>
+                              </label>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="space-y-2">
-                      {[
-                        'Social media',
-                        'WhatsApp / Telegram group',
-                        'Friend or colleague',
-                        'Benin Tech Fest',
-                        'Email / newsletter',
-                        'Radio, TV or press',
-                        'Other'
-                      ].map((opt) => (
-                        <label
-                          key={opt}
-                          className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                            discoverySource === opt
-                              ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
-                              : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="discoverySource"
-                            checked={discoverySource === opt}
-                            onChange={() => setDiscoverySource(opt)}
-                            className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
-                          />
-                          <span className="text-xs sm:text-sm">{opt}</span>
+                    {/* Question: How did you hear about Óghowa Business Week? */}
+                    {isVisible('discoverySource') && (
+                      <div className="space-y-3 pt-3 border-t border-[#E2E8F0]">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('discoverySource', 'How did you hear about Óghowa Business Week?')}{' '}
+                          {isRequired('discoverySource') && <span className="text-[#DC2626] font-bold">*</span>}
                         </label>
-                      ))}
+                        {getFieldHelper('discoverySource') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('discoverySource')}</p>
+                        )}
 
-                      {discoverySource === 'Other' && (
+                        <div className="space-y-2">
+                          {getFieldOptions('discoverySource', [
+                            'Social media',
+                            'WhatsApp / Telegram group',
+                            'Friend or colleague',
+                            'Benin Tech Fest',
+                            'Email / newsletter',
+                            'Radio, TV or press',
+                            'Other'
+                          ]).map((opt) => (
+                            <label
+                              key={opt}
+                              className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                                discoverySource === opt
+                                  ? 'bg-[#FEE2E2]/40 border-[#DC2626] font-bold text-[#0B1E48]'
+                                  : 'bg-white hover:bg-[#F8FAFC] border-[#E2E8F0] text-[#0F172A]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="discoverySource"
+                                checked={discoverySource === opt}
+                                onChange={() => setDiscoverySource(opt)}
+                                className="w-4 h-4 text-[#0B1E48] accent-[#0B1E48]"
+                              />
+                              <span className="text-xs sm:text-sm">{opt}</span>
+                            </label>
+                          ))}
+
+                          {discoverySource === 'Other' && (
+                            <input
+                              type="text"
+                              required={isRequired('discoverySource')}
+                              value={otherDiscoverySource}
+                              onChange={(e) => setOtherDiscoverySource(e.target.value)}
+                              placeholder="How did you hear about us?"
+                              className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Accessibility or dietary requirements (optional) */}
+                    {isVisible('accessibilityRequirements') && (
+                      <div className="space-y-1 pt-3 border-t border-[#E2E8F0]">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('accessibilityRequirements', 'Accessibility or dietary requirements (optional)')}{' '}
+                          {isRequired('accessibilityRequirements') && (
+                            <span className="text-[#DC2626] font-bold">*</span>
+                          )}
+                        </label>
+                        <p className="text-xs text-[#64748B]">
+                          {getFieldHelper('accessibilityRequirements', 'Let us know anything we should prepare for.')}
+                        </p>
                         <input
                           type="text"
-                          required
-                          value={otherDiscoverySource}
-                          onChange={(e) => setOtherDiscoverySource(e.target.value)}
-                          placeholder="How did you hear about us?"
-                          className="w-full mt-2 bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-xs text-[#0F172A]"
+                          required={isRequired('accessibilityRequirements')}
+                          value={accessibility}
+                          onChange={(e) => setAccessibility(e.target.value)}
+                          placeholder={getFieldPlaceholder(
+                            'accessibilityRequirements',
+                            'e.g. Wheelchair access, dietary requirements, sign language translation'
+                          )}
+                          className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
                         />
-                      )}
+                      </div>
+                    )}
+
+                    {/* What do you hope to get from the week? (optional) */}
+                    {isVisible('expectations') && (
+                      <div className="space-y-1">
+                        <label className="text-sm font-bold text-[#0F172A] block">
+                          {getFieldLabel('expectations', 'What do you hope to get from the week? (optional)')}{' '}
+                          {isRequired('expectations') && <span className="text-[#DC2626] font-bold">*</span>}
+                        </label>
+                        {getFieldHelper('expectations') && (
+                          <p className="text-xs text-[#64748B]">{getFieldHelper('expectations')}</p>
+                        )}
+                        <textarea
+                          rows={3}
+                          required={isRequired('expectations')}
+                          value={expectations}
+                          onChange={(e) => setExpectations(e.target.value)}
+                          placeholder={getFieldPlaceholder(
+                            'expectations',
+                            'e.g. Meet investors for my venture, network with industry partners, gain actionable policy insights'
+                          )}
+                          className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
+                        />
+                      </div>
+                    )}
+
+                    {/* Section 2 Custom Fields if any */}
+                    {formFields
+                      .filter((f) => !f.isCore && f.isVisible !== false && f.section === 'participation')
+                      .map(renderCustomField)}
+                  </div>
+                )}
+
+                {/* ADDITIONAL QUESTIONS CARD (For any custom fields not in about_you or participation) */}
+                {formFields.filter(
+                  (f) =>
+                    !f.isCore &&
+                    f.isVisible !== false &&
+                    f.section !== 'about' &&
+                    f.section !== 'participation' &&
+                    f.section !== 'consent'
+                ).length > 0 && (
+                  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-6">
+                    <div className="pb-3 border-b border-[#E2E8F0]">
+                      <h2 className="text-xl font-bold text-[#0B1E48]">Additional Questions</h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">Please provide responses to these custom requirements.</p>
+                    </div>
+                    <div className="space-y-5">
+                      {formFields
+                        .filter(
+                          (f) =>
+                            !f.isCore &&
+                            f.isVisible !== false &&
+                            f.section !== 'about' &&
+                            f.section !== 'participation' &&
+                            f.section !== 'consent'
+                        )
+                        .map(renderCustomField)}
                     </div>
                   </div>
-
-                  {/* Accessibility or dietary requirements (optional) */}
-                  <div className="space-y-1 pt-3 border-t border-[#E2E8F0]">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      Accessibility or dietary requirements (optional)
-                    </label>
-                    <p className="text-xs text-[#64748B]">Let us know anything we should prepare for.</p>
-                    <input
-                      type="text"
-                      value={accessibility}
-                      onChange={(e) => setAccessibility(e.target.value)}
-                      placeholder="e.g. Wheelchair access, dietary requirements, sign language translation"
-                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                    />
-                  </div>
-
-                  {/* What do you hope to get from the week? (optional) */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-bold text-[#0F172A] block">
-                      What do you hope to get from the week? (optional)
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={expectations}
-                      onChange={(e) => setExpectations(e.target.value)}
-                      placeholder="e.g. Meet investors for my venture, network with industry partners, gain actionable policy insights"
-                      className="w-full bg-white px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] text-sm text-[#0F172A] focus:outline-hidden focus:ring-2 focus:ring-[#0B1E48]"
-                    />
-                  </div>
-                </div>
+                )}
 
                 {/* SECTION 3: CONSENT */}
                 <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xs border border-[#E2E8F0] space-y-5">
@@ -1547,7 +1912,7 @@ END:VCALENDAR`;
                         Participant declaration <span className="text-[#DC2626] font-bold">*</span>
                       </span>
                       <span className="text-xs text-[#64748B] mt-0.5 block leading-relaxed">
-                        I confirm that the information provided is accurate and consent to its use for registration and for communicating with me about Óghowa Business Week.
+                        {config?.declarationText || 'I confirm that the information provided is accurate and consent to its use for registration and for communicating with me about Óghowa Business Week.'}
                       </span>
                     </div>
                   </label>
@@ -1565,7 +1930,7 @@ END:VCALENDAR`;
                         Updates (optional)
                       </span>
                       <span className="text-xs text-[#64748B] mt-0.5 block leading-relaxed">
-                        Keep me updated about future Óghowa Business Week and Benin Tech Fest events.
+                        {config?.updatesCheckboxLabel || 'Keep me updated about future Óghowa Business Week and Benin Tech Fest events.'}
                       </span>
                     </div>
                   </label>

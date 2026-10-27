@@ -1,4 +1,4 @@
-import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide, BusinessWeekConfig, SmtpSettings } from '../types';
+import { Mentor, NewsArticle, Venture, ApplicationSubmission, PartnerItem, CarouselSlide, BusinessWeekConfig, SmtpSettings, RegistrationFormField } from '../types';
 
 export const DEFAULT_SMTP_SETTINGS: SmtpSettings = {
   senderEmail: 'oghowa@metaspaceconsult.com',
@@ -215,6 +215,7 @@ export const FEATURED_VENTURES: Venture[] = [
     tagline: 'Modern school management & digital administrative ecosystem.',
     description: 'Comprehensive school management platform simplifying school administration, tuition reconciliation, attendance, and student academic performance across K-12 institutions.',
     founder: 'Osasere Idehen',
+    websiteUrl: 'https://ugbekun.com',
     metrics: [
       { label: 'Schools', value: '180+' },
       { label: 'Active Students', value: '52,000+' },
@@ -234,6 +235,7 @@ export const FEATURED_VENTURES: Venture[] = [
     tagline: 'Smart student and campus mobility for safety and reliability.',
     description: 'Tech-enabled student transportation management and route optimization ensuring guaranteed child transit security, real-time bus telemetry, and parent peace of mind.',
     founder: 'Efe Omoregie',
+    websiteUrl: 'https://myeduride.ng',
     metrics: [
       { label: 'Safe Trips', value: '220,000+' },
       { label: 'Partner Schools', value: '45' },
@@ -253,6 +255,7 @@ export const FEATURED_VENTURES: Venture[] = [
     tagline: 'Digital diagnostics and patient-provider matching platform.',
     description: 'Clinic and patient healthcare services matching platform providing verified telehealth consultations, digitized medical records, and doorstep prescription delivery.',
     founder: 'Dr. Blessing Osagie',
+    websiteUrl: 'https://cyona.health',
     metrics: [
       { label: 'Consultations', value: '35,000+' },
       { label: 'Partner Clinics', value: '78' },
@@ -621,6 +624,207 @@ export const DEFAULT_CAROUSEL_EVENTS: CarouselSlide[] = [
   }
 ];
 
+export const DEFAULT_REGISTRATION_FIELDS: RegistrationFormField[] = [
+  {
+    id: 'primaryEmail',
+    label: 'Email',
+    type: 'email',
+    placeholder: 'Your email address',
+    helperText: 'Primary contact email for badge pass & confirmation',
+    required: true,
+    isVisible: true,
+    section: 'email',
+    order: 1,
+    isCore: true
+  },
+  {
+    id: 'fullName',
+    label: 'Full name',
+    type: 'text',
+    placeholder: 'Your full name',
+    helperText: 'Your verified identification as will appear on badge',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 2,
+    isCore: true
+  },
+  {
+    id: 'contactEmail',
+    label: 'Email address',
+    type: 'email',
+    placeholder: 'Your contact email',
+    helperText: 'Delegate email for notifications',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 3,
+    isCore: true
+  },
+  {
+    id: 'phoneNumber',
+    label: 'Phone / WhatsApp number',
+    type: 'tel',
+    placeholder: '+234 800 000 0000',
+    helperText: 'Include your country code, e.g. +234…',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 4,
+    isCore: true
+  },
+  {
+    id: 'organization',
+    label: 'Organisation / business / school',
+    type: 'text',
+    placeholder: 'Your organisation or "Independent"',
+    helperText: 'Write "Independent" if you are not attached to an organisation.',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 5,
+    isCore: true
+  },
+  {
+    id: 'jobRole',
+    label: 'Job title / role',
+    type: 'text',
+    placeholder: 'e.g. Founder, CEO, Student, Tech Lead',
+    helperText: 'Your current primary responsibility or role title',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 6,
+    isCore: true
+  },
+  {
+    id: 'location',
+    label: 'City, state and country',
+    type: 'location_split',
+    placeholder: 'e.g. Benin City, Edo State, Nigeria',
+    helperText: 'Split each: country listed, all Nigeria states listed with cities too',
+    required: true,
+    isVisible: true,
+    section: 'about',
+    order: 7,
+    isCore: true
+  },
+  {
+    id: 'persona',
+    label: 'Which best describes you?',
+    type: 'radio',
+    required: true,
+    isVisible: true,
+    section: 'participation',
+    order: 8,
+    isCore: true,
+    options: [
+      'Entrepreneur / business owner',
+      'Startup founder',
+      'Tech or digital professional',
+      'Investor / funder',
+      'Corporate / business professional',
+      'Government / public sector',
+      'Student / young professional',
+      'Creative / media',
+      'Other'
+    ]
+  },
+  {
+    id: 'interests',
+    label: 'What are you most interested in?',
+    type: 'checkbox',
+    helperText: 'Select all that apply.',
+    required: true,
+    isVisible: true,
+    section: 'participation',
+    order: 9,
+    isCore: true,
+    options: [
+      'Keynotes & panel discussions',
+      'Masterclasses & workshops',
+      'Startup pitches & showcase',
+      'Networking & investor meetups',
+      'Exhibition',
+      'Mentorship & business support'
+    ]
+  },
+  {
+    id: 'attendanceMode',
+    label: 'Will you attend in person?',
+    type: 'radio',
+    required: true,
+    isVisible: true,
+    section: 'participation',
+    order: 10,
+    isCore: true,
+    options: [
+      'Yes, in person',
+      'Not sure yet',
+      'No, I would like to follow remotely'
+    ]
+  },
+  {
+    id: 'exhibitSponsorInterest',
+    label: 'Are you interested in exhibiting or sponsoring?',
+    type: 'radio',
+    required: true,
+    isVisible: true,
+    section: 'participation',
+    order: 11,
+    isCore: true,
+    options: [
+      'No',
+      'Exhibiting',
+      'Sponsoring',
+      'Both'
+    ]
+  },
+  {
+    id: 'discoverySource',
+    label: 'How did you hear about Óghowa Business Week?',
+    type: 'radio',
+    required: true,
+    isVisible: true,
+    section: 'participation',
+    order: 12,
+    isCore: true,
+    options: [
+      'Social media',
+      'WhatsApp / Telegram group',
+      'Friend or colleague',
+      'Benin Tech Fest',
+      'Email / newsletter',
+      'Radio, TV or press',
+      'Other'
+    ]
+  },
+  {
+    id: 'accessibilityRequirements',
+    label: 'Accessibility or dietary requirements (optional)',
+    type: 'text',
+    placeholder: 'e.g. Wheelchair access, dietary requirements, sign language',
+    helperText: 'Let us know anything we should prepare for.',
+    required: false,
+    isVisible: true,
+    section: 'participation',
+    order: 13,
+    isCore: true
+  },
+  {
+    id: 'expectations',
+    label: 'What do you hope to get from the week? (optional)',
+    type: 'textarea',
+    placeholder: 'e.g. Meet investors for my venture, network with industry partners, gain actionable policy insights',
+    helperText: 'Share your key goals or outcomes expected.',
+    required: false,
+    isVisible: true,
+    section: 'participation',
+    order: 14,
+    isCore: true
+  }
+];
+
 export const DEFAULT_BUSINESS_WEEK_CONFIG: BusinessWeekConfig = {
   summitTitle: 'Óghowa Business Week 2026',
   dates: 'November 16 – 21, 2026',
@@ -630,6 +834,13 @@ export const DEFAULT_BUSINESS_WEEK_CONFIG: BusinessWeekConfig = {
   expectedDelegates: '2,500+',
   capacityWindowText: 'Limited Participants — Registrations are reviewed systematically by the secretariat.',
   isRegistrationOpen: true,
+  registrationTitle: 'Óghowa Business Week — Participant Registration',
+  registrationSubtitle: 'Óghowa Business Week · Innovation for Economic Transformation ...Our own',
+  registrationDescription: 'Register to take part in Óghowa Business Week, in collaboration with Benin Tech Fest. Join founders, investors, business leaders and innovators for keynotes, masterclasses, startup pitches and networking in Edo State. Please complete all required questions (*). It takes about 3 minutes.',
+  registrationCapacity: 500,
+  declarationText: 'I confirm that the information provided is accurate and consent to its use for registration and for communicating with me about Óghowa Business Week.',
+  updatesCheckboxLabel: 'Keep me updated about future Óghowa Business Week and Benin Tech Fest events.',
+  formFields: DEFAULT_REGISTRATION_FIELDS,
   tracks: [
     {
       id: 'digital_economy',

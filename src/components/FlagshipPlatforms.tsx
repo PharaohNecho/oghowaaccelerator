@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowRight, X, Calendar, Check, ExternalLink } from 'lucide-react';
 import { FLAGSHIP_PLATFORMS } from '../data/mockData';
 
@@ -11,23 +12,33 @@ export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyFor
   const [selectedPlatform, setSelectedPlatform] = useState<typeof FLAGSHIP_PLATFORMS[0] | null>(null);
 
   return (
-    <section id="platforms" className="py-20 sm:py-24 bg-white border-b border-slate-100">
+    <section id="platforms" className="py-20 sm:py-24 bg-white border-b border-slate-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="text-center max-w-2xl mx-auto mb-16"
+        >
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B1E48] tracking-tight">
             Flagship Platforms
           </h2>
           <p className="mt-3 text-base sm:text-lg text-slate-600 font-normal">
             Initiatives designed to turn ideas into high-impact businesses.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 6 Grid Cards with Photography matching the exact layout */}
+        {/* 6 Grid Cards with Photography */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {FLAGSHIP_PLATFORMS.map((platform) => (
-            <div
+          {FLAGSHIP_PLATFORMS.map((platform, idx) => (
+            <motion.div
               key={platform.id}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5, delay: idx * 0.08, ease: 'easeOut' }}
               className="group bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between"
             >
               <div>
@@ -87,7 +98,7 @@ export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyFor
                   </button>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -148,7 +159,7 @@ export const FlagshipPlatforms: React.FC<FlagshipPlatformsProps> = ({ onApplyFor
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   onClick={() => setSelectedPlatform(null)}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg"
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg cursor-pointer"
                 >
                   Close
                 </button>

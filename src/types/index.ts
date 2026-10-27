@@ -172,6 +172,31 @@ export interface SummitDaySchedule {
   events: SummitScheduleItem[];
 }
 
+export type RegistrationFieldType =
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'textarea'
+  | 'number'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'location_split';
+
+export interface RegistrationFormField {
+  id: string;
+  label: string;
+  type: RegistrationFieldType;
+  placeholder?: string;
+  helperText?: string;
+  required: boolean;
+  isVisible: boolean;
+  section: 'email' | 'about' | 'participation' | 'consent' | 'custom';
+  order: number;
+  options?: string[];
+  isCore?: boolean;
+}
+
 export interface RegisteredDelegate {
   id: string;
   code: string;
@@ -197,6 +222,7 @@ export interface RegisteredDelegate {
   expectations?: string;
   declarationConfirmed?: boolean;
   receiveUpdates?: boolean;
+  customAnswers?: Record<string, any>;
   registeredAt: string;
   status: 'Accreditation Issued' | 'Fast-Track VIP' | 'Pending Verification' | 'Declined';
   dealRoomInterest?: boolean;
@@ -211,6 +237,13 @@ export interface BusinessWeekConfig {
   expectedDelegates: string;
   capacityWindowText: string;
   isRegistrationOpen: boolean;
+  registrationTitle?: string;
+  registrationSubtitle?: string;
+  registrationDescription?: string;
+  registrationCapacity?: number;
+  declarationText?: string;
+  updatesCheckboxLabel?: string;
+  formFields?: RegistrationFormField[];
   tracks: SummitTrack[];
   speakers: SummitSpeaker[];
   schedule: SummitDaySchedule[];
