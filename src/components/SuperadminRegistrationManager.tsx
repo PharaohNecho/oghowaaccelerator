@@ -45,6 +45,8 @@ import {
 import { BusinessWeekConfig, RegisteredDelegate, RegistrationFormField, RegistrationFieldType } from '../types';
 import { DEFAULT_REGISTRATION_FIELDS } from '../data/mockData';
 import { BusinessWeekLogo } from './BusinessWeekLogo';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db, cleanForFirestore } from '../lib/firebase';
 
 interface SuperadminRegistrationManagerProps {
   config: BusinessWeekConfig;
@@ -205,23 +207,33 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
   };
 
   // Change Delegate Status
-  const handleChangeDelegateStatus = (delegateId: string, newStatus: RegisteredDelegate['status']) => {
+  const handleChangeDelegateStatus = async (delegateId: string, newStatus: RegisteredDelegate['status']) => {
     const updatedDelegates = config.delegates.map((d) =>
       d.id === delegateId ? { ...d, status: newStatus } : d
     );
     onUpdateConfig({ ...config, delegates: updatedDelegates });
+    try {
+      await setDoc(doc(db, 'delegates', delegateId), { status: newStatus }, { merge: true });
+    } catch (err) {
+      console.error('Failed to update delegate status in Firestore:', err);
+    }
   };
 
   // Delete Participant
-  const handleDeleteDelegate = (delegateId: string) => {
+  const handleDeleteDelegate = async (delegateId: string) => {
     if (window.confirm('Are you sure you want to revoke and delete this participant accreditation?')) {
       const updatedDelegates = config.delegates.filter((d) => d.id !== delegateId);
       onUpdateConfig({ ...config, delegates: updatedDelegates });
+      try {
+        await deleteDoc(doc(db, 'delegates', delegateId));
+      } catch (err) {
+        console.error('Failed to delete delegate from Firestore:', err);
+      }
     }
   };
 
   // Add Delegate Submit
-  const handleSaveNewDelegate = (e: React.FormEvent) => {
+  const handleSaveNewDelegate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDelegateForm.name || !newDelegateForm.email) {
       alert('Delegate name and email are required');
@@ -251,6 +263,13 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
       ...config,
       delegates: [createdDelegate, ...config.delegates]
     });
+
+    try {
+      await setDoc(doc(db, 'delegates', createdDelegate.id), cleanForFirestore(createdDelegate), { merge: true });
+    } catch (err) {
+      console.error('Failed to save delegate to Firestore:', err);
+    }
+
     setIsAddingDelegate(false);
     setNewDelegateForm({
       name: '',
@@ -550,7 +569,13 @@ export const SuperadminRegistrationManager: React.FC<SuperadminRegistrationManag
           delegates: [...newDelegates, ...config.delegates]
         });
 
-        setImportSuccessNotice(`Successfully imported ${newDelegates.length} delegates from Google Form CSV!`);
+        for (const del of newDelegates) {
+          setDoc(doc(db, 'delegates', del.id), cleanForFirestore(del), { merge: true }).catch((err) =>
+            console.error('Failed to save imported delegate to Firestore:', err)
+          );
+        }
+
+        setImportSuccessNotice(`Successfully imported ${newDelegates.length} delegates from Google Form CSV and saved to server!`);
         setTimeout(() => setImportSuccessNotice(''), 6000);
       } catch (err) {
         console.error(err);

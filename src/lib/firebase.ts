@@ -77,3 +77,20 @@ export async function testConnection(): Promise<boolean> {
     return false;
   }
 }
+
+// Utility to remove undefined values before persisting to Firestore
+export function cleanForFirestore<T>(obj: T): any {
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(cleanForFirestore);
+  }
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = cleanForFirestore(value);
+    }
+  }
+  return cleaned;
+}

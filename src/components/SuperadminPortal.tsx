@@ -36,6 +36,8 @@ import { EmailNotification, Venture, PartnerItem, CarouselSlide, BusinessWeekCon
 import { DEFAULT_SMTP_SETTINGS } from '../data/mockData';
 import { SuperadminSummitManager } from './SuperadminSummitManager';
 import { SuperadminRegistrationManager } from './SuperadminRegistrationManager';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { db, cleanForFirestore } from '../lib/firebase';
 
 interface SuperadminPortalProps {
   appData: {
@@ -108,6 +110,24 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
     }
     return { username: 'Admin01', password: 'OghAdmin@26' };
   });
+
+  // Sync Admin Credentials with Firestore server so changes persist across all devices/sessions
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'adminAuth'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as { username?: string; password?: string };
+        if (data.username && data.password) {
+          setAdminCredentials({ username: data.username, password: data.password });
+        }
+      } else {
+        // Initialize default credentials document on server if not yet present
+        setDoc(doc(db, 'settings', 'adminAuth'), { username: 'Admin01', password: 'OghAdmin@26' }, { merge: true }).catch((err) =>
+          console.warn('Could not initialize adminAuth on server:', err)
+        );
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // Authentication & Auto-Lock State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -243,7 +263,7 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
   };
 
   // Change Credentials & Password handler
-  const handleChangeCredentials = (e: React.FormEvent) => {
+  const handleChangeCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     setCredUpdateError('');
     setCredUpdateSuccess('');
@@ -270,10 +290,16 @@ export const SuperadminPortal: React.FC<SuperadminPortalProps> = ({
     try {
       localStorage.setItem('oghowa_admin_credentials', JSON.stringify(updated));
     } catch (err) {
-      console.error('Failed to store credentials', err);
+      console.error('Failed to store credentials locally', err);
     }
 
-    setCredUpdateSuccess('Credentials updated successfully. Saved for subsequent logins.');
+    try {
+      await setDoc(doc(db, 'settings', 'adminAuth'), updated, { merge: true });
+    } catch (err) {
+      console.error('Failed to store credentials on Firestore server', err);
+    }
+
+    setCredUpdateSuccess('Credentials updated successfully. Saved to server for subsequent logins.');
     setTimeout(() => {
       setIsChangePasswordOpen(false);
       setCurrentPassInput('');

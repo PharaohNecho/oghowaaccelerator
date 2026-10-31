@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from './lib/firebase';
+import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType, cleanForFirestore } from './lib/firebase';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { EventCountdown } from './components/EventCountdown';
@@ -83,16 +83,53 @@ export default function App() {
     return DEFAULT_BUSINESS_WEEK_CONFIG;
   });
 
-  const handleUpdateBusinessWeekConfig = (updated: BusinessWeekConfig | ((prev: BusinessWeekConfig) => BusinessWeekConfig)) => {
+  const handleUpdateBusinessWeekConfig = async (
+    updated: BusinessWeekConfig | ((prev: BusinessWeekConfig) => BusinessWeekConfig)
+  ) => {
+    let nextConfig: BusinessWeekConfig;
     setBusinessWeekConfig((prev) => {
-      const next = typeof updated === 'function' ? updated(prev) : updated;
+      nextConfig = typeof updated === 'function' ? updated(prev) : updated;
       try {
-        localStorage.setItem('oghowa_business_week_config', JSON.stringify(next));
+        localStorage.setItem('oghowa_business_week_config', JSON.stringify(nextConfig));
       } catch (err) {
         console.warn('Failed to save oghowa_business_week_config', err);
       }
-      return next;
+      return nextConfig;
     });
+
+    try {
+      const { delegates, ...configWithoutDelegates } = nextConfig!;
+      // Persist summit config & form builder fields to Firestore server
+      await setDoc(
+        doc(db, 'settings', 'businessWeek'),
+        cleanForFirestore(configWithoutDelegates),
+        { merge: true }
+      );
+      // Persist any updated delegates to Firestore delegates collection
+      if (delegates && delegates.length > 0) {
+        for (const del of delegates) {
+          await setDoc(doc(db, 'delegates', del.id), cleanForFirestore(del), { merge: true });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save businessWeekConfig to Firestore:', err);
+    }
+  };
+
+  // Dedicated server persistence handler for new participant registrations
+  const handleRegisterDelegate = async (newDelegate: RegisteredDelegate) => {
+    // 1. Optimistic local state update
+    setBusinessWeekConfig((prev) => ({
+      ...prev,
+      delegates: [newDelegate, ...prev.delegates.filter((d) => d.id !== newDelegate.id)]
+    }));
+
+    // 2. Persist directly to Firestore server collection 'delegates'
+    try {
+      await setDoc(doc(db, 'delegates', newDelegate.id), cleanForFirestore(newDelegate), { merge: true });
+    } catch (err) {
+      console.error('Failed to save delegate to Firestore server:', err);
+    }
   };
 
   // Mail Server & SMTP Configuration controlled by Superadmin (mail.metaspaceconsult.com:465)
@@ -190,19 +227,104 @@ export default function App() {
       }
     );
 
+    // 4. Delegates / Registrations Firestore Listener (Real-Time Server Registrations)
+    const delegatesPath = 'delegates';
+    const unsubDelegates = onSnapshot(
+      collection(db, delegatesPath),
+      (snapshot) => {
+        const list: RegisteredDelegate[] = [];
+        snapshot.forEach((docSnap) => {
+          list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+        });
+        if (list.length > 0) {
+          setBusinessWeekConfig((prev) => ({
+            ...prev,
+            delegates: list,
+          }));
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.LIST, delegatesPath);
+        }
+      }
+    );
+
+    // 5. Business Week Settings Firestore Listener (Server Settings & Form Builder)
+    const businessWeekSettingsPath = 'settings/businessWeek';
+    const unsubBusinessWeek = onSnapshot(
+      doc(db, 'settings', 'businessWeek'),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const serverConfig = docSnap.data() as Partial<BusinessWeekConfig>;
+          setBusinessWeekConfig((prev) => ({
+            ...prev,
+            ...serverConfig,
+            // Keep delegates from the delegates collection snapshot
+            delegates: prev.delegates,
+          }));
+        } else {
+          // Initialize server document with default configuration if missing
+          const { delegates, ...configWithoutDelegates } = DEFAULT_BUSINESS_WEEK_CONFIG;
+          setDoc(
+            doc(db, 'settings', 'businessWeek'),
+            cleanForFirestore(configWithoutDelegates),
+            { merge: true }
+          ).catch((err) => console.warn('Could not initialize businessWeek settings on server:', err));
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.GET, businessWeekSettingsPath);
+        }
+      }
+    );
+
+    // 6. SMTP Settings Firestore Listener
+    const smtpPath = 'settings/smtp';
+    const unsubSmtp = onSnapshot(
+      doc(db, 'settings', 'smtp'),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setSmtpSettings(docSnap.data() as SmtpSettings);
+        } else {
+          setDoc(
+            doc(db, 'settings', 'smtp'),
+            cleanForFirestore(DEFAULT_SMTP_SETTINGS),
+            { merge: true }
+          ).catch((err) => console.warn('Could not initialize SMTP settings on server:', err));
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          handleFirestoreError(error, OperationType.GET, smtpPath);
+        }
+      }
+    );
+
     return () => {
       unsubVentures();
       unsubPartners();
       unsubCarousel();
+      unsubDelegates();
+      unsubBusinessWeek();
+      unsubSmtp();
     };
   }, []);
 
   // Update Ventures with Firestore sync
   const handleUpdateVentures = async (updated: Venture[]) => {
+    const previous = ventures;
     setVentures(updated);
     try {
+      const updatedIds = new Set(updated.map((v) => v.id));
+      for (const old of previous) {
+        if (!updatedIds.has(old.id)) {
+          await deleteDoc(doc(db, 'ventures', old.id));
+        }
+      }
       for (const v of updated) {
-        await setDoc(doc(db, 'ventures', v.id), v, { merge: true });
+        await setDoc(doc(db, 'ventures', v.id), cleanForFirestore(v), { merge: true });
       }
     } catch {
       console.warn('Persisting to Firestore: local state updated');
@@ -211,10 +333,17 @@ export default function App() {
 
   // Update Partners with Firestore sync
   const handleUpdatePartners = async (updated: PartnerItem[]) => {
+    const previous = partners;
     setPartners(updated);
     try {
+      const updatedIds = new Set(updated.map((p) => p.id));
+      for (const old of previous) {
+        if (!updatedIds.has(old.id)) {
+          await deleteDoc(doc(db, 'partners', old.id));
+        }
+      }
       for (const p of updated) {
-        await setDoc(doc(db, 'partners', p.id), p, { merge: true });
+        await setDoc(doc(db, 'partners', p.id), cleanForFirestore(p), { merge: true });
       }
     } catch {
       console.warn('Persisting to Firestore: local state updated');
@@ -223,10 +352,17 @@ export default function App() {
 
   // Update Carousel Events with Firestore sync
   const handleUpdateCarouselEvents = async (updated: CarouselSlide[]) => {
+    const previous = carouselEvents;
     setCarouselEvents(updated);
     try {
+      const updatedIds = new Set(updated.map((s) => s.id));
+      for (const old of previous) {
+        if (!updatedIds.has(old.id)) {
+          await deleteDoc(doc(db, 'carouselEvents', old.id));
+        }
+      }
       for (const s of updated) {
-        await setDoc(doc(db, 'carouselEvents', s.id), s, { merge: true });
+        await setDoc(doc(db, 'carouselEvents', s.id), cleanForFirestore(s), { merge: true });
       }
     } catch {
       console.warn('Persisting to Firestore: local state updated');
@@ -237,7 +373,7 @@ export default function App() {
   const handleUpdateSmtpSettings = async (updated: SmtpSettings) => {
     setSmtpSettings(updated);
     try {
-      await setDoc(doc(db, 'settings', 'smtp'), updated, { merge: true });
+      await setDoc(doc(db, 'settings', 'smtp'), cleanForFirestore(updated), { merge: true });
     } catch {
       console.warn('Persisting SMTP settings to Firestore: local state updated');
     }
@@ -354,12 +490,7 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onTicketReserved={handleTicketReserved}
-          onRegisterDelegate={(newDelegate: RegisteredDelegate) => {
-            handleUpdateBusinessWeekConfig((prev) => ({
-              ...prev,
-              delegates: [newDelegate, ...prev.delegates]
-            }));
-          }}
+          onRegisterDelegate={handleRegisterDelegate}
         />
       </Suspense>
     );

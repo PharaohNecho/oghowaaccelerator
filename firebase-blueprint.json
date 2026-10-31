@@ -15,6 +15,7 @@
         "logoText": { "type": "string", "maxLength": 10 },
         "badgeColor": { "type": "string", "maxLength": 50 },
         "isDisplayed": { "type": "boolean" },
+        "websiteUrl": { "type": "string", "maxLength": 300 },
         "createdAt": { "type": "string" }
       },
       "required": ["id", "name", "sector", "description"]
@@ -75,15 +76,32 @@
       },
       "required": ["id", "founderName", "founderEmail", "startupName", "status"]
     },
-    "Settings": {
-      "title": "Settings",
-      "description": "Global portal configurations and event seats countdown",
+    "Delegate": {
+      "title": "Delegate",
+      "description": "Accredited participant registration for Óghowa Business Week 2026",
       "type": "object",
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
-        "eventSeats": { "type": "number" },
-        "eventDate": { "type": "string", "maxLength": 100 },
-        "eventName": { "type": "string", "maxLength": 150 }
+        "code": { "type": "string", "maxLength": 60 },
+        "name": { "type": "string", "maxLength": 120 },
+        "email": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 60 },
+        "organization": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 200 },
+        "persona": { "type": "string", "maxLength": 80 },
+        "attendanceMode": { "type": "string", "maxLength": 80 },
+        "registeredAt": { "type": "string", "maxLength": 80 },
+        "status": { "type": "string", "maxLength": 60 }
+      },
+      "required": ["id", "code", "name", "email", "status"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global portal configurations, SMTP settings, and Óghowa Business Week configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 }
       },
       "required": ["id"]
     }
@@ -105,9 +123,13 @@
       "schema": { "$ref": "#/entities/Application" },
       "description": "Startup cohort applications under review"
     },
+    "/delegates/{delegateId}": {
+      "schema": { "$ref": "#/entities/Delegate" },
+      "description": "Registered participants and accredited delegates for Óghowa Business Week"
+    },
     "/settings/{settingId}": {
       "schema": { "$ref": "#/entities/Settings" },
-      "description": "Global accelerator configurations"
+      "description": "Global accelerator configurations, Business Week summit settings, and SMTP configuration"
     }
   }
 }

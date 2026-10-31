@@ -39,6 +39,8 @@ import {
 import { BusinessWeekLogo } from './BusinessWeekLogo';
 import { EmailNotification, RegisteredDelegate, BusinessWeekConfig, RegistrationFormField } from '../types';
 import { DEFAULT_REGISTRATION_FIELDS } from '../data/mockData';
+import { doc, setDoc } from 'firebase/firestore';
+import { db, cleanForFirestore } from '../lib/firebase';
 
 interface BusinessWeekRegistrationProps {
   onBackToBusinessWeek: () => void;
@@ -569,6 +571,14 @@ END:VCALENDAR`;
 
     if (onRegisterDelegate) {
       onRegisterDelegate(newDelegate);
+    }
+
+    try {
+      setDoc(doc(db, 'delegates', newDelegate.id), cleanForFirestore(newDelegate), { merge: true }).catch((err) =>
+        console.error('Direct Firestore delegate write error:', err)
+      );
+    } catch (err) {
+      console.warn('Direct Firestore delegate write failed:', err);
     }
 
     if (onTicketReserved) {

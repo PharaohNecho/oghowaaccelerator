@@ -21,22 +21,35 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    // Delegates Collection: Participant registrations & accreditations for Óghowa Business Week 2026
+    match /delegates/{delegateId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if true;
+    }
+
+    // Settings Collection: Summit config, Form fields builder, SMTP settings, Admin auth
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
     // Ventures Collection: Public read for portfolio display; Admins can manage
     match /ventures/{ventureId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin() || true; // Fallback for prototyping admin credentials
+      allow create, update, delete: if true;
     }
 
     // Partners Collection: Public read; Admins can manage
     match /partners/{partnerId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin() || true;
+      allow create, update, delete: if true;
     }
 
     // Carousel Events Collection: Public read for hero upcoming event slider; Admins can manage
     match /carouselEvents/{eventId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin() || true;
+      allow create, update, delete: if true;
     }
 
     // Applications Collection: Founders can create their application; Admins can review & update
@@ -44,12 +57,6 @@ service cloud.firestore {
       allow read: if true;
       allow create: if true;
       allow update, delete: if true;
-    }
-
-    // Settings Collection
-    match /settings/{settingId} {
-      allow read: if true;
-      allow write: if true;
     }
 
     // Test connection doc
