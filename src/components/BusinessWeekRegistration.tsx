@@ -2146,7 +2146,7 @@ END:VCALENDAR`;
                 <p className="font-bold text-[#0B1E48]">Deal Room Day: Thursday, 19 November 2026</p>
                 <p className="mt-1">Pitch decks and term sheet submissions close on November 10, 2026.</p>
               </div>
-              <p>Upload your one-pager or deck to the closed deal portal or email investment@oghowa.africa with your code in the subject.</p>
+              <p>Upload your one-pager or deck to the closed deal portal or email oghowa@metaspaceconsult.com with your code in the subject.</p>
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => {
@@ -2178,7 +2178,7 @@ END:VCALENDAR`;
               <p>For official delegations, flight arrivals at Benin Airport, and hotel bookings at our partner hotels in GRA:</p>
               <div className="space-y-1 bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
                 <p><strong>Desk:</strong> Óghowa Business Week Secretariat</p>
-                <p><strong>Email:</strong> secretariat@oghowa.africa</p>
+                <p><strong>Email:</strong> oghowa@metaspaceconsult.com</p>
                 <p><strong>Hotline:</strong> +234 803 123 4567</p>
                 <p><strong>Venue:</strong> Victor Uwaifo Creative Hub</p>
               </div>

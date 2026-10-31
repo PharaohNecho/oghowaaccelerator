@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Linkedin, Twitter, Instagram, Youtube, Mail, MapPin, CheckCircle, Info } from 'lucide-react';
+import { ArrowRight, Linkedin, Twitter, Instagram, Youtube, Mail, CheckCircle, Info } from 'lucide-react';
 import { OghowaLogo } from './OghowaLogo';
 
 interface FooterProps {
@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
             </button>
 
             <button
-              onClick={() => showNotice("Thank you for your interest in partnering! Contact partnership@oghowa.africa for institutional collaboration.")}
+              onClick={() => showNotice("Thank you for your interest in partnering! Contact oghowa@metaspaceconsult.com for institutional collaboration.")}
               className="px-6 py-3.5 text-sm sm:text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg backdrop-blur-xs transition cursor-pointer"
             >
               <span>Become a Partner</span>
@@ -71,12 +71,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
 
             <div className="pt-2 text-xs text-slate-400 space-y-1.5">
               <p className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                <span>Victor Uwaifo Creative Hub</span>
-              </p>
-              <p className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-blue-400" />
-                <span>ventures@oghowa.africa</span>
+                <a href="mailto:oghowa@metaspaceconsult.com" className="hover:text-white transition-colors">
+                  oghowa@metaspaceconsult.com
+                </a>
               </p>
             </div>
           </div>
@@ -162,7 +160,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenApply, onNavigate }) => {
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400 mb-6">
               <li><button onClick={() => onNavigate('home')} className="hover:text-white transition-colors">About Us</button></li>
-              <li><button onClick={() => showNotice("Contact us at contact@oghowa.africa")} className="hover:text-white transition-colors">Contact</button></li>
+              <li><button onClick={() => showNotice("Contact us at oghowa@metaspaceconsult.com")} className="hover:text-white transition-colors">Contact</button></li>
               <li><button onClick={() => showNotice("Privacy Policy: All startup intellectual property and founder submissions remain 100% strictly confidential.")} className="hover:text-white transition-colors">Privacy Policy</button></li>
               <li><button onClick={() => showNotice("Terms of Use: Powered by Óghowa Accelerator.")} className="hover:text-white transition-colors">Terms of Use</button></li>
             </ul>

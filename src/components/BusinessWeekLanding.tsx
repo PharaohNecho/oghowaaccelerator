@@ -24,7 +24,8 @@ import {
   Compass,
   TrendingUp,
   Cpu,
-  GraduationCap
+  GraduationCap,
+  Mail
 } from 'lucide-react';
 import { BusinessWeekLogo } from './BusinessWeekLogo';
 import { BusinessWeekConfig } from '../types';
@@ -1058,9 +1059,14 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
               <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
                 Óghowa Business Week is West Africa's frontline venture, tech, and economic policy summit, powered in direct institutional collaboration with Benin Tech Fest & Edo State Innovation Network.
               </p>
-              <p className="text-xs text-slate-400">
-                Official Venue: <strong className="text-slate-200">Victor Uwaifo Creative Hub</strong>
-              </p>
+              <div className="pt-1 text-xs text-slate-400">
+                <p className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-blue-400" />
+                  <a href="mailto:oghowa@metaspaceconsult.com" className="hover:text-white transition-colors">
+                    oghowa@metaspaceconsult.com
+                  </a>
+                </p>
+              </div>
             </div>
 
             <div>
@@ -1077,7 +1083,7 @@ export const BusinessWeekLanding: React.FC<BusinessWeekLandingProps> = ({
                 <li><button onClick={() => scrollToSection('bw-problem-vision')} className="hover:text-white">Vision & Strategic Pillars</button></li>
                 <li><button onClick={() => scrollToSection('bw-goals')} className="hover:text-white">Stakeholder Outcomes</button></li>
                 <li><button onClick={() => scrollToSection('bw-agenda')} className="hover:text-white">4-Day Schedule</button></li>
-                <li><button onClick={() => scrollToSection('bw-venue')} className="hover:text-white">Venue: Victor Uwaifo Creative Hub</button></li>
+                <li><button onClick={() => scrollToSection('bw-venue')} className="hover:text-white">Venue & Location</button></li>
                 <li><button onClick={onOpenRegistration} className="text-rose-400 font-bold hover:underline">Participant Registration</button></li>
               </ul>
             </div>
